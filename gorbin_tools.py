@@ -42,8 +42,8 @@ def now():
     return dt.datetime.now()
 
 
-# Useful print function
-def uprint(*items):
+# Useful visible print function
+def vprint(*items):
     """takes >= 1 object, prints them line by line for easy view"""
     print('\n-----------------------\n')
     for i in items:
@@ -74,63 +74,98 @@ def hash(message, salt=b'JT7BX67_rVrdEpLlzWbNRV'):
 
 
 # MongoDB functions
-def get_db(g, dbname, collection=None, addres='mongodb://localhost:27017/'):
-    """requires g object from Flask and the name of database, adds a database object as attribute to flask.g and returns a database object 
-    or additionaly takes the collection name then returns the collection object.
+def get_db(g, dbname, addres='mongodb://localhost:27017/'):
+    """requires g object from Flask and the name of database, adds a database object (if no exists)
+    as attribute to flask.g and returns a database object 
     optionally takes the mongodb address (localhost by default)"""
     db = getattr(g, 'db', None)
     if db is None:
         client = MongoClient(addres)
         db = g.db = client[dbname]
-    if collection: return db[collection]
     return db
+
+def get_users_col(g, dbname, users_col_name, addres='mongodb://localhost:27017/'):
+    """requires g object from Flask, names of database and users collection, adds a database and users
+    collection objects (if no exist) as attributes to flask.g, return users collection object.
+    optionally takes the mongodb address (localhost by default)"""
+    db = get_db(g, dbname)
+    users = getattr(g, 'users', None)
+    if users is None:
+        users = g.users = db[users_col_name]
+    return users
+
+def get_files_col(g, dbname, files_col_name, addres='mongodb://localhost:27017/'):
+    """requires g object from Flask, names of database and files collection, adds a database and files
+    collection objects (if no exist) as attributes to flask.g, return files collection object.
+    optionally takes the mongodb address (localhost by default)"""
+    db = get_db(g, dbname)
+    files = getattr(g, 'files', None)
+    if files is None:
+        files = g.files = db[files_col_name]
+    return files
 
 
 # Functions for working with users collection
-def remake_users(col, yes='no'):
-    """takes users collection object and the second parameter "yes" as confirmation. clear collection, build the indexes"""
+def remake_users(g, yes='no', dbname='gorbin', users_col_name='users'):
+    """takes flask.g object and the second parameter "yes" as confirmation. clear collection, build the indexes.
+    optionally takes database and users collection names (\"gorbin\", \"users\" by default)"""
     if yes == "yes":
+        col = get_users_col(g, dbname, users_col_name)
         col.remove()
         col.create_index('login', unique=True)
         col.create_index('email', unique=True)
     else: uprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_user(col, login, pas, email):
-    """takes users collection object, login, password, email. adds a user to the collection, returns its unique _id object"""
+def add_user(g, login, pas, email, dbname='gorbin', users_col_name='users'):
+    """takes flask.g object, login, password, email. adds a user to the collection, returns its unique _id object.
+    optionally takes database and users collection names (\"gorbin\", \"users\" by default)"""
+    col = get_users_col(g, dbname, users_col_name)
     _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def check_user(col, login, pas):
-    """takes users collection object, login and password, returns True if such user exists and is not deleted or returns False"""
+def check_user(g, login, pas, dbname='gorbin', users_col_name='users'):
+    """takes flask.g object, login and password, returns True if such user exists and is not deleted or returns False.
+    optionally takes database and users collection names (\"gorbin\", \"users\" by default)"""
+    col = get_users_col(g, dbname, users_col_name)
     if col.count({'login':login, 'pas':pas, 'deleted':False}) == 1: return True
     else: return False
 
-def del_user(col, _id=None, login=None):
-    """takes users collection object, _id or login, switches deleted to Tru for this user"""
+def del_user(g, _id=None, login=None, dbname='gorbin', users_col_name='users'):
+    """takes flask.g object, _id or login, switches deleted flag to Tru for this user.
+    optionally takes database and users collection names (\"gorbin\", \"users\" by default)"""
+    col = get_users_col(g, dbname, users_col_name)
     if _id or login:
         col.update_one({'$or':[{'_id':obj_id(_id)}, {'login':login}]}, {'$set':{'deleted':True}})
     else: uprint('could not delete user. did you forget to enter _id or login?')
 
 
 # Functions for working with files collection
-def remake_files(col, yes='no'):
-    """takes files collection object and the second parameter "yes" as confirmation. clear collection"""
+def remake_files(g, yes='no', dbname='gorbin', files_col_name='files'):
+    """takes flask.g object and the second parameter "yes" as confirmation. clear collection.
+    optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
     if yes == "yes":
+        col = get_files_col(g, dbname, files_col_name)
         col.remove()
         #col.create_index(['owner', 'name'], unique=True)
     else: uprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_file(col, owner, name, size):
-    """takes files collection object, name, size, owner. adds a file to the collection, returns its unique _id object"""
-    _id = col.insert_one({'name':name, 'size': size, 'owner':owner, 'data':now_stamp(), 'deleted':False}).inserted_id
+def add_file(g, owner, name, size, dbname='gorbin', files_col_name='files'):
+    """takes flask.g object, name, size, owner. adds a file to the files collection, returns its unique _id object.
+    optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
+    col = get_files_col(g, dbname, files_col_name)
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def check_file(col, owner, name):
-    """takes files collection object, owner and name, returns True if such file exists and is not deleted or returns False"""
+def check_file(g, owner, name, dbname='gorbin', files_col_name='files'):
+    """takes flask.g object, owner and name, returns True if such file exists and is not deleted or returns False.
+    optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
+    col = get_files_col(g, dbname, files_col_name)
     if col.count({'owner':owner, 'name':name, 'deleted':False}) >= 1: return True
     else: return False
 
-def del_file(col, _id):
-    """takes files collection object and _id of file, switches deleted to Tru for this file"""
+def del_file(g, _id, dbname='gorbin', files_col_name='files'):
+    """takes flask.g object and _id of file, switches deleted flag to Tru for this file.
+    optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
+    col = get_files_col(g, dbname, files_col_name)
     col.update_one({'_id':obj_id(_id)}, {'$set':{'deleted':True}})
 
