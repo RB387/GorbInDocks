@@ -15,10 +15,6 @@ import datetime as dt
 import base64
 
 
-# Lambdas for working with request.form dict
-form = lambda key: request.form[key] # takes key, returns value
-form_get = lambda key, ret: request.form.get(key, ret) # takes key and ret, returns value if exists or returns ret
-
 
 # Functions for working with time
 def now_stamp():

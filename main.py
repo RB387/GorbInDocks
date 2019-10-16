@@ -4,6 +4,11 @@ app = Flask(__name__)
 app.config.from_object('config')
 
 
+# Lambdas for working with request.form dict
+form = lambda key: request.form[key] # takes key, returns value
+form_get = lambda key, ret: request.form.get(key, ret) # takes key and ret, returns value if exists or returns ret
+
+
 @app.route('/home')
 def home(): 
 	pass
