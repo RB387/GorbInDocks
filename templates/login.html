@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <form method="post" action="{{ url_for('login') }}">
+            <table>
+                <tr>
+                    <td><label for="loginField">Login</label></td>
+                    <td><input id="loginField" type="text" name="login" required></td>
+                </tr>
+                <tr>
+                    <td><label for="passwordField">Password</label></td>
+                    <td><input id="passwordField" type="password" name="password" ></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: center"><input type="submit" value="Войти"></td>
+                </tr>
+            </table>
+            {% if bad_auth %}
+                <span style="color: #ff0000;">Bad login or password!</span>
+            {% endif %}
+        </form>
+    </body>
+</html>

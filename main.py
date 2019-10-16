@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, g
+from gorbin_tools import *
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -11,7 +12,7 @@ form_get = lambda key, ret: request.form.get(key, ret) # takes key and ret, retu
 
 @app.route('/home')
 def home(): 
-	pass
+	return '<h1>YOU IN! WELCOME TO HOME!</h1>'
 
 @app.route('/reg', methods = ['GET', 'POST'])
 def reg(): 
@@ -24,9 +25,15 @@ def reg():
 	return render_template("reg.html", title = 'Register')
 
 
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/')
 def index():
-    return '<h1>START PAGE</h1>'
+    return render_template('login.html')
+
+@app.route('/login', methods = ['POST'])
+def login():
+	if check_user(g, form('login'), form('password')):
+		return redirect(url_for('home'))
+	return render_template('login.html', bad_auth=True)
 
 if __name__ == '__main__':
     app.debug = True
