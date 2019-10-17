@@ -149,7 +149,7 @@ def add_file(g, owner, name, size, location, dbname='gorbin', files_col_name='fi
     """takes flask.g object, owner, name, size, location. adds a file to the files collection, returns its unique _id object.
     optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
     col = get_files_col(g, dbname, files_col_name)
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'location'=location, 'data':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def check_file(g, owner, name, dbname='gorbin', files_col_name='files'):
