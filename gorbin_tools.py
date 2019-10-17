@@ -119,12 +119,14 @@ def add_user(g, login, pas, email, dbname='gorbin', users_col_name='users'):
     _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def check_user(g, login, pas, dbname='gorbin', users_col_name='users'):
-    """takes flask.g object, login and password, returns True if such user exists and is not deleted or returns False.
+def get_user(g, login, pas, dbname='gorbin', users_col_name='users'):
+    """takes flask.g object, login and password, returns data of user in dict if such user exists and is not deleted or returns False.
     optionally takes database and users collection names (\"gorbin\", \"users\" by default)"""
     col = get_users_col(g, dbname, users_col_name)
-    if col.count({'login':login, 'pas':pas, 'deleted':False}) == 1: return True
-    else: return False
+    user_data = col.find_one({'login':login, 'deleted':False})
+    if user_data:
+        if user_data['pas'] == pas: return user_data
+    return False 
 
 def del_user(g, _id=None, login=None, dbname='gorbin', users_col_name='users'):
     """takes flask.g object, _id or login, switches deleted flag to Tru for this user.
