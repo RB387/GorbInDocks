@@ -167,3 +167,9 @@ def del_file(g, _id, dbname='gorbin', files_col_name='files'):
     col = get_files_col(g, dbname, files_col_name)
     col.update_one({'_id':obj_id(_id)}, {'$set':{'deleted':True}})
 
+def get_user_files(g, owner, dbname='gorbin', files_col_name='files'):
+    """takes flask.g object and owner of files, return iterable object with files of this owner.
+    if it has no files, the returned object will have a length of 0
+    optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
+    col = get_files_col(g, dbname, files_col_name)
+    return col.find({'owner':owner, 'deleted':False})
