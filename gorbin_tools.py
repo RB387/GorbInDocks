@@ -126,6 +126,22 @@ def get_user(g, login, pas, dbname='gorbin', users_col_name='users'):
     user_data = col.find_one({'login':login, 'deleted':False})
     if user_data:
         if user_data['pas'] == pas: return user_data
+    return False
+
+def check_login(g, login, dbname='gorbin', users_col_name='users'):
+    """takes flask.g object, login, returns True if such login is already taken and False if not"""
+    col = get_users_col(g, dbname, users_col_name)
+    user_data = col.find_one({'login':login, 'deleted':False})
+    if user_data:
+        return True
+    return False
+
+def check_email(g, email, dbname='gorbin', users_col_name='users'):
+    """takes flask.g object, login, returns True if such email is already taken and False if not"""
+    col = get_users_col(g, dbname, users_col_name)
+    user_data = col.find_one({'email':email, 'deleted':False})
+    if user_data:
+        return True
     return False 
 
 def del_user(g, _id=None, login=None, dbname='gorbin', users_col_name='users'):
