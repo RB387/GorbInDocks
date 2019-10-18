@@ -1,6 +1,6 @@
-####################
-#	Coded by RB387 # 
-####################
+'''
+Coded by RB387
+'''
 
 from flask import Flask, render_template, request, g, session, redirect, url_for
 import gorbin_tools as gt
@@ -12,17 +12,20 @@ app.config.from_object('config')
 
 @app.route('/home')
 def home(): 
-	pass
+	if 'login' in session:
+		return 'Files list'
+	else:
+		return redirect(url_for('index'))
 
 @app.route('/reg', methods = ['GET', 'POST'])
 def reg(): 
 	'''
-		Registration function 
+	Registration function 
 	'''
 
 	if 'login' in session:
 		#If such already logged in, then redirect him to home page
-		return redirect(url_for('index'))
+		return redirect(url_for('home'))
 
 	if request.method == "POST":
 		#get information from registarion form
@@ -31,11 +34,11 @@ def reg():
 			#check if such login and email already taken or not
 			if (not gt.check_login(g, result['login'])) and (not gt.check_email(g, result['email'])):
 				#if not, then add information about new user in database
-				gt.add_user(g, login = result['login'], pas = result['password'], email = result['email'])
-				#login him in session
+				gt.add_user(g, login = result['login'], pas = gt.hash(result['password']), email = result['email'])
+				#login user in session
 				session['login'] = result['login']
 				#redirect to home page
-				return redirect(url_for('index'))
+				return redirect(url_for('home'))
 			else:
 				# if current login taken 
 				if gt.check_login(g, result['login']):
@@ -57,9 +60,19 @@ def logout():
 @app.route('/', methods = ['GET', 'POST'])
 def index():
 	if 'login' in session:
-		return 'logged in ' + session['login']
+		return redirect(url_for('home'))
 	else:
-		return '<h1>START PAGE</h1>'
+		if request.method == "POST":
+			#get information from registarion form
+			result = request.form 
+			if gt.get_user(g, result['login'], gt.hash(result['password'])):
+				#login user to session
+				session['login'] = result['login']
+				return redirect(url_for('home'))
+			else:
+				#print error
+				return render_template("main.html", bad_auth = True)
+	return render_template("main.html", bad_auth = False)
 
 if __name__ == '__main__':
 	app.debug = True
