@@ -1,3 +1,7 @@
+####################
+#	Coded by RB387 # 
+####################
+
 from flask import Flask, render_template, request, g, session, redirect, url_for
 import gorbin_tools as gt
 
@@ -12,29 +16,41 @@ def home():
 
 @app.route('/reg', methods = ['GET', 'POST'])
 def reg(): 
+	'''
+		Registration function 
+	'''
 
-	title = 'Register'
 	if 'login' in session:
+		#If such already logged in, then redirect him to home page
 		return redirect(url_for('index'))
-	if request.method == "POST":
-		result = request.form 
 
+	if request.method == "POST":
+		#get information from registarion form
+		result = request.form 
 		with app.app_context():
+			#check if such login and email already taken or not
 			if (not gt.check_login(g, result['login'])) and (not gt.check_email(g, result['email'])):
+				#if not, then add information about new user in database
 				gt.add_user(g, login = result['login'], pas = result['password'], email = result['email'])
+				#login him in session
 				session['login'] = result['login']
+				#redirect to home page
 				return redirect(url_for('index'))
 			else:
+				# if current login taken 
 				if gt.check_login(g, result['login']):
-					return render_template("reg.html", title = title, error_flag = True, error_message = 'This login is already taken')
-
+					#print error msg
+					return render_template("reg.html", error_flag = True, error_message = 'This login is already taken')
+				#if current email taken
 				elif gt.check_email(g, result['email']):
-					return render_template("reg.html", title = title, error_flag = True, error_message = 'This email is already taken')
+					#print error msg
+					return render_template("reg.html", error_flag = True, error_message = 'This email is already taken')
 
-	return render_template("reg.html", title = 'Register', error_flag = False)
+	return render_template("reg.html", error_flag = False)
 
 @app.route('/logout')
 def logout():
+	#logout user from session (test function)
 	session.pop('login', None)
 	return redirect(url_for('index'))
 
@@ -46,7 +62,5 @@ def index():
 		return '<h1>START PAGE</h1>'
 
 if __name__ == '__main__':
-	with app.app_context():
-		print(gt.get_users_col(g, dbname = 'gorbin', users_col_name = 'users'))
 	app.debug = True
 	app.run()
