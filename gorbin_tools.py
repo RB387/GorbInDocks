@@ -137,7 +137,7 @@ def check_login(g, login, dbname='gorbin', users_col_name='users'):
     return False
 
 def check_email(g, email, dbname='gorbin', users_col_name='users'):
-    """takes flask.g object, login, returns True if such email is already taken and False if not"""
+    """takes flask.g object, email, returns True if such email is already taken and False if not"""
     col = get_users_col(g, dbname, users_col_name)
     user_data = col.find_one({'email':email, 'deleted':False})
     if user_data:
