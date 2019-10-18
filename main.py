@@ -1,40 +1,52 @@
-from flask import Flask, render_template, request, redirect, url_for, g
-from gorbin_tools import *
+from flask import Flask, render_template, request, g, session, redirect, url_for
+import gorbin_tools as gt
+
 
 app = Flask(__name__)
 app.config.from_object('config')
 
 
-# Lambdas for working with request.form dict
-form = lambda key: request.form[key] # takes key, returns value
-form_get = lambda key, ret: request.form.get(key, ret) # takes key and ret, returns value if exists or returns ret
-
-
 @app.route('/home')
 def home(): 
-	return '<h1>YOU IN! WELCOME TO HOME!</h1>'
+	pass
 
 @app.route('/reg', methods = ['GET', 'POST'])
 def reg(): 
+
+	title = 'Register'
+	if 'login' in session:
+		return redirect(url_for('index'))
 	if request.method == "POST":
-		result = request.form
-		print(result)
-		
-		#EMPTY
+		result = request.form 
 
-	return render_template("reg.html", title = 'Register')
+		with app.app_context():
+			if (not gt.check_login(g, result['login'])) and (not gt.check_email(g, result['email'])):
+				gt.add_user(g, login = result['login'], pas = result['password'], email = result['email'])
+				session['login'] = result['login']
+				return redirect(url_for('index'))
+			else:
+				if gt.check_login(g, result['login']):
+					return render_template("reg.html", title = title, error_flag = True, error_message = 'This login is already taken')
 
+				elif gt.check_email(g, result['email']):
+					return render_template("reg.html", title = title, error_flag = True, error_message = 'This email is already taken')
 
-@app.route('/')
+	return render_template("reg.html", title = 'Register', error_flag = False)
+
+@app.route('/logout')
+def logout():
+	session.pop('login', None)
+	return redirect(url_for('index'))
+
+@app.route('/', methods = ['GET', 'POST'])
 def index():
-    return render_template('login.html')
-
-@app.route('/login', methods = ['POST'])
-def login():
-	if check_user(g, form('login'), form('password')):
-		return redirect(url_for('home'))
-	return render_template('login.html', bad_auth=True)
+	if 'login' in session:
+		return 'logged in ' + session['login']
+	else:
+		return '<h1>START PAGE</h1>'
 
 if __name__ == '__main__':
-    app.debug = True
-    app.run()
+	with app.app_context():
+		print(gt.get_users_col(g, dbname = 'gorbin', users_col_name = 'users'))
+	app.debug = True
+	app.run()
