@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html>
     <body>
+        <form action="{{ url_for('home') }}" method="post" name="logout_form">
+            <input type="submit" name="logout" value="Logout">
+        </form>
         <form method=post enctype=multipart/form-data>
-            <input type=file name=file>
+            <input type=file name=file multiple>
             <input type=submit value=Upload>
         </form>
         {% if error %}
                 <span style="color: #ff0000;">{{ error_message }}</span>
+        {% endif %}
+        {% if upload %}
+                <span>{{ upload_message }}</span>
         {% endif %}
         <table border="1" width="100%" cellpadding="5">
                 {% for file in files %}
@@ -14,8 +20,13 @@
                         <th>{{ file['name'] }}</th>
                         <th>{{ file['size'] }}</th>
                         <th>
-                            <form action="{{ url_for('home') }}" method="post" name="{{ file['_id'] }}">
-                                    <input type="submit" name="{{ file['_id'] }}" value="download">
+                            <form action="{{ url_for('home') }}" method="post" name="download {{ file['_id'] }}">
+                                    <input type="submit" name="download {{ file['_id'] }}" value="Download">
+                            </form>
+                        </th>
+                        <th>
+                            <form action="{{ url_for('home') }}" method="post" name="delete {{ file['_id'] }}">
+                                    <input type="submit" name="delete {{ file['_id'] }}" value="Delete">
                             </form>
                         </th>
                     </tr>
