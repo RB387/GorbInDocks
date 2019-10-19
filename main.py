@@ -25,7 +25,7 @@ def home():
 				for file in file_list:
 					if file.filename == '':
 						return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+								files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
 								error = True, error_message = 'No selected file')
 					elif file:
 						#get file name
@@ -41,7 +41,7 @@ def home():
 						if os.path.exists(file_path):
 							#print error
 							return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+								files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
 								upload = True, upload_message = 'File ' + filename + ' already exists')
 						file.save(file_path)
 						#"reset" fd to the beginning of the file
@@ -50,10 +50,10 @@ def home():
 						file_bytes = file.read()
 						file.close()
 						#add information about file in to database
-						gt.add_file(g, owner=session['login'], name=filename, size = len(file_bytes), location = file_path, dbname='gorbin', files_col_name='files')	
+						gt.add_file(g, app.config, owner=session['login'], name=filename, size = len(file_bytes), location = file_path)	
 				#refresh page
 				return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+								files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
 								upload = True, upload_message = 'Uploaded!')
 			else:
 				#get information what to do
@@ -66,16 +66,24 @@ def home():
 				else:
 					#get information about file
 					action, file_id = action.split()
-					file_data = gt.get_file(g, id = file_id, dbname='gorbin', files_col_name='files')
+					file_data = gt.get_file(g, app.config, id = file_id)
 					
 					if action == 'download':
 						print('yes')
 						#if user have permission
 						if session['login'] == file_data['owner']:
+							#if file disappeared
+							if not os.path.exists(file_data['location']):
+								#delete file and print error
+								gt.del_file(g, app.config, _id = file_data['_id'])
+								return render_template("home.html",
+									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
+									error = True, error_message = 'File not found!') 
+							#else
 							return send_file(file_data['location'], as_attachment=True)
 						else:
 							return render_template("home.html",
-									files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
 									error = True, error_message = 'Permission denied') 
 
 					elif action == 'delete':
@@ -84,23 +92,23 @@ def home():
 							#if such file exists
 							if os.path.exists(file_data['location']):
 								#delete file from database
-								gt.del_file(g, _id = file_id, dbname='gorbin', files_col_name='files')
+								gt.del_file(g, app.config, _id = file_id)
 								#delete file from system
 								os.remove(file_data['location'])
 							else:
 								#delete from database
-								gt.del_file(g, _id = file_id, dbname='gorbin', files_col_name='files')
+								gt.del_file(g, app.config, _id = file_id)
 								return render_template("home.html",
-									files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
 									error = True, error_message = 'File not found')
 						else:
 							return render_template("home.html",
-									files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
 									error = True, error_message = 'Permission denied')
 
 
 		return render_template("home.html",
-				files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+				files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
 				error = False)
 	else:
 		return redirect(url_for('index'))
@@ -117,11 +125,12 @@ def reg():
 	if request.method == "POST":
 		#get information from registarion form
 		result = request.form
+
 		with app.app_context():
 			#check if such login and email already taken or not
-			if (not gt.check_login(g, result['login'])) and (not gt.check_email(g, result['email'])):
+			if (not gt.check_login(g, app.config, result['login'])) and (not gt.check_email(g, app.config, result['email'])):
 				#if not, then add information about new user in database
-				gt.add_user(g, login = result['login'], 
+				gt.add_user(g, app.config, login = result['login'], 
 							pas = gt.hash(result['password']), 
 							email = result['email'])
 				#log in user in session
@@ -130,13 +139,13 @@ def reg():
 				return redirect(url_for('home'))
 			else:
 				# if current login taken 
-				if gt.check_login(g, result['login']):
+				if gt.check_login(g, app.config, result['login']):
 					#print error msg
 					return render_template("reg.html", 
 									error_flag = True, 
 									error_message = 'This login is already taken')
 				#if current email taken
-				elif gt.check_email(g, result['email']):
+				elif gt.check_email(g, app.config, result['email']):
 					#print error msg
 					return render_template("reg.html", 
 									error_flag = True, 
@@ -158,7 +167,10 @@ def index():
 		if request.method == "POST":
 			#get information from registarion form
 			result = request.form 
-			if gt.get_user(g, result['login'], gt.hash(result['password'])):
+			print(result)
+			if 'register' == list(result.keys())[0]:
+				return redirect(url_for('reg'))
+			if gt.get_user(g, app.config, result['login'], gt.hash(result['password'])):
 				#log in user to session
 				session['login'] = result['login']
 				return redirect(url_for('home'))
