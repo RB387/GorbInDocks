@@ -169,14 +169,14 @@ def get_file(g, conf, id):
     return col.find_one({'_id': obj_id(id), 'deleted':False})
 
 def check_file(g, conf, owner, name):
-    """takes flask.g object, owner and name, returns True if such file exists and is not deleted or returns False"""
+    """takes flask.g and app.config objects, owner and name, returns True if such file exists and is not deleted or returns False"""
     col = get_files_col(g, conf)
     if col.count({'owner':owner, 'name':name, 'deleted':False}) >= 1: return True
     else: return False
 
 def del_file(g, conf, _id):
     """takes flask.g, app.config objects and _id of file, switches deleted flag to Tru for this file"""
-    col = get_files_col(g, dbname, files_col_name)
+    col = get_files_col(g, conf)
     col.update_one({'_id':obj_id(_id)}, {'$set':{'deleted':True}})
 
 def get_user_files(g, conf, owner):
