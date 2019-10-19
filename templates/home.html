@@ -5,6 +5,9 @@
             <input type=file name=file>
             <input type=submit value=Upload>
         </form>
+        {% if error %}
+                <span style="color: #ff0000;">{{ error_message }}</span>
+        {% endif %}
         <table border="1" width="100%" cellpadding="5">
                 {% for file in files %}
                     <tr>
