@@ -72,6 +72,14 @@ def home():
 						print('yes')
 						#if user have permission
 						if session['login'] == file_data['owner']:
+							#if file disappeared
+							if not os.path.exists(file_data['location']):
+								#delete file and print error
+								gt.del_file(g, app.config, _id = file_data['_id'])
+								return render_template("home.html",
+									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
+									error = True, error_message = 'File not found!') 
+							#else
 							return send_file(file_data['location'], as_attachment=True)
 						else:
 							return render_template("home.html",
