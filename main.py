@@ -56,40 +56,47 @@ def home():
 								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
 								upload = True, upload_message = 'Uploaded!')
 			else:
-				#get information what to do with file and file id
-				action, file_id = list(request.form.keys())[0].split()
-				#get information about file
-				file_data = gt.get_file(g, id = file_id, dbname='gorbin', files_col_name='files')
-				print(action)
-				if action == 'download':
-					print('yes')
-					#if user have permission
-					if session['login'] == file_data['owner']:
-						return send_file(file_data['location'], as_attachment=True)
-					else:
-						return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
-								error = True, error_message = 'Permission denied') 
+				#get information what to do
+				action = list(request.form.keys())[0]
 
-				elif action == 'delete':
-					#if user have permission
-					if session['login'] == file_data['owner']:
-						#if such file exists
-						if os.path.exists(file_data['location']):
-							#delete file from database
-							gt.del_file(g, _id = file_id, dbname='gorbin', files_col_name='files')
-							#delete file from system
-							os.remove(file_data['location'])
+				if action == 'logout':
+					#logout user from session
+					return redirect(url_for('logout'))
+
+				else:
+					#get information about file
+					action, file_id = action.split()
+					file_data = gt.get_file(g, id = file_id, dbname='gorbin', files_col_name='files')
+					
+					if action == 'download':
+						print('yes')
+						#if user have permission
+						if session['login'] == file_data['owner']:
+							return send_file(file_data['location'], as_attachment=True)
 						else:
-							#delete from database
-							gt.del_file(g, _id = file_id, dbname='gorbin', files_col_name='files')
 							return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
-								error = True, error_message = 'File not found')
-					else:
-						return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
-								error = True, error_message = 'Permission denied')
+									files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+									error = True, error_message = 'Permission denied') 
+
+					elif action == 'delete':
+						#if user have permission
+						if session['login'] == file_data['owner']:
+							#if such file exists
+							if os.path.exists(file_data['location']):
+								#delete file from database
+								gt.del_file(g, _id = file_id, dbname='gorbin', files_col_name='files')
+								#delete file from system
+								os.remove(file_data['location'])
+							else:
+								#delete from database
+								gt.del_file(g, _id = file_id, dbname='gorbin', files_col_name='files')
+								return render_template("home.html",
+									files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+									error = True, error_message = 'File not found')
+						else:
+							return render_template("home.html",
+									files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+									error = True, error_message = 'Permission denied')
 
 
 		return render_template("home.html",
