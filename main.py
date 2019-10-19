@@ -11,7 +11,7 @@ import os
 
 app = Flask(__name__)
 app.config.from_object('config')
-app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'data')
+
 
 @app.route('/home', methods = ['GET', 'POST'])
 def home(): 
