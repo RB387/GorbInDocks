@@ -57,7 +57,8 @@ def home():
 							error = True, error_message = 'Permission denied') 
 
 		return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), error = False)
+				files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+				error = False)
 	else:
 		return redirect(url_for('index'))
 
@@ -78,8 +79,8 @@ def reg():
 			if (not gt.check_login(g, result['login'])) and (not gt.check_email(g, result['email'])):
 				#if not, then add information about new user in database
 				gt.add_user(g, login = result['login'], 
-								pas = gt.hash(result['password']), 
-								email = result['email'])
+							pas = gt.hash(result['password']), 
+							email = result['email'])
 				#log in user in session
 				session['login'] = result['login']
 				#redirect to home page
@@ -89,14 +90,14 @@ def reg():
 				if gt.check_login(g, result['login']):
 					#print error msg
 					return render_template("reg.html", 
-											error_flag = True, 
-											error_message = 'This login is already taken')
+									error_flag = True, 
+									error_message = 'This login is already taken')
 				#if current email taken
 				elif gt.check_email(g, result['email']):
 					#print error msg
 					return render_template("reg.html", 
-											error_flag = True, 
-											error_message = 'This email is already taken')
+									error_flag = True, 
+									error_message = 'This email is already taken')
 
 	return render_template("reg.html", error_flag = False)
 
