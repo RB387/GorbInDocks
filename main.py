@@ -24,7 +24,6 @@ def home():
 					return render_template("home.html",
 							files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
 							error = True, error_message = 'No selected file')
-					return render_template
 				elif file:
 					#get file name
 					filename = secure_filename(file.filename)
