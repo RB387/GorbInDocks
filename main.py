@@ -18,16 +18,16 @@ def home():
 	if 'login' in session:
 		if request.method == "POST":
 			if 'file' in request.files:
-				#if app get file upload request
+				#if app gets file upload request
 				file = request.files['file']
 				if file.filename == '':
-					#
-					# DO NOT FORGET
-					#
-					print('error')
+					return render_template("home.html",
+							files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+							error = True, error_message = 'No selected file')
+					return render_template
 				elif file:
 					#get file name
-					filename = secure_filename(file.filename)
+					filename, file_path = secure_filename(file.filename)
 					#get path where file will be saved
 					file_path = os.path.join(app.config['UPLOAD_FOLDER'], session['login'])
 					#create directory
@@ -51,13 +51,12 @@ def home():
 				if session['login'] == file_data['owner']:
 					return send_file(file_data['location'], as_attachment=True)
 				else:
-					#
-					# DO NOT FORGET 
-					#
-					print('error') 
+					return render_template("home.html",
+							files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), 
+							error = True, error_message = 'Permission denied') 
 
 		return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')))
+								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')), error = False)
 	else:
 		return redirect(url_for('index'))
 
@@ -80,7 +79,7 @@ def reg():
 				gt.add_user(g, login = result['login'], 
 								pas = gt.hash(result['password']), 
 								email = result['email'])
-				#login user in session
+				#log in user in session
 				session['login'] = result['login']
 				#redirect to home page
 				return redirect(url_for('home'))
@@ -115,7 +114,7 @@ def index():
 			#get information from registarion form
 			result = request.form 
 			if gt.get_user(g, result['login'], gt.hash(result['password'])):
-				#login user to session
+				#log in user to session
 				session['login'] = result['login']
 				return redirect(url_for('home'))
 			else:
