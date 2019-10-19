@@ -27,7 +27,7 @@ def home():
 					return render_template
 				elif file:
 					#get file name
-					filename, file_path = secure_filename(file.filename)
+					filename = secure_filename(file.filename)
 					#get path where file will be saved
 					file_path = os.path.join(app.config['UPLOAD_FOLDER'], session['login'])
 					#create directory
@@ -48,6 +48,7 @@ def home():
 			else:
 				#get information about file
 				file_data = gt.get_file(g, id = list(request.form.keys())[0], dbname='gorbin', files_col_name='files')
+
 				if session['login'] == file_data['owner']:
 					return send_file(file_data['location'], as_attachment=True)
 				else:
