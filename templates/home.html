@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <form method=post enctype=multipart/form-data>
+            <input type=file name=file>
+            <input type=submit value=Upload>
+        </form>
+        <table border="1" width="100%" cellpadding="5">
+                {% for file in files %}
+                    <tr>
+                        <th>{{ file['name'] }}</th>
+                        <th>{{ file['size'] }}</th>
+                        <th>
+                            <form action="{{ url_for('home') }}" method="post" name="{{ file['_id'] }}">
+                                    <input type="submit" name="{{ file['_id'] }}" value="download">
+                            </form>
+                        </th>
+                    </tr>
+                {% endfor %}
+        </table>
+    </body>
+</html>
