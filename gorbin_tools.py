@@ -110,7 +110,7 @@ def remake_users(g, yes='no', dbname='gorbin', users_col_name='users'):
         col.remove()
         col.create_index('login', unique=True)
         col.create_index('email', unique=True)
-    else: uprint(("as a confirmation, add \"yes\" with the second parameter"))
+    else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
 def add_user(g, login, pas, email, dbname='gorbin', users_col_name='users'):
     """takes flask.g object, login, password, email. adds a user to the collection, returns its unique _id object.
@@ -150,7 +150,7 @@ def del_user(g, _id=None, login=None, dbname='gorbin', users_col_name='users'):
     col = get_users_col(g, dbname, users_col_name)
     if _id or login:
         col.update_one({'$or':[{'_id':obj_id(_id)}, {'login':login}]}, {'$set':{'deleted':True}})
-    else: uprint('could not delete user. did you forget to enter _id or login?')
+    else: vprint('could not delete user. did you forget to enter _id or login?')
 
 
 # Functions for working with files collection
@@ -161,7 +161,7 @@ def remake_files(g, yes='no', dbname='gorbin', files_col_name='files'):
         col = get_files_col(g, dbname, files_col_name)
         col.remove()
         #col.create_index(['owner', 'name'], unique=True)
-    else: uprint(("as a confirmation, add \"yes\" with the second parameter"))
+    else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
 def add_file(g, owner, name, size, location, dbname='gorbin', files_col_name='files'):
     """takes flask.g object, owner, name, size, location. adds a file to the files collection, returns its unique _id object.
@@ -169,6 +169,11 @@ def add_file(g, owner, name, size, location, dbname='gorbin', files_col_name='fi
     col = get_files_col(g, dbname, files_col_name)
     _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
+
+def get_file(g, id, dbname='gorbin', files_col_name='files'):
+    """takes flask.g object, id. returns file information by id"""
+    col = get_files_col(g, dbname, files_col_name)
+    return col.find_one({'_id': obj_id(id), 'deleted':False})
 
 def check_file(g, owner, name, dbname='gorbin', files_col_name='files'):
     """takes flask.g object, owner and name, returns True if such file exists and is not deleted or returns False.
