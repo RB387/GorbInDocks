@@ -50,7 +50,7 @@ def home():
 						file_bytes = file.read()
 						file.close()
 						#add information about file in to database
-						gt.add_file(g, app.config, owner=session['login'], name=filename, size = len(file_bytes), location = file_path)	
+						gt.add_file(g, app.config, owner=session['login'], name=filename, size = round(len(file_bytes)/1024/1024, 2), location = file_path)
 				#refresh page
 				return render_template("home.html",
 								files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
@@ -71,40 +71,42 @@ def home():
 					if action == 'download':
 						print('yes')
 						#if user have permission
-						if session['login'] == file_data['owner']:
-							#if file disappeared
-							if not os.path.exists(file_data['location']):
-								#delete file and print error
-								gt.del_file(g, app.config, _id = file_data['_id'])
+						if file_data:
+							if session['login'] == file_data['owner']:
+								#if file disappeared
+								if not os.path.exists(file_data['location']):
+									#delete file and print error
+									gt.del_file(g, app.config, _id = file_data['_id'])
+									return render_template("home.html",
+										files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
+										error = True, error_message = 'File not found!') 
+								#else
+								return send_file(file_data['location'], as_attachment=True)
+							else:
 								return render_template("home.html",
-									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
-									error = True, error_message = 'File not found!') 
-							#else
-							return send_file(file_data['location'], as_attachment=True)
-						else:
-							return render_template("home.html",
-									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
-									error = True, error_message = 'Permission denied') 
+										files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
+										error = True, error_message = 'Permission denied') 
 
 					elif action == 'delete':
 						#if user have permission
-						if session['login'] == file_data['owner']:
-							#if such file exists
-							if os.path.exists(file_data['location']):
-								#delete file from database
-								gt.del_file(g, app.config, _id = file_id)
-								#delete file from system
-								os.remove(file_data['location'])
+						if file_data:
+							if session['login'] == file_data['owner']:
+								#if such file exists
+								if os.path.exists(file_data['location']):
+									#delete file from database
+									gt.del_file(g, app.config, _id = file_id)
+									#delete file from system
+									os.remove(file_data['location'])
+								else:
+									#delete from database
+									gt.del_file(g, app.config, _id = file_id)
+									return render_template("home.html",
+										files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
+										error = True, error_message = 'File not found')
 							else:
-								#delete from database
-								gt.del_file(g, app.config, _id = file_id)
 								return render_template("home.html",
-									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
-									error = True, error_message = 'File not found')
-						else:
-							return render_template("home.html",
-									files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
-									error = True, error_message = 'Permission denied')
+										files = list(gt.get_user_files(g, app.config, owner=session['login'])), 
+										error = True, error_message = 'Permission denied')
 
 
 		return render_template("home.html",
@@ -167,7 +169,6 @@ def index():
 		if request.method == "POST":
 			#get information from registarion form
 			result = request.form 
-			print(result)
 			if 'register' == list(result.keys())[0]:
 				return redirect(url_for('reg'))
 			if gt.get_user(g, app.config, result['login'], gt.hash(result['password'])):
