@@ -2,18 +2,62 @@
 Coded by RB387
 '''
 
-from flask import Flask, render_template, request, g, session, redirect, url_for
+from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, g, session, redirect, url_for, send_file
 import gorbin_tools as gt
+import os
+
 
 
 app = Flask(__name__)
 app.config.from_object('config')
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'data')
 
-
-@app.route('/home')
+@app.route('/home', methods = ['GET', 'POST'])
 def home(): 
 	if 'login' in session:
-		return 'Files list'
+		if request.method == "POST":
+			if 'file' in request.files:
+				#if app get file upload request
+				file = request.files['file']
+				if file.filename == '':
+					#
+					# DO NOT FORGET
+					#
+					print('error')
+				elif file:
+					#get file name
+					filename = secure_filename(file.filename)
+					#get path where file will be saved
+					file_path = os.path.join(app.config['UPLOAD_FOLDER'], session['login'])
+					#create directory
+					if not os.path.exists(file_path):
+						os.makedirs(file_path)
+					#save file
+					file_path = os.path.join(file_path, filename)
+					file.save(file_path)
+					#"reset" fd to the beginning of the file
+					file.seek(0)
+					#get file size
+					file_bytes = file.read()
+					file.close()
+					#add information about file in to database
+					gt.add_file(g, owner=session['login'], name=filename, size = len(file_bytes), location = file_path, dbname='gorbin', files_col_name='files')
+					#refresh page
+					return redirect(url_for('home'))
+			else:
+				#get information about file
+				file_data = gt.get_file(g, id = list(request.form.keys())[0], dbname='gorbin', files_col_name='files')
+				if session['login'] == file_data['owner']:
+					return send_file(file_data['location'], as_attachment=True)
+				else:
+					#
+					# DO NOT FORGET 
+					#
+					print('error') 
+
+		return render_template("home.html",
+								files = list(gt.get_user_files(g, owner=session['login'], dbname='gorbin', files_col_name='files')))
 	else:
 		return redirect(url_for('index'))
 
@@ -22,19 +66,20 @@ def reg():
 	'''
 	Registration function 
 	'''
-
 	if 'login' in session:
-		#If such already logged in, then redirect him to home page
+		#If such user already logged in, then redirect him to home page
 		return redirect(url_for('home'))
 
 	if request.method == "POST":
 		#get information from registarion form
-		result = request.form 
+		result = request.form
 		with app.app_context():
 			#check if such login and email already taken or not
 			if (not gt.check_login(g, result['login'])) and (not gt.check_email(g, result['email'])):
 				#if not, then add information about new user in database
-				gt.add_user(g, login = result['login'], pas = gt.hash(result['password']), email = result['email'])
+				gt.add_user(g, login = result['login'], 
+								pas = gt.hash(result['password']), 
+								email = result['email'])
 				#login user in session
 				session['login'] = result['login']
 				#redirect to home page
@@ -43,11 +88,15 @@ def reg():
 				# if current login taken 
 				if gt.check_login(g, result['login']):
 					#print error msg
-					return render_template("reg.html", error_flag = True, error_message = 'This login is already taken')
+					return render_template("reg.html", 
+											error_flag = True, 
+											error_message = 'This login is already taken')
 				#if current email taken
 				elif gt.check_email(g, result['email']):
 					#print error msg
-					return render_template("reg.html", error_flag = True, error_message = 'This email is already taken')
+					return render_template("reg.html", 
+											error_flag = True, 
+											error_message = 'This email is already taken')
 
 	return render_template("reg.html", error_flag = False)
 
