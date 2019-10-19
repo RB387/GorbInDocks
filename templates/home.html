@@ -18,7 +18,7 @@
                 {% for file in files %}
                     <tr>
                         <th>{{ file['name'] }}</th>
-                        <th>{{ file['size'] }}</th>
+                        <th>{{ file['size'] }}mb</th>
                         <th>
                             <form action="{{ url_for('home') }}" method="post" name="download {{ file['_id'] }}">
                                     <input type="submit" name="download {{ file['_id'] }}" value="Download">
