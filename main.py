@@ -125,6 +125,7 @@ def reg():
 	if request.method == "POST":
 		#get information from registarion form
 		result = request.form
+
 		with app.app_context():
 			#check if such login and email already taken or not
 			if (not gt.check_login(g, app.config, result['login'])) and (not gt.check_email(g, app.config, result['email'])):
@@ -166,6 +167,9 @@ def index():
 		if request.method == "POST":
 			#get information from registarion form
 			result = request.form 
+			print(result)
+			if 'register' == list(result.keys())[0]:
+				return redirect(url_for('reg'))
 			if gt.get_user(g, app.config, result['login'], gt.hash(result['password'])):
 				#log in user to session
 				session['login'] = result['login']
