@@ -70,117 +70,122 @@ def hash(message, salt=b'JT7BX67_rVrdEpLlzWbNRV'):
 
 
 # MongoDB functions
-def get_db(g, conf):
-    """takes flask.g object and app.config object, adds a database object (if no exists)
-    as attribute to flask.g and returns a database object"""
+def get_db(g):
+    """takes flask.g object, adds a database object (if no exists), MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
+    as attributes to flask.g and returns a database object"""
     db = getattr(g, 'db', None)
     if db is None:
-        client = MongoClient(conf['MONGO_ADDRESS'])
-        db = g.db = client[conf['DB_NAME']]
+        from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
+        g.MONGO_ADDRESS = MONGO_ADDRESS
+        g.DB_NAME = DB_NAME
+        g.USERS_COL_NAME = USERS_COL_NAME
+        g.FILES_COL_NAME = FILES_COL_NAME
+        client = MongoClient(g.MONGO_ADDRESS)
+        db = g.db = client[g.DB_NAME]
     return db
 
-def get_users_col(g, conf):
-    """takes flask.g object and app.config object, adds a database and users
+def get_users_col(g):
+    """takes flask.g object, adds a database and users
     collection objects (if no exist) as attributes to flask.g, return users collection object"""
-    db = get_db(g, conf)
+    db = get_db(g)
     users = getattr(g, 'users', None)
     if users is None:
-        users = g.users = db[conf['USERS_COL_NAME']]
+        users = g.users = db[g.USERS_COL_NAME]
     return users
 
-def get_files_col(g, conf):
-    """takes flask.g object and app.config object, adds a database and files
+def get_files_col(g):
+    """takes flask.g object object, adds a database and files
     collection objects (if no exist) as attributes to flask.g, return files collection object"""
-    db = get_db(g, conf)
+    db = get_db(g)
     files = getattr(g, 'files', None)
     if files is None:
-        files = g.files = db[conf['FILES_COL_NAME']]
+        files = g.files = db[g.FILES_COL_NAME]
     return files
 
 
 # Functions for working with users collection
-def remake_users(g, conf, yes='no'):
-    """takes flask.g and app.cpnfig objects and the second parameter "yes" as confirmation. clear collection, build the indexes"""
+def remake_users(g, yes='no'):
+    """takes flask.g object and the second parameter "yes" as confirmation. clear collection, build the indexes"""
     if yes == "yes":
-        col = get_users_col(g, conf)
+        col = get_users_col(g)
         col.remove()
         col.create_index('login', unique=True)
         col.create_index('email', unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_user(g, conf, login, pas, email):
-    """takes flask.g and app.config objects, login, password, email. adds a user to the collection, returns its unique _id object"""
-    col = get_users_col(g, conf)
+def add_user(g, login, pas, email):
+    """takes flask.g object, login, password, email. adds a user to the collection, returns its unique _id object"""
+    col = get_users_col(g)
     _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def get_user(g, conf, login, pas):
-    """takes flask.g and app.config objects, app.config object, login and password, returns data of user in dict
+def get_user(g, login, pas):
+    """takes flask.g object, login and password, returns data of user in dict
     if such user exists and is not deleted or returns False"""
-    col = get_users_col(g, conf)
+    col = get_users_col(g)
     user_data = col.find_one({'login':login, 'deleted':False})
     if user_data:
         if user_data['pas'] == pas: return user_data
     return False
 
-def check_login(g, conf, login):
-    """takes flask.g and app.config objects, login, returns True if such login is already used and False if it is not"""
-    col = get_users_col(g, conf)
+def check_login(g, login):
+    """takes flask.g object, login, returns True if such login is already used and False if it is not"""
+    col = get_users_col(g)
     user_data = col.find_one({'login':login, 'deleted':False})
     if user_data:
         return True
     return False
 
-def check_email(g, conf, email):
-    """takes flask.g and app.config objects, email, returns True if such email is already used and False if it is not"""
-    col = get_users_col(g, conf)
+def check_email(g, email):
+    """takes flask.g object, email, returns True if such email is already used and False if it is not"""
+    col = get_users_col(g)
     user_data = col.find_one({'email':email, 'deleted':False})
     if user_data:
         return True
     return False 
 
-def del_user(g, conf, _id=None, login=None):
+def del_user(g, _id=None, login=None):
     """takes flask.g object, _id or login, switches deleted flag to Tru for this user"""
-    col = get_users_col(g, conf)
+    col = get_users_col(g)
     if _id or login:
         col.update_one({'$or':[{'_id':obj_id(_id)}, {'login':login}]}, {'$set':{'deleted':True}})
     else: vprint('could not delete user. did you forget to enter _id or login?')
 
 
 # Functions for working with files collection
-def remake_files(g, conf, yes='no'):
-    """takes flask.g, app.config objects and the second parameter "yes" as confirmation. clear collection.
+def remake_files(g, yes='no'):
+    """takes flask.g object and the second parameter "yes" as confirmation. clear collection.
     optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
     if yes == "yes":
-        col = get_files_col(g, conf)
+        col = get_files_col(g)
         col.remove()
         #col.create_index(['owner', 'name'], unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_file(g, conf, owner, name, size, location):
-    """takes flask.g and app.config objects, owner, name, size, location. adds a file to the files collection, returns its unique _id object"""
-    col = get_files_col(g, conf)
+def add_file(g, owner, name, size, location):
+    """takes flask.g object, owner, name, size, location. adds a file to the files collection, returns its unique _id object"""
+    col = get_files_col(g)
     _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def get_file(g, conf, id):
-    """takes flask.g and app.config objects, id. returns file information by id"""
-    col = get_files_col(g, conf)
+def get_file(g, id):
+    """takes flask.g object, id. returns file information by id"""
+    col = get_files_col(g)
     return col.find_one({'_id': obj_id(id), 'deleted':False})
 
-def check_file(g, conf, owner, name):
-    """takes flask.g and app.config objects, owner and name, returns True if such file exists and is not deleted or returns False"""
-    col = get_files_col(g, conf)
+def check_file(g, owner, name):
+    """takes flask.g object, owner and name, returns True if such file exists and is not deleted or returns False"""
+    col = get_files_col(g)
     if col.count({'owner':owner, 'name':name, 'deleted':False}) >= 1: return True
     else: return False
 
-def del_file(g, conf, _id):
-    """takes flask.g, app.config objects and _id of file, switches deleted flag to Tru for this file"""
-    col = get_files_col(g, conf)
+def del_file(g, _id):
+    """takes flask.g object and _id of file, switches deleted flag to Tru for this file"""
+    col = get_files_col(g)
     col.update_one({'_id':obj_id(_id)}, {'$set':{'deleted':True}})
 
-def get_user_files(g, conf, owner):
+def get_user_files(g, owner):
     """takes flask.g object and owner of files, return iterable object with files of this owner.
     if it has no files, the returned object will have a length of 0"""
-    col = get_files_col(g, conf)
+    col = get_files_col(g)
     return col.find({'owner':owner, 'deleted':False})
