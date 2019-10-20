@@ -4,25 +4,25 @@
         <form action="{{ url_for('index') }}" method="post" name="login_form">
             <table>
                 <tr>
-                    <td><label for="loginField">Login</label></td>
-                    <td><input id="loginField" type="text" name="login" required></td>
+                  <td> Login: </td>
+                  <td><label> <input  type="text" name="login" required> </label></td>
                 </tr>
                 <tr>
-                    <td><label for="passwordField">Password</label></td>
-                    <td><input id="passwordField" type="password" name="password" required></td>
+                  <td> Password: </td>
+                  <td><label> <input  type="password" name="password"required></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="text-align: center"><input type="submit" value="Log in!"></td>
+                    <td colspan="2" style="text-align: center">
+                        <input value="Registration" type="button" onclick="location.href='reg'"/>
+                        <input type="submit" name="btn_submit_authorization"  value="Log in!">
+
+                    </td>
                 </tr>
             </table>
             {% if bad_auth %}
                 <span style="color: #ff0000;">Wrong login or password!</span>
             {% endif %}
         </form>
-        <form action="{{ url_for('index') }}" method="post" name="Register">
-            <tr>
-                <input type="submit" name="register" value="Register">
-            </tr>
-        </form>
+
     </body>
 </html>
