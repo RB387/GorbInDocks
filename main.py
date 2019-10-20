@@ -168,9 +168,7 @@ def index():
 	else:
 		if request.method == "POST":
 			#get information from registarion form
-			result = request.form 
-			if 'register' == list(result.keys())[0]:
-				return redirect(url_for('reg'))
+			result = request.form
 			if gt.get_user(g, result['login'], gt.hash(result['password'])):
 				#log in user to session
 				session['login'] = result['login']
@@ -181,5 +179,14 @@ def index():
 	return render_template("main.html", bad_auth = False)
 
 if __name__ == '__main__':
+	#For first time database configuration
+	setup = False
+
+	if setup:
+		with app.app_context():
+			gt.remake_files(g, 'yes')
+			gt.remake_users(g, 'yes')
+			setup = False
+
 	app.debug = True
 	app.run()
