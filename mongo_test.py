@@ -65,7 +65,23 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get['dir'], NEW)
         self.assertEqual(get['shared'], [])
 
-    
+
+        lst = [new, NEW]
+
+        link = make_link(g, lst)
+        get = g.links.find_one({'_id':link})
+
+        self.assertEqual(get['files'], lst)
+        self.assertEqual(get['_id'], link)
+        self.assertEqual(get['deleted'], False)
+        self.assertEqual(get_linked(g, link), lst)
+        self.assertEqual(get_linked(g, '---'), None)
+
+        del_link(g, link)
+        self.assertEqual(get_linked(g, link), None)
+        self.assertEqual(g.links.find_one({'_id':link})['deleted'], True)
+
+
 
 
 if 1:

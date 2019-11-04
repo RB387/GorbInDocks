@@ -10,9 +10,10 @@ from bson.objectid import ObjectId as obj_id
 from pymongo.errors import DuplicateKeyError
 from pymongo import MongoClient
 from Crypto.Cipher import AES
-from hashlib import sha256
+from hashlib import sha256, sha1
 import datetime as dt
 import base64
+from os import urandom
 
 
 
@@ -117,7 +118,7 @@ def remake_users(g, yes='no'):
     """takes flask.g object and the second parameter "yes" as confirmation. clear collection, build the indexes"""
     if yes == "yes":
         col = get_users_col(g)
-        col.remove()
+        col.delete_many({})
         col.create_index('login', unique=True)
         col.create_index('email', unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
@@ -167,7 +168,7 @@ def remake_files(g, yes='no'):
     optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
     if yes == "yes":
         col = get_files_col(g)
-        col.remove()
+        col.delete_many({})
         #col.create_index(['owner', 'name'], unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
@@ -216,5 +217,28 @@ def remake_links(g, yes='no'):
     optionally takes database and files collection names (\"gorbin\", \"links\" by default)"""
     if yes == "yes":
         col = get_links_col(g)
-        col.remove()
+        col.delete_many({})
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
+
+
+def make_link(g, files):
+    """takes flask.g object and list _id of files/folders that will be available at this link. return a unique link"""
+    col = get_links_col(g)
+    link = base64.b64encode(sha1(urandom(64)).digest()).decode('utf-8').replace('/', 's')
+    try: 
+        col.insert_one({'_id':link, 'files':list(map(obj_id, files)), 'deleted':False}).inserted_id
+    except DuplicateKeyError:
+        link = make_link(g, files)
+    return link
+
+def get_linked(g, link):
+    """takes flask.g object and unique link. return list _id of files/folders. if such link does not exist or deleted, return None"""
+    col = get_links_col(g)
+    files = col.find_one({'_id':link, 'deleted':False})
+    if files != None: return files['files']
+    return files
+
+def del_link(g, link):
+    """takes flask.g object and the link, switches deleted flag to Tru for this file"""
+    col = get_links_col(g)
+    col.update_one({'_id':link}, {'$set':{'deleted':True}})
