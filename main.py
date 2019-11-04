@@ -185,6 +185,7 @@ if __name__ == '__main__':
 	if setup:
 		with app.app_context():
 			gt.remake_files(g, 'yes')
+			gt.remake_links(g, 'yes')
 			gt.remake_users(g, 'yes')
 			setup = False
 
