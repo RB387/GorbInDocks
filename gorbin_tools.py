@@ -116,7 +116,7 @@ def remake_users(g, yes='no'):
 def add_user(g, login, pas, email):
     """takes flask.g object, login, password, email. adds a user to the collection, returns its unique _id object"""
     col = get_users_col(g)
-    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'create_date':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'shared':[], 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_user(g, login, pas):
@@ -165,7 +165,7 @@ def remake_files(g, yes='no'):
 def add_file(g, owner, name, size, location):
     """takes flask.g object, owner, name, size, location. adds a file to the files collection, returns its unique _id object"""
     col = get_files_col(g)
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'shared':[], 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_file(g, id):
