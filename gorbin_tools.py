@@ -75,7 +75,7 @@ def get_db(g):
     as attributes to flask.g and returns a database object"""
     db = getattr(g, 'db', None)
     if db is None:
-        from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
+        from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
         g.MONGO_ADDRESS = MONGO_ADDRESS
         g.DB_NAME = DB_NAME
         g.USERS_COL_NAME = USERS_COL_NAME
@@ -101,6 +101,15 @@ def get_files_col(g):
     if files is None:
         files = g.files = db[g.FILES_COL_NAME]
     return files
+
+def get_links_col(g):
+    """takes flask.g object object, adds a database and links collection objects (if no exist)
+    as attributes to flask.g, return files collection object"""
+    db = get_db(g)
+    links = getattr(g, 'links', None)
+    if links is None:
+        links = g.links = db[g.LINKS_COL_NAME]
+    return links
 
 
 # Functions for working with users collection
@@ -199,3 +208,13 @@ def get_user_files(g, owner):
     if it has no files, the returned object will have a length of 0"""
     col = get_files_col(g)
     return col.find({'owner':owner, 'deleted':False})
+
+
+# Functions for working with links collection
+def remake_links(g, yes='no'):
+    """takes flask.g object and the second parameter "yes" as confirmation. clear collection.
+    optionally takes database and files collection names (\"gorbin\", \"links\" by default)"""
+    if yes == "yes":
+        col = get_links_col(g)
+        col.remove()
+    else: vprint(("as a confirmation, add \"yes\" with the second parameter"))

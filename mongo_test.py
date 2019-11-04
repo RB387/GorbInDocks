@@ -1,7 +1,7 @@
 from gorbin_tools import *
 import unittest
 from time import sleep
-from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
+from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
 
 class flask_g():
     def __init__(self):
@@ -11,9 +11,11 @@ class flask_g():
         self.DB_NAME = DB_NAME
         self.USERS_COL_NAME = USERS_COL_NAME
         self.FILES_COL_NAME = FILES_COL_NAME
+        self.LINKS_COL_NAME = LINKS_COL_NAME
 
         self.users = self.db['test_users']
         self.files = self.db['test_files']
+        self.links = self.db['test_links']
 
 
 class mongo_test(unittest.TestCase):
@@ -80,11 +82,18 @@ if 1:
 
             self.assertEqual(size, 0)
 
+        def test_remake_links(self):
+            remake_links(g, 'yes')
+            size = g.links.count_documents({})
+
+            self.assertEqual(size, 0)
+
 
 
 if __name__ == '__main__':
     g = flask_g()
     remake_users(g, 'yes')
     remake_files(g, 'yes')
+    remake_links(g, 'yes')
     unittest.main()
 
