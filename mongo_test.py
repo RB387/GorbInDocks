@@ -31,6 +31,8 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get['pas'], hash(pas))
         self.assertEqual(get['email'], mail)
         self.assertEqual(get['shared'], [])
+        
+        self.assertEqual(get_user_shared(g, new), [])
 
 
 

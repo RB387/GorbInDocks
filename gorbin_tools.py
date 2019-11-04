@@ -242,3 +242,10 @@ def del_link(g, link):
     """takes flask.g object and the link, switches deleted flag to Tru for this file"""
     col = get_links_col(g)
     col.update_one({'_id':link}, {'$set':{'deleted':True}})
+
+
+# Functions for working with shared files
+def get_user_shared(g, user_id):
+    """takes flask.g object and unique user's _id. return its list _id of files/folders which were shared with him"""
+    col = get_users_col(g)
+    return col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})['shared']
