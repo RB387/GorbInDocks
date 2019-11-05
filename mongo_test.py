@@ -48,7 +48,6 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get['size'], size)
         self.assertEqual(get['location'], location)
         self.assertEqual(get['dir'], '/')
-        self.assertEqual(get['shared'], [])
 
         owner = 'log1'
         name = 'name1'
@@ -62,7 +61,6 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get['size'], size)
         self.assertEqual(get['location'], location)
         self.assertEqual(get['dir'], NEW)
-        self.assertEqual(get['shared'], [])
 
 
         lst = [new, NEW]

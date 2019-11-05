@@ -177,7 +177,7 @@ def add_file(g, owner, name, size, location, directory='/'):
     adds a file to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'file', 'shared':[], 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'file', 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def add_folder(g, owner, name, size, location, directory='/'):
@@ -185,7 +185,7 @@ def add_folder(g, owner, name, size, location, directory='/'):
     adds a folder to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'folder', 'shared':[], 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'folder', 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_file(g, id):
