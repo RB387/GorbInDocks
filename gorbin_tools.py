@@ -188,10 +188,10 @@ def add_folder(g, owner, name, size, location, directory='/'):
     _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'folder', 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def get_file(g, id):
+def get_file(g, file_id):
     """takes flask.g object, id. returns file information by id"""
     col = get_files_col(g)
-    return col.find_one({'_id': obj_id(id), 'deleted':False})
+    return col.find_one({'_id': obj_id(file_id), 'deleted':False})
 
 def check_file(g, owner, name):
     """takes flask.g object, owner and name, returns True if such file exists and is not deleted or returns False"""
