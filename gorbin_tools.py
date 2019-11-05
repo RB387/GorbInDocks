@@ -221,22 +221,22 @@ def remake_links(g, yes='no'):
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
 
-def make_link(g, files):
+def make_link(g, file_ids):
     """takes flask.g object and list _id of files/folders that will be available at this link. return a unique link"""
     col = get_links_col(g)
     link = base64.b64encode(sha1(urandom(64)).digest()).decode('utf-8').replace('/', 's')
     try: 
-        col.insert_one({'_id':link, 'files':list(map(obj_id, files)), 'deleted':False}).inserted_id
+        col.insert_one({'_id':link, 'files':list(map(obj_id, file_ids)), 'deleted':False}).inserted_id
     except DuplicateKeyError:
-        link = make_link(g, files)
+        link = make_link(g, file_ids)
     return link
 
 def get_linked(g, link):
     """takes flask.g object and unique link. return list _id of files/folders. if such link does not exist or deleted, return None"""
     col = get_links_col(g)
-    files = col.find_one({'_id':link, 'deleted':False})
-    if files != None: return files['files']
-    return files
+    file_ids = col.find_one({'_id':link, 'deleted':False})
+    if file_ids != None: return file_ids['files']
+    return file_ids
 
 def del_link(g, link):
     """takes flask.g object and the link, switches deleted flag to Tru for this file"""
@@ -248,4 +248,24 @@ def del_link(g, link):
 def get_user_shared(g, user_id):
     """takes flask.g object and unique user's _id. return its list _id of files/folders which were shared with him"""
     col = get_users_col(g)
-    return col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})['shared']
+    file_ids = col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})
+    if file_ids != None: file_ids = col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})['shared']
+    return file_ids
+
+def add_linked(g, user_id, file_ids):
+    """takes flask.g object, unique user's _id and list _id of files/folders which were shared with him. adds to his shared list files from list"""
+    col = get_users_col(g)
+    for file_id in file_ids:
+        col.update_one({'_id':obj_id(user_id)}, {'$addToSet':{'shared':obj_id(file_id)}})
+
+def del_shared(g, user_id, file_ids):
+    """takes flask.g object, unique user's _id and list _id of files/folders which were shared with him. delete them from his shared list"""
+    col = get_users_col(g)
+    col.update_one({'_id':obj_id(user_id)}, {'$pullAll':{'shared':list(map(obj_id, file_ids))}})
+
+def check_availability(g, user_id, file_id):
+    """takes flask.g object, unique user's _id and unique files's/folder's _id. return True if this file is available to this user, else return False"""
+    col = get_users_col(g)
+    checked = col.find_one({'_id':obj_id(user_id), 'shared':obj_id(file_id)}, {})
+    if checked != None: return True
+    return False

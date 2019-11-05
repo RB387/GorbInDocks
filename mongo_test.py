@@ -24,19 +24,16 @@ class mongo_test(unittest.TestCase):
         pas = 'pas1'
         mail = 'e@ma.il'
 
-        new = add_user(g, log, hash(pas), mail)
-        get = g.users.find_one({'_id':new})
+        new_user = add_user(g, log, hash(pas), mail)
+        get = g.users.find_one({'_id':new_user})
         
         self.assertEqual(get['login'], log)
         self.assertEqual(get['pas'], hash(pas))
         self.assertEqual(get['email'], mail)
         self.assertEqual(get['shared'], [])
-        
-        self.assertEqual(get_user_shared(g, new), [])
 
 
 
-    def test_add_folder(self):
         owner = 'log2'
         name = 'name2'
         location = 'C:\\tesk_loc'
@@ -83,10 +80,21 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get_linked(g, link), None)
         self.assertEqual(g.links.find_one({'_id':link})['deleted'], True)
 
+        add_linked(g, new_user, [new, NEW, new, NEW])
+        self.assertEqual(get_user_shared(g, new_user), [new, NEW])
+        self.assertEqual(get_user_shared(g, new), None)
+
+        del_shared(g, new_user, [new, new])
+        self.assertEqual(get_user_shared(g, new_user), [NEW])
+
+        self.assertEqual(check_availability(g, new_user, NEW), True)
+        self.assertEqual(check_availability(g, new_user, new), False)
 
 
 
-if 1:
+
+
+if 0:
     class remake_test(unittest.TestCase):
         def test_remake_users(self):
             remake_users(g, 'yes')
