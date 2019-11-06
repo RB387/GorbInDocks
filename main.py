@@ -4,6 +4,7 @@ Coded by RB387
 
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, g, session, redirect, url_for, send_file
+from zipfile import ZipFile 
 import gorbin_tools as gt
 import os
 
@@ -57,16 +58,27 @@ def home():
 								upload = True, upload_message = 'Uploaded!')
 			else:
 				#get information what to do
+				action = request.form
+				print(action)
 				action = list(request.form.keys())[0]
 
 				if action == 'logout':
 					#logout user from session
 					return redirect(url_for('logout'))
 
+				elif action == 'select_button':
+					return render_template('home.html',
+								files = list(gt.get_user_files(g, owner=session['login'])), 
+								check = True)
+
 				else:
 					#get information about file
-					action, file_id = action.split()
-					file_data = gt.get_file(g, id = file_id)
+					info = action.split()
+					if len(info) == 2:
+						action, file_id = info[0], info[1]
+						file_data = gt.get_file(g, file_id = file_id)
+					else:
+						action = info[0]
 					
 					if action == 'download':
 						print('yes')
@@ -86,6 +98,46 @@ def home():
 								return render_template("home.html",
 										files = list(gt.get_user_files(g, owner=session['login'])), 
 										error = True, error_message = 'Permission denied') 
+
+					elif action == 'download_list':
+						values = list(request.form.values())
+						if len(values) > 1:
+							values = values[1::]
+							files_location = []
+							for file_id in values:
+								file_data = gt.get_file(g, file_id = file_id)
+								if file_data:
+									if session['login'] == file_data['owner']:
+										#if file disappeared
+										if not os.path.exists(file_data['location']):
+											#delete file and print error
+											gt.del_file(g, _id = file_data['_id'])
+											return render_template("home.html",
+												files = list(gt.get_user_files(g, owner=session['login'])), 
+												error = True, error_message = 'File not found!') 
+										#else
+										files_location.append(file_data['location'])
+									else:
+										return render_template("home.html",
+												files = list(gt.get_user_files(g, owner=session['login'])), 
+												error = True, error_message = 'Permission denied')
+								else:
+									return render_template("home.html",
+										files = list(gt.get_user_files(g, owner=session['login'])))
+									
+							if not os.path.exists('./temp_data'):
+								os.makedirs('./temp_data')
+
+							temp_path = './temp_data/' + session['login'] + '.zip'
+							with ZipFile(temp_path,'w') as zip: 
+								# writing each file one by one 
+								for file_loc in files_location:
+									zip.write(file_loc, os.path.basename(file_loc))
+							return send_file(temp_path, as_attachment=True)
+						else:
+							return render_template("home.html",
+								files = list(gt.get_user_files(g, owner=session['login'])), 
+								upload = True, upload_message = 'No file selected!')
 
 					elif action == 'delete':
 						#if user have permission
@@ -107,7 +159,42 @@ def home():
 								return render_template("home.html",
 										files = list(gt.get_user_files(g, owner=session['login'])), 
 										error = True, error_message = 'Permission denied')
-
+					elif action == 'delete_list':
+						values = list(request.form.values())
+						if len(values) > 1:
+							values = values[1::]
+							for file_id in values:
+								file_data = gt.get_file(g, file_id = file_id)
+								if file_data:
+									if session['login'] == file_data['owner']:
+										#if such file exists
+										if os.path.exists(file_data['location']):
+											#delete file from database
+											gt.del_file(g, _id = file_id)
+											#delete file from system
+											os.remove(file_data['location'])
+										else:
+											#delete from database
+											gt.del_file(g, _id = file_id)
+											return render_template("home.html",
+												files = list(gt.get_user_files(g, owner=session['login'])), 
+												error = True, error_message = 'File not found')
+									else:
+										return render_template("home.html",
+												files = list(gt.get_user_files(g, owner=session['login'])), 
+												error = True, error_message = 'Permission denied')
+								else:
+									return render_template("home.html",
+										files = list(gt.get_user_files(g, owner=session['login'])))
+						else:
+							return render_template("home.html",
+								files = list(gt.get_user_files(g, owner=session['login'])), 
+								upload = True, upload_message = 'No file selected!')
+							
+					elif action == 'cancel_list':
+						return render_template("home.html",
+										files = list(gt.get_user_files(g, owner=session['login'])),
+										check = False)
 
 		return render_template("home.html",
 				files = list(gt.get_user_files(g, owner=session['login'])), 
@@ -185,9 +272,7 @@ if __name__ == '__main__':
 	if setup:
 		with app.app_context():
 			gt.remake_files(g, 'yes')
-			gt.remake_links(g, 'yes')
 			gt.remake_users(g, 'yes')
-			setup = False
 
 	app.debug = True
 	app.run()
