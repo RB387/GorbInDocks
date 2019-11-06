@@ -8,29 +8,45 @@
             <input type=file name=file multiple>
             <input type=submit value=Upload>
         </form>
+        <form action="{{ url_for('home') }}" method="post" name="checkbox">
         {% if error %}
                 <span style="color: #ff0000;">{{ error_message }}</span>
         {% endif %}
         {% if upload %}
                 <span>{{ upload_message }}</span>
         {% endif %}
-        <table border="1" width="100%" cellpadding="5">
-                {% for file in files %}
-                    <tr>
-                        <th>{{ file['name'] }}</th>
-                        <th>{{ file['size'] }}mb</th>
-                        <th>
-                            <form action="{{ url_for('home') }}" method="post" name="download {{ file['_id'] }}">
-                                    <input type="submit" name="download {{ file['_id'] }}" value="Download">
-                            </form>
-                        </th>
-                        <th>
-                            <form action="{{ url_for('home') }}" method="post" name="delete {{ file['_id'] }}">
-                                    <input type="submit" name="delete {{ file['_id'] }}" value="Delete">
-                            </form>
-                        </th>
-                    </tr>
-                {% endfor %}
-        </table>
+        {% if not check %}
+                <form action="{{ url_for('home') }}" method="post" name="select_form">
+                    <input type="submit" name="select_button" value="Select">
+                </form>
+        {% else %}
+                <input type="submit" name="download_list" value="Download">
+                <input type="submit" name="delete_list" value="Delete">
+                <input type="submit" name="cancel_list" value="Cancel">
+        {% endif %}
+        
+            <table border="1" width="100%" cellpadding="5">
+                    {% for file in files %}
+                        <tr>
+                            <th>{{ file['name'] }}</th>
+                            <th>{{ file['size'] }}mb</th>
+                            {% if check %}
+                            <th><input type="checkbox" name="{{ 'box' ~ loop.index0 }}" value="{{ file['_id'] }}"></th>
+                            {% else %}
+                            <th>
+                                <form action="{{ url_for('home') }}" method="post" name="download {{ file['_id'] }}">
+                                        <input type="submit" name="download {{ file['_id'] }}" value="Download">
+                                </form>
+                            </th>
+                            <th>
+                                <form action="{{ url_for('home') }}" method="post" name="delete {{ file['_id'] }}">
+                                        <input type="submit" name="delete {{ file['_id'] }}" value="Delete">
+                                </form>
+                            </th>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+            </table>
+        </form>
     </body>
 </html>
