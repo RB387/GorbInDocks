@@ -129,7 +129,7 @@ def home():
 							if not os.path.exists(app.config['ZIP_FOLDER']):
 								os.makedirs(app.config['ZIP_FOLDER'])
 
-							temp_path = os.path.join(app.config['ZIP_FOLDER'], gt.str_now().replace(' ', '_')) + '.zip'
+							temp_path = os.path.join(app.config['ZIP_FOLDER'], gt.str_now().replace(' ', '_')) + '_' + session['login'] + '.zip'
 							with ZipFile(temp_path,'w') as zip: 
 								# writing each file one by one 
 								for file_loc in files_location:
