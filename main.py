@@ -126,10 +126,10 @@ def home():
 									return render_template("home.html",
 										files = list(gt.get_user_files(g, owner=session['login'])))
 									
-							if not os.path.exists(app.config['UPLOAD_FOLDER']):
-								os.makedirs(app.config['UPLOAD_FOLDER'])
+							if not os.path.exists(app.config['ZIP_FOLDER']):
+								os.makedirs(app.config['ZIP_FOLDER'])
 
-							temp_path = app.config['UPLOAD_FOLDER'] + session['login'] + '.zip'
+							temp_path = app.config['ZIP_FOLDER'] + session['login'] + '.zip'
 							with ZipFile(temp_path,'w') as zip: 
 								# writing each file one by one 
 								for file_loc in files_location:
