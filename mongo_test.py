@@ -20,6 +20,7 @@ class flask_g():
 
 class mongo_test(unittest.TestCase):
     def test_add_user(self):
+        self.maxDiff = 1500
         log = 'log1'
         pas = 'pas1'
         mail = 'e@ma.il'
@@ -30,7 +31,7 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get['login'], log)
         self.assertEqual(get['pas'], hash(pas))
         self.assertEqual(get['email'], mail)
-        self.assertEqual(get['shared'], [])
+        self.assertEqual(get['shared'], {})
 
 
 
@@ -78,15 +79,18 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get_linked(g, link), None)
         self.assertEqual(g.links.find_one({'_id':link})['deleted'], True)
 
-        add_linked(g, new_user, [new, NEW, new, NEW])
-        self.assertEqual(get_user_shared(g, new_user), [new, NEW])
+        add_linked(g, log, new_user, [new, NEW, new, NEW])
+        add_linked(g, 'pasha', new_user, [new])
+        #self.assertEqual(get_user_shared(g, new_user), g.files.find)
         self.assertEqual(get_user_shared(g, new), None)
 
-        del_shared(g, new_user, [new, new])
-        self.assertEqual(get_user_shared(g, new_user), [NEW])
+        del_shared(g, log, new_user, [new, new])
+        #self.assertEqual(get_user_shared(g, new_user), {log:[NEW], 'pasha':[new]})
+        del_shared(g, 'pasha', new_user, [new])
+        #self.assertEqual(get_user_shared(g, new_user), {log:[NEW], 'pasha':[]})
 
-        self.assertEqual(check_availability(g, new_user, NEW), True)
-        self.assertEqual(check_availability(g, new_user, new), False)
+        self.assertEqual(check_availability(g, log, new_user, NEW), True)
+        self.assertEqual(check_availability(g, log, new_user, new), False)
 
 
 

@@ -126,7 +126,7 @@ def remake_users(g, yes='no'):
 def add_user(g, login, pas, email):
     """takes flask.g object, login, password, email. adds a user to the collection, returns its unique _id object"""
     col = get_users_col(g)
-    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'shared':[], 'create_date':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'shared':{}, 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_user(g, login, pas):
@@ -248,24 +248,30 @@ def del_link(g, link):
 def get_user_shared(g, user_id):
     """takes flask.g object and unique user's _id. return its list _id of files/folders which were shared with him"""
     col = get_users_col(g)
-    file_ids = col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})
-    if file_ids != None: file_ids = col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})['shared']
-    return file_ids
+    f_col = get_files_col(g)
+    ret = {}
+    files = col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})
+    if files != None:
+        ret = {}
+        for log, lst in files['shared'].items():
+	        if lst != []: ret[log] = list(f_col.find({'_id':{'$in': lst}}))
+        return ret
+    return None
 
-def add_linked(g, user_id, file_ids):
+def add_linked(g, login: str, user_id, file_ids):
     """takes flask.g object, unique user's _id and list _id of files/folders which were shared with him. adds to his shared list files from list"""
     col = get_users_col(g)
     for file_id in file_ids:
-        col.update_one({'_id':obj_id(user_id)}, {'$addToSet':{'shared':obj_id(file_id)}})
+        col.update_one({'_id':obj_id(user_id)}, {'$addToSet':{'shared.'+login:obj_id(file_id)}})
 
-def del_shared(g, user_id, file_ids):
+def del_shared(g, login: str, user_id, file_ids):
     """takes flask.g object, unique user's _id and list _id of files/folders which were shared with him. delete them from his shared list"""
     col = get_users_col(g)
-    col.update_one({'_id':obj_id(user_id)}, {'$pullAll':{'shared':list(map(obj_id, file_ids))}})
+    col.update_one({'_id':obj_id(user_id)}, {'$pullAll':{'shared.'+login:list(map(obj_id, file_ids))}})
 
-def check_availability(g, user_id, file_id):
+def check_availability(g, login: str, user_id, file_id):
     """takes flask.g object, unique user's _id and unique files's/folder's _id. return True if this file is available to this user, else return False"""
     col = get_users_col(g)
-    checked = col.find_one({'_id':obj_id(user_id), 'shared':obj_id(file_id)}, {})
+    checked = col.find_one({'_id':obj_id(user_id), 'shared.'+login:obj_id(file_id)}, {})
     if checked != None: return True
     return False
