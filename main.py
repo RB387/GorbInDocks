@@ -4,7 +4,8 @@ Coded by RB387
 
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, g, session, redirect, url_for, send_file
-from zipfile import ZipFile 
+from zipfile import ZipFile
+from sys import platform
 import gorbin_tools as gt
 import os
 
@@ -125,10 +126,10 @@ def home():
 									return render_template("home.html",
 										files = list(gt.get_user_files(g, owner=session['login'])))
 									
-							if not os.path.exists('./temp_data'):
-								os.makedirs('./temp_data')
+							if not os.path.exists(app.config['UPLOAD_FOLDER']):
+								os.makedirs(app.config['UPLOAD_FOLDER'])
 
-							temp_path = './temp_data/' + session['login'] + '.zip'
+							temp_path = app.config['UPLOAD_FOLDER'] + session['login'] + '.zip'
 							with ZipFile(temp_path,'w') as zip: 
 								# writing each file one by one 
 								for file_loc in files_location:
@@ -273,6 +274,10 @@ if __name__ == '__main__':
 		with app.app_context():
 			gt.remake_files(g, 'yes')
 			gt.remake_users(g, 'yes')
-
+			gt.remake_links(g, 'yes')
+	
 	app.debug = True
-	app.run()
+	if platform == 'win32':
+		app.run()
+	else:
+		app.run(host = '0.0.0.0')
