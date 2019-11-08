@@ -123,10 +123,11 @@ def remake_users(g, yes='no'):
         col.create_index('email', unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_user(g, login, pas, email):
-    """takes flask.g object, login, password, email. adds a user to the collection, returns its unique _id object"""
+def add_user(g, login, pas, email, status='simple'):
+    """takes flask.g object, login, password, email. additionally, takes user status simple/admin ('simple' by default).
+    adds a user to the collection, returns its unique _id object"""
     col = get_users_col(g)
-    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'shared':{}, 'create_date':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'status':status, 'shared':{}, 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_user(g, login, pas):
