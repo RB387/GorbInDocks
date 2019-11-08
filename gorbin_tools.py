@@ -246,7 +246,8 @@ def del_link(g, link):
 
 # Functions for working with shared files
 def get_user_shared(g, user_id):
-    """takes flask.g object and unique user's _id. return its list _id of files/folders which were shared with him"""
+    """takes flask.g object and unique user's _id. return dict: keys - logins of users who shared, values - 
+    list _id of files which were shared with him by this user"""
     col = get_users_col(g)
     f_col = get_files_col(g)
     ret = {}
@@ -258,19 +259,19 @@ def get_user_shared(g, user_id):
         return ret
     return None
 
-def add_linked(g, login: str, user_id, file_ids):
-    """takes flask.g object, unique user's _id and list _id of files/folders which were shared with him. adds to his shared list files from list"""
+def add_linked(g, login, user_id, file_ids):
+    """takes flask.g object,  login of user who shared. current user's _id and list _id of files/folders which were shared with him. adds to his shared list files from list"""
     col = get_users_col(g)
     for file_id in file_ids:
         col.update_one({'_id':obj_id(user_id)}, {'$addToSet':{'shared.'+login:obj_id(file_id)}})
 
-def del_shared(g, login: str, user_id, file_ids):
-    """takes flask.g object, unique user's _id and list _id of files/folders which were shared with him. delete them from his shared list"""
+def del_shared(g, login, user_id, file_ids):
+    """takes flask.g object, login of user who shared. current user's _id and list _id of files/folders which were shared with him. delete them from his shared list"""
     col = get_users_col(g)
     col.update_one({'_id':obj_id(user_id)}, {'$pullAll':{'shared.'+login:list(map(obj_id, file_ids))}})
 
 def check_availability(g, login: str, user_id, file_id):
-    """takes flask.g object, unique user's _id and unique files's/folder's _id. return True if this file is available to this user, else return False"""
+    """takes flask.g object,  login of user who shared. current user's _id and unique files's/folder's _id. return True if this file is available to this user, else return False"""
     col = get_users_col(g)
     checked = col.find_one({'_id':obj_id(user_id), 'shared.'+login:obj_id(file_id)}, {})
     if checked != None: return True
