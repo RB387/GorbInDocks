@@ -177,7 +177,7 @@ def add_file(g, owner, name, size, location, directory='/'):
     adds a file to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'file', 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'file', 'location':location, 'data':now_stamp(), 'comment':None, 'deleted':False}).inserted_id
     return _id
 
 def add_folder(g, owner, name, size, location, directory='/'):
@@ -185,7 +185,7 @@ def add_folder(g, owner, name, size, location, directory='/'):
     adds a folder to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'folder', 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'folder', 'location':location, 'data':now_stamp(), 'comment':None, 'deleted':False}).inserted_id
     return _id
 
 def get_file(g, file_id):
@@ -210,6 +210,11 @@ def get_user_files(g, owner):
     col = get_files_col(g)
     return col.find({'owner':owner, 'deleted':False})
 
+def add_comment(g, file_id, comment):
+    """takes flask.g object and unique file's _id. add a comment to this file"""
+    col = get_files_col(g)
+    col.update_one({'_id':obj_id(file_id)}, {'$set':{'comment':comment}})
+
 
 # Functions for working with links collection
 def remake_links(g, yes='no'):
@@ -221,21 +226,23 @@ def remake_links(g, yes='no'):
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
 
-def make_link(g, file_ids):
-    """takes flask.g object and list _id of files/folders that will be available at this link. return a unique link"""
+def make_link(g, file_ids, comment=None):
+    """takes flask.g object and list _id of files/folders that will be available at this link, additionally, the comment
+    (None by default). return a unique link"""
     col = get_links_col(g)
     link = base64.b64encode(sha1(urandom(64)).digest()).decode('utf-8').replace('/', 's')
     try: 
-        col.insert_one({'_id':link, 'files':list(map(obj_id, file_ids)), 'deleted':False}).inserted_id
+        col.insert_one({'_id':link, 'files':list(map(obj_id, file_ids)), 'comment':comment, 'deleted':False}).inserted_id
     except DuplicateKeyError:
-        link = make_link(g, file_ids)
+        link = make_link(g, file_ids, comment)
     return link
 
 def get_linked(g, link):
-    """takes flask.g object and unique link. return list _id of files/folders. if such link does not exist or deleted, return None"""
+    """takes flask.g object and unique link. return dict {'files':list _id of files/folders, 'comment':comment to this list (may be None)}. if such link does not exist or deleted, return None"""
     col = get_links_col(g)
+    f_col = get_files_col(g)
     file_ids = col.find_one({'_id':link, 'deleted':False})
-    if file_ids != None: return file_ids['files']
+    if file_ids != None: return {'files':list(f_col.find({'_id':{'$in':file_ids['files']}})), 'comment':file_ids['comment']}
     return file_ids
 
 def del_link(g, link):

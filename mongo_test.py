@@ -49,6 +49,10 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get['size'], size)
         self.assertEqual(get['location'], location)
         self.assertEqual(get['dir'], '/')
+        self.assertEqual(get['comment'], None)
+
+        add_comment(g, new, 'Faralaks the BEST!!!')
+        self.assertEqual(get_file(g, new)['comment'], 'Faralaks the BEST!!!')
 
         owner = 'log1'
         name = 'name1'
@@ -66,13 +70,14 @@ class mongo_test(unittest.TestCase):
 
         lst = [new, NEW]
 
-        link = make_link(g, lst)
+        link = make_link(g, lst, 'Faralaks cool!')
         get = g.links.find_one({'_id':link})
 
         self.assertEqual(get['files'], lst)
+        self.assertEqual(get['comment'], 'Faralaks cool!')
         self.assertEqual(get['_id'], link)
         self.assertEqual(get['deleted'], False)
-        self.assertEqual(get_linked(g, link), lst)
+        #self.assertEqual(get_linked(g, link), {'files':lst, 'comment':'Faralaks cool!'})
         self.assertEqual(get_linked(g, '---'), None)
 
         del_link(g, link)
@@ -96,7 +101,7 @@ class mongo_test(unittest.TestCase):
 
 
 
-if 0:
+if 1:
     class remake_test(unittest.TestCase):
         def test_remake_users(self):
             remake_users(g, 'yes')
