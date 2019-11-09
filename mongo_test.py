@@ -42,11 +42,14 @@ class mongo_test(unittest.TestCase):
         size = 10
 
         new = add_folder(g, owner, name, size, location)
+        add_tags(g, new, ['Sasa', 'Masa', 'Misa', 'и', 'Nicita - Kisa'])
+        del_tags(g, new, ['Sasa', 'Masa', 'Misa', 'и'])
         get = g.files.find_one({'_id':new})
         NEW = new
         
         self.assertEqual(get['owner'], owner)
         self.assertEqual(get['name'], name)
+        self.assertEqual(get['tags'], ['Nicita - Kisa'])
         self.assertEqual(get['size'], size)
         self.assertEqual(get['location'], location)
         self.assertEqual(get['dir'], '/')
@@ -59,11 +62,13 @@ class mongo_test(unittest.TestCase):
         name = 'name1'
         location = 'C:\\tesk_loc'
         size = 10
-        new = add_file(g, owner, name, size, location, NEW)
+        new = add_file(g, owner, name, size, location, NEW, 'Lox', 'Nicita')
         get = g.files.find_one({'_id':new})
         
         self.assertEqual(get['owner'], owner)
         self.assertEqual(get['name'], name)
+        self.assertEqual(get['tags'], 'Nicita')
+        self.assertEqual(get['comment'], 'Lox')
         self.assertEqual(get['size'], size)
         self.assertEqual(get['location'], location)
         self.assertEqual(get['dir'], NEW)

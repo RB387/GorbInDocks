@@ -173,20 +173,22 @@ def remake_files(g, yes='no'):
         #col.create_index(['owner', 'name'], unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_file(g, owner, name, size, location, directory='/'):
+def add_file(g, owner, name, size, location, directory='/', comment=None, tags=[]):
     """takes flask.g object, owner, name, size, location and _id of the folder in which it is located ('/' for the main directory).
     adds a file to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'file', 'location':location, 'data':now_stamp(), 'comment':None, 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'location':location, 'comment':comment, 'tags':tags,
+        'type':'file', 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def add_folder(g, owner, name, size, location, directory='/'):
+def add_folder(g, owner, name, size, location, directory='/', comment=None, tags=[]):
     """takes flask.g object, owner, name, size, location and _id of the folder in which it is located ('/' for the main directory).
     adds a folder to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'type':'folder', 'location':location, 'data':now_stamp(), 'comment':None, 'deleted':False}).inserted_id
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'location':location, 'comment':comment, 'tags':tags,
+        'type':'folder', 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_file(g, file_id):
@@ -215,6 +217,17 @@ def add_comment(g, file_id, comment):
     """takes flask.g object and unique file's _id. add a comment to this file"""
     col = get_files_col(g)
     col.update_one({'_id':obj_id(file_id)}, {'$set':{'comment':comment}})
+
+def add_tags(g, file_id, tags):
+    """takes flask.g object, unique file's _id and list of tags. add tags to this file"""
+    col = get_files_col(g)
+    for tag in tags:
+        col.update_one({'_id':obj_id(file_id)}, {'$addToSet':{'tags':tag}})
+
+def del_tags(g, file_id, tags):
+    """takes flask.g object, unique file's _id and list of tags. delete tags from this file"""
+    col = get_files_col(g)
+    col.update_one({'_id':obj_id(file_id)}, {'$pullAll':{'tags':tags}})
 
 
 # Functions for working with links collection
