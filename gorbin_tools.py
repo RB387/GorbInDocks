@@ -292,8 +292,20 @@ def del_shared(g, login, user_id, file_ids):
     col.update_one({'_id':obj_id(user_id)}, {'$pullAll':{'shared.'+login:list(map(obj_id, file_ids))}})
 
 def check_availability(g, login: str, user_id, file_id):
-    """takes flask.g object,  login of user who shared. current user's _id and unique files's/folder's _id. return True if this file is available to this user, else return False"""
+    """takes flask.g object, login of user who shared. current user's _id and unique files's/folder's _id. return True if this file is available to this user, else return False"""
     col = get_users_col(g)
     checked = col.find_one({'_id':obj_id(user_id), 'shared.'+login:obj_id(file_id)}, {})
     if checked != None: return True
     return False
+
+
+#Admin Functions
+def get_simple_users(g, deleted=False):
+    """takes flask.g object and deleted parameter which can be True, False, 'all' (False by default).
+    if False: return list of all non-deleed simple users (no admins).
+    if True: return list of all deleted simple users (no admins).
+    else: return list of all simple users (no admins)."""
+    col = get_users_col(g)
+    if deleted == True: return col.find({'status':'simple', 'delete':True})
+    elif  deleted == False: return col.find({'status':'simple', 'delete':False})
+    else: return col.find({'status':'simple'})
