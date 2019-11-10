@@ -184,7 +184,7 @@ def add_file(g, owner, name, size, location, directory='/', comment=None, tags=[
     adds a file to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'location':location, 'comment':comment, 'tags':tags,
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':str(directory), 'location':location, 'comment':comment, 'tags':tags,
         'type':'file', 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
@@ -193,7 +193,7 @@ def add_folder(g, owner, name, size, location, directory='/', comment=None, tags
     adds a folder to the files collection, returns its unique _id object"""
     col = get_files_col(g)
     directory = obj_id(directory) if directory != '/' else '/'
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':directory, 'location':location, 'comment':comment, 'tags':tags,
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':str(directory), 'location':location, 'comment':comment, 'tags':tags,
         'type':'folder', 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
@@ -218,11 +218,11 @@ def del_file(g, _id):
     col = get_files_col(g)
     col.update_one({'_id':obj_id(_id)}, {'$set':{'deleted':True}})
 
-def get_user_files(g, owner):
+def get_user_files(g, owner, directory):
     """takes flask.g object and owner of files, return iterable object with files of this owner.
     if it has no files, the returned object will have a length of 0"""
     col = get_files_col(g)
-    return col.find({'owner':owner, 'deleted':False})
+    return col.find({'owner':owner, 'deleted':False, 'dir': directory})
 
 def add_comment(g, file_id, comment):
     """takes flask.g object and unique file's _id. add a comment to this file"""
