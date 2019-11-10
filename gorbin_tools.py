@@ -81,6 +81,7 @@ def get_db(g):
         g.DB_NAME = DB_NAME
         g.USERS_COL_NAME = USERS_COL_NAME
         g.FILES_COL_NAME = FILES_COL_NAME
+        g.LINKS_COL_NAME = LINKS_COL_NAME
         client = MongoClient(g.MONGO_ADDRESS)
         db = g.db = client[g.DB_NAME]
     return db
