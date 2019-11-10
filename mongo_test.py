@@ -26,11 +26,12 @@ class mongo_test(unittest.TestCase):
         mail = 'e@ma.il'
 
         new_user = add_user(g, log, hash(pas), mail)
+        update_user(g, new_user, log, hash(pas), 'ex@amp.le')
         get = g.users.find_one({'_id':new_user})
         
         self.assertEqual(get['login'], log)
         self.assertEqual(get['pas'], hash(pas))
-        self.assertEqual(get['email'], mail)
+        self.assertEqual(get['email'], 'ex@amp.le')
         self.assertEqual(get['shared'], {})
         self.assertEqual(get['status'], 'simple')
 

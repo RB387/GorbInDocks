@@ -127,7 +127,7 @@ def add_user(g, login, pas, email, status='simple'):
     """takes flask.g object, login, password, email. additionally, takes user status simple/admin ('simple' by default).
     adds a user to the collection, returns its unique _id object"""
     col = get_users_col(g)
-    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'status':status, 'shared':{}, 'create_date':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'shared':{}, 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_user(g, login, pas):
@@ -154,6 +154,11 @@ def check_email(g, email):
     if user_data:
         return True
     return False 
+
+def update_user(g, user_id, login, pas, email):
+    """takes flask.g object, unique user's _id, new login, new password, new email. update user's data"""
+    col = get_users_col(g)
+    col.update_one({'_id':obj_id(user_id)}, {'$set':{'login':login, 'pas':pas, 'email':email}})
 
 def del_user(g, _id=None, login=None):
     """takes flask.g object, _id or login, switches deleted flag to Tru for this user"""
