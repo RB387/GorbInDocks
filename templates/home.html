@@ -43,7 +43,39 @@
                             <input type="submit" name="back" value="Go back">
                         </form>
                     {% endif %}
-                    
+                     <p>
+                        <ul>
+                        <form id="{{ 'dir_form' ~ '_home' }}" method="post" class="dir_tree">
+                                <input type="hidden" id="{{ 'folder' ~ '_home' }}" name="{{ 'dir' ~ '_home' }}" value="/">
+                                <a href="#" onclick="{{ 'dir_link' ~ '_home' }}()">home/</a>
+                                <script>
+                                    function {{ 'dir_link' ~ '_home' }}(){
+                                         document.getElementById("{{ 'dir_form' ~ '_home' }}").submit();
+                                    }
+                                </script>
+                            </form>
+                       {% for dir in directories %}
+                            <form id="{{ 'dir_form' ~ loop.index0 }}" method="post" class="dir_tree">
+                                <input type="hidden" id="{{ 'folder' ~ loop.index0 }}" name="{{ 'dir' ~ loop.index0 }}" value="{{ dir[0] }}">
+                                <a href="#" onclick="{{ 'dir_link' ~ loop.index0 }}()">{{ dir[1] }}/</a>
+                                <script>
+                                    function {{ 'dir_link' ~ loop.index0 }}(){
+                                         document.getElementById("{{ 'dir_form' ~ loop.index0 }}").submit();
+                                    }
+                                </script>
+                            </form>
+                       {% endfor %}
+                   </ul>
+                   </p>
+                    <style>
+                        ul {
+                            font-size: 0;
+                        }
+                        .dir_tree {
+                          display: inline-block;
+                          font-size: 20px;
+                        }
+                    </style>
                         <table border="1" width="100%" cellpadding="5">
                             
                                 {% for file in files %}
