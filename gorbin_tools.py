@@ -196,6 +196,11 @@ def add_folder(g, owner, name, size, location, directory='/', comment=None, tags
         'type':'folder', 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
+def update_file(g, file_id, name, size, comment, tags):
+    """takes flask.g object, unique file's _id, new file name, new size, new comment, new list of tags. update file's data"""
+    col = get_files_col(g)
+    col.update_one({'_id':obj_id(file_id)}, {'$set':{'name':name, 'size':size, 'comment':comment, 'tags':tags}})
+
 def get_file(g, file_id):
     """takes flask.g object, id. returns file information by id"""
     col = get_files_col(g)

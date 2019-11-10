@@ -44,7 +44,8 @@ class mongo_test(unittest.TestCase):
 
         new = add_folder(g, owner, name, size, location)
         add_tags(g, new, ['Sasa', 'Masa', 'Misa', 'и', 'Nicita - Kisa'])
-        del_tags(g, new, ['Sasa', 'Masa', 'Misa', 'и'])
+        update_file(g, new, name, size, 'No comments', ['Sasa', 'и', 'Nicita - Kisa'])
+        del_tags(g, new, ['Sasa', 'и'])
         get = g.files.find_one({'_id':new})
         NEW = new
         
@@ -54,7 +55,7 @@ class mongo_test(unittest.TestCase):
         self.assertEqual(get['size'], size)
         self.assertEqual(get['location'], location)
         self.assertEqual(get['dir'], '/')
-        self.assertEqual(get['comment'], None)
+        self.assertEqual(get['comment'], 'No comments')
 
         add_comment(g, new, 'Faralaks the BEST!!!')
         self.assertEqual(get_file(g, new)['comment'], 'Faralaks the BEST!!!')
