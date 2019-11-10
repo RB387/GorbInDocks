@@ -46,9 +46,14 @@
                         <tr>
                             {% if file['type'] == 'folder' %}
                                 <th>
-                                <form id="folder" method="post">
-                                    <input type="hidden" id="folder" name="folder" value="{{ file['_id'] }}">
-                                    <p><a href="#" onclick="document.getElementById('folder').submit();">{{ file['name'] }}</a></p>
+                                <form id="{{ 'folder_form' ~ loop.index0 }}" method="post">
+                                    <input type="hidden" id="{{ 'folder' ~ loop.index0 }}" name="{{ 'folder' ~ loop.index0 }}" value="{{ file['_id'] }}">
+                                    <p><a href="#" onclick="{{ 'get' ~ loop.index0 }}()">{{ file['name'] }}</a></p>
+                                    <script>
+                                      function {{ 'get' ~ loop.index0 }}(){
+                                        document.getElementById("{{ 'folder_form' ~ loop.index0 }}").submit();
+                                      }
+                                    </script>
                                 </form></th>
                             {% else %}
                                 <th>{{ file['name'] }}</th>
