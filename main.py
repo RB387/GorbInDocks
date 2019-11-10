@@ -15,6 +15,21 @@ app = Flask(__name__)
 app.config.from_object('config')
 
 
+def get_file_paths(dirName):
+ 
+  # setup file paths variable
+  filePaths = []
+   
+  # Read all directory, subdirectories and file lists
+  for root, directories, files in os.walk(dirName):
+    for filename in files:
+        # Create the full filepath by using os module.
+        filePath = os.path.join(root, filename)
+        filePaths.append(filePath)
+         
+  # return all paths
+  return filePaths
+
 @app.route('/home', methods = ['GET', 'POST'])
 @app.route('/home/<directory>', methods = ['GET', 'POST'])
 def home(directory = '/'): 
@@ -74,14 +89,12 @@ def home(directory = '/'):
 
 				data =  dict(request.form)
 				action = list(data.keys())[0]
-				print(data, action)
 
 				if action == 'logout':
 					#logout user from session
 					return redirect(url_for('logout'))
 
 				elif action == 'select_button':
-					print('IN', directory)
 					return render_template('home.html', directory = directory,
 								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
 								check = True,
@@ -94,8 +107,6 @@ def home(directory = '/'):
 								path = directory if directory!='/' else None)
 
 				elif action[:-1:] == 'folder':
-					print(data)
-					print(action)
 					return redirect(url_for('home', directory = data[action]))
 
 				elif action == 'back':
@@ -134,6 +145,7 @@ def home(directory = '/'):
 
 					elif action == 'download_list':
 						values = list(request.form.values())
+						print(request.form)
 						if len(values) > 1:
 							values = values[1::]
 							files_location = []
@@ -150,7 +162,11 @@ def home(directory = '/'):
 												error = True, error_message = 'File not found!',
 												path = directory if directory!='/' else None) 
 										#else
-										files_location.append(file_data['location'])
+										if file_data['type']=='folder':
+											
+											files_location += get_file_paths(file_data['location'])
+										else:
+											files_location.append(file_data['location'])
 									else:
 										return render_template("home.html",
 												files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
@@ -164,11 +180,17 @@ def home(directory = '/'):
 							if not os.path.exists(app.config['ZIP_FOLDER']):
 								os.makedirs(app.config['ZIP_FOLDER'])
 
-							temp_path = os.path.join(app.config['ZIP_FOLDER'], gt.str_now().replace(' ', '_')) + '_' + session['login'] + '.zip'
+							temp_path = os.path.join(app.config['ZIP_FOLDER'], gt.str_now().replace(' ', '_').replace(':', '-')) + '_' + session['login'] + '.zip'
+							
 							with ZipFile(temp_path,'w') as zip: 
+								if directory == '/':
+									basename = os.path.join(app.config['UPLOAD_FOLDER'], session['login'])
+								else:
+									basename = os.path.dirname(gt.get_file(g, values[0])['location'])
+
 								# writing each file one by one 
 								for file_loc in files_location:
-									zip.write(file_loc, os.path.basename(file_loc))
+									zip.write(file_loc, os.path.relpath(file_loc, basename))
 							return send_file(temp_path, as_attachment=True)
 						else:
 							return render_template("home.html",
