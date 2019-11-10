@@ -66,7 +66,6 @@
                                             {% if check %}
                                                 <th><input type="checkbox" name="{{ 'box' ~ loop.index0 }}" value="{{ file['_id'] }}" form = "checkbox_form"></th>
                                             {% else %}
-                                            {% if file['type'] != 'folder' %}
                                             <th>
                                                 <form action="{{ url_for('home', directory = path) }}" method="post" name="download {{ file['_id'] }}">
                                                         <input type="submit" name="download {{ file['_id'] }}" value="Download">
@@ -78,8 +77,6 @@
                                                 </form>
                                             </th>
                                             {% endif %}
-                                            {% endif %}
-                                        
                                     </tr>
                                 {% endfor %}
                         </table>
