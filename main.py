@@ -3,11 +3,12 @@ Coded by RB387
 '''
 
 from werkzeug.utils import secure_filename
-from flask import Flask, render_template, request, g, session, redirect, url_for, send_file
+from flask import Flask, render_template, request, g, session, redirect, url_for, send_file, after_this_request
 from zipfile import ZipFile
 from sys import platform
 import gorbin_tools as gt
 import os
+import shutil
 
 
 
@@ -16,7 +17,6 @@ app.config.from_object('config')
 
 
 def get_file_paths(dirName):
- 
   # setup file paths variable
   filePaths = []
    
@@ -29,6 +29,7 @@ def get_file_paths(dirName):
          
   # return all paths
   return filePaths
+
 
 @app.route('/home', methods = ['GET', 'POST'])
 @app.route('/home/<directory>', methods = ['GET', 'POST'])
@@ -136,7 +137,29 @@ def home(directory = '/'):
 										error = True, error_message = 'File not found!',
 										path = directory if directory!='/' else None) 
 								#else
-								return send_file(file_data['location'], as_attachment=True)
+								if file_data['type'] == 'folder':
+									if not os.path.exists(app.config['ZIP_FOLDER']):
+										os.makedirs(app.config['ZIP_FOLDER'])
+									temp_path = os.path.join(app.config['ZIP_FOLDER'], gt.str_now().replace(' ', '_').replace(':', '-')) + '_' + session['login'] + '.zip'
+
+									with ZipFile(temp_path,'w') as zip: 
+										if directory == '/':
+											basename = os.path.join(app.config['UPLOAD_FOLDER'], session['login'])
+										else:
+											basename = os.path.dirname(file_data['location'])
+
+										files_location = get_file_paths(basename)
+										
+										# writing each file one by one 
+										for file_loc in files_location:
+											zip.write(file_loc, os.path.relpath(file_loc, basename))
+
+									
+
+									return send_file(temp_path, as_attachment=True)
+
+								else:
+									return send_file(file_data['location'], as_attachment=True)
 							else:
 								return render_template("home.html",
 										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
@@ -163,7 +186,6 @@ def home(directory = '/'):
 												path = directory if directory!='/' else None) 
 										#else
 										if file_data['type']=='folder':
-											
 											files_location += get_file_paths(file_data['location'])
 										else:
 											files_location.append(file_data['location'])
@@ -191,6 +213,10 @@ def home(directory = '/'):
 								# writing each file one by one 
 								for file_loc in files_location:
 									zip.write(file_loc, os.path.relpath(file_loc, basename))
+
+
+							
+
 							return send_file(temp_path, as_attachment=True)
 						else:
 							return render_template("home.html",
@@ -207,7 +233,10 @@ def home(directory = '/'):
 									#delete file from database
 									gt.del_file(g, _id = file_id)
 									#delete file from system
-									os.remove(file_data['location'])
+									if file_data['type'] == 'folder':
+										shutil.rmtree(file_data['location'])
+									else:
+										os.remove(file_data['location'])
 								else:
 									#delete from database
 									gt.del_file(g, _id = file_id)
@@ -234,7 +263,10 @@ def home(directory = '/'):
 											#delete file from database
 											gt.del_file(g, _id = file_id)
 											#delete file from system
-											os.remove(file_data['location'])
+											if file_data['type'] == 'folder':
+												shutil.rmtree(file_data['location'])
+											else:
+												os.remove(file_data['location'])
 										else:
 											#delete from database
 											gt.del_file(g, _id = file_id)
