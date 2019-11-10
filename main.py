@@ -18,6 +18,7 @@ app.config.from_object('config')
 @app.route('/home', methods = ['GET', 'POST'])
 @app.route('/home/<directory>', methods = ['GET', 'POST'])
 def home(directory = '/'): 
+	print(directory)
 
 	if 'login' in session:
 		if request.method == "POST":
@@ -92,7 +93,9 @@ def home(directory = '/'):
 								add_folder = True,
 								path = directory if directory!='/' else None)
 
-				elif action == 'folder':
+				elif action[:-1:] == 'folder':
+					print(data)
+					print(action)
 					return redirect(url_for('home', directory = data[action]))
 
 				elif action == 'back':
