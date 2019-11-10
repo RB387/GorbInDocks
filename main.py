@@ -16,7 +16,9 @@ app.config.from_object('config')
 
 
 @app.route('/home', methods = ['GET', 'POST'])
-def home(): 
+@app.route('/home/<directory>', methods = ['GET', 'POST'])
+def home(directory = '/'): 
+
 	if 'login' in session:
 		if request.method == "POST":
 			#if app gets file upload request
@@ -27,8 +29,9 @@ def home():
 				for file in file_list:
 					if file.filename == '':
 						return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'])), 
-								error = True, error_message = 'No selected file')
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								error = True, error_message = 'No selected file',
+								path = directory if directory!='/' else None)
 					elif file:
 						#get file name
 						filename = secure_filename(file.filename)
@@ -38,13 +41,20 @@ def home():
 						if not os.path.exists(file_path):
 							os.makedirs(file_path)
 						#save file
+						if directory != '/':
+							file_path = gt.get_file(g, directory)['location']
+							print(file_path)
+						else:
+							file_path = os.path.join(app.config['UPLOAD_FOLDER'], session['login'])
+
 						file_path = os.path.join(file_path, filename)
 						#if file file with same name already exists
 						if os.path.exists(file_path):
 							#print error
 							return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'])), 
-								upload = True, upload_message = 'File ' + filename + ' already exists')
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								upload = True, upload_message = 'File ' + filename + ' already exists', 
+								path = directory if directory!='/' else None)
 						file.save(file_path)
 						#"reset" fd to the beginning of the file
 						file.seek(0)
@@ -52,37 +62,54 @@ def home():
 						file_bytes = file.read()
 						file.close()
 						#add information about file in to database
-						gt.add_file(g, owner=session['login'], name=filename, size = round(len(file_bytes)/1024/1024, 2), location = file_path)
+						gt.add_file(g, owner=session['login'], name=filename, size = round(len(file_bytes)/1024/1024, 2), location = file_path, directory = str(directory))
 				#refresh page
 				return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'])), 
-								upload = True, upload_message = 'Uploaded!')
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								upload = True, upload_message = 'Uploaded!',
+								path = directory if directory!='/' else None)
 			else:
 				#get information what to do
-				action = request.form
-				print(action)
-				action = list(request.form.keys())[0]
+
+				data =  dict(request.form)
+				action = list(data.keys())[0]
+				print(data, action)
 
 				if action == 'logout':
 					#logout user from session
 					return redirect(url_for('logout'))
 
 				elif action == 'select_button':
+					print('IN', directory)
+					return render_template('home.html', directory = directory,
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								check = True,
+								path = directory if directory!='/' else None)
+
+				elif action == 'add_folder':
 					return render_template('home.html',
-								files = list(gt.get_user_files(g, owner=session['login'])), 
-								check = True)
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								add_folder = True,
+								path = directory if directory!='/' else None)
+
+				elif action == 'folder':
+					return redirect(url_for('home', directory = data[action]))
+
+				elif action == 'back':
+					back_dir = gt.get_file(g, directory)['dir']
+					return redirect(url_for('home', directory = back_dir if back_dir!='/' else None))
 
 				else:
 					#get information about file
 					info = action.split()
 					if len(info) == 2:
+						print('in')
 						action, file_id = info[0], info[1]
 						file_data = gt.get_file(g, file_id = file_id)
 					else:
 						action = info[0]
-					
+
 					if action == 'download':
-						print('yes')
 						#if user have permission
 						if file_data:
 							if session['login'] == file_data['owner']:
@@ -91,14 +118,16 @@ def home():
 									#delete file and print error
 									gt.del_file(g, _id = file_data['_id'])
 									return render_template("home.html",
-										files = list(gt.get_user_files(g, owner=session['login'])), 
-										error = True, error_message = 'File not found!') 
+										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+										error = True, error_message = 'File not found!',
+										path = directory if directory!='/' else None) 
 								#else
 								return send_file(file_data['location'], as_attachment=True)
 							else:
 								return render_template("home.html",
-										files = list(gt.get_user_files(g, owner=session['login'])), 
-										error = True, error_message = 'Permission denied') 
+										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+										error = True, error_message = 'Permission denied',
+										path = directory if directory!='/' else None) 
 
 					elif action == 'download_list':
 						values = list(request.form.values())
@@ -114,17 +143,20 @@ def home():
 											#delete file and print error
 											gt.del_file(g, _id = file_data['_id'])
 											return render_template("home.html",
-												files = list(gt.get_user_files(g, owner=session['login'])), 
-												error = True, error_message = 'File not found!') 
+												files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+												error = True, error_message = 'File not found!',
+												path = directory if directory!='/' else None) 
 										#else
 										files_location.append(file_data['location'])
 									else:
 										return render_template("home.html",
-												files = list(gt.get_user_files(g, owner=session['login'])), 
-												error = True, error_message = 'Permission denied')
+												files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+												error = True, error_message = 'Permission denied',
+												path = directory if directory!='/' else None)
 								else:
 									return render_template("home.html",
-										files = list(gt.get_user_files(g, owner=session['login'])))
+										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)),
+										path = directory if directory!='/' else None)
 									
 							if not os.path.exists(app.config['ZIP_FOLDER']):
 								os.makedirs(app.config['ZIP_FOLDER'])
@@ -137,8 +169,9 @@ def home():
 							return send_file(temp_path, as_attachment=True)
 						else:
 							return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'])), 
-								upload = True, upload_message = 'No file selected!')
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								upload = True, upload_message = 'No file selected!',
+								path = directory if directory!='/' else None)
 
 					elif action == 'delete':
 						#if user have permission
@@ -154,12 +187,15 @@ def home():
 									#delete from database
 									gt.del_file(g, _id = file_id)
 									return render_template("home.html",
-										files = list(gt.get_user_files(g, owner=session['login'])), 
-										error = True, error_message = 'File not found')
+										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+										error = True, error_message = 'File not found',
+										path = directory if directory!='/' else None)
 							else:
 								return render_template("home.html",
-										files = list(gt.get_user_files(g, owner=session['login'])), 
-										error = True, error_message = 'Permission denied')
+										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+										error = True, error_message = 'Permission denied',
+										path = directory if directory!='/' else None)
+
 					elif action == 'delete_list':
 						values = list(request.form.values())
 						if len(values) > 1:
@@ -178,28 +214,50 @@ def home():
 											#delete from database
 											gt.del_file(g, _id = file_id)
 											return render_template("home.html",
-												files = list(gt.get_user_files(g, owner=session['login'])), 
-												error = True, error_message = 'File not found')
+												files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+												error = True, error_message = 'File not found',
+												path = directory if directory!='/' else None)
 									else:
 										return render_template("home.html",
-												files = list(gt.get_user_files(g, owner=session['login'])), 
-												error = True, error_message = 'Permission denied')
+												files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+												error = True, error_message = 'Permission denied',
+												path = directory if directory!='/' else None)
 								else:
 									return render_template("home.html",
-										files = list(gt.get_user_files(g, owner=session['login'])))
+										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)),
+										path = directory if directory!='/' else None)
 						else:
 							return render_template("home.html",
-								files = list(gt.get_user_files(g, owner=session['login'])), 
-								upload = True, upload_message = 'No file selected!')
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								upload = True, upload_message = 'No file selected!',
+								path = directory if directory!='/' else None)
 							
 					elif action == 'cancel_list':
 						return render_template("home.html",
-										files = list(gt.get_user_files(g, owner=session['login'])),
-										check = False)
+										files = list(gt.get_user_files(g, owner=session['login'], directory = directory)),
+										check = False,
+										path = directory if directory!='/' else None)
+
+					elif action == 'create_folder':
+						if directory != '/':
+							path = os.path.join(gt.get_file(g, directory)['location'], data[action])
+						else:
+							path = os.path.join(app.config['UPLOAD_FOLDER'], session['login'], data[action])
+
+						if not os.path.exists(path):
+							os.makedirs(path)
+							gt.add_folder(g, owner  = session['login'], name = data[action], size = None, location = path, directory = directory)
+						else:
+							return render_template("home.html",
+								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+								upload = True, upload_message = 'Folder ' + data[action] + ' already exists!',
+								path = directory if directory!='/' else None)
+
 
 		return render_template("home.html",
-				files = list(gt.get_user_files(g, owner=session['login'])), 
-				error = False)
+				files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
+				error = False,
+				path = directory if directory!='/' else None)
 	else:
 		return redirect(url_for('index'))
 
