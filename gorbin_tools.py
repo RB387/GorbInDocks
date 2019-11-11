@@ -10,9 +10,10 @@ from bson.objectid import ObjectId as obj_id
 from pymongo.errors import DuplicateKeyError
 from pymongo import MongoClient
 from Crypto.Cipher import AES
-from hashlib import sha256
+from hashlib import sha256, sha1
 import datetime as dt
 import base64
+from os import urandom
 
 
 
@@ -75,11 +76,12 @@ def get_db(g):
     as attributes to flask.g and returns a database object"""
     db = getattr(g, 'db', None)
     if db is None:
-        from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
+        from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
         g.MONGO_ADDRESS = MONGO_ADDRESS
         g.DB_NAME = DB_NAME
         g.USERS_COL_NAME = USERS_COL_NAME
         g.FILES_COL_NAME = FILES_COL_NAME
+        g.LINKS_COL_NAME = LINKS_COL_NAME
         client = MongoClient(g.MONGO_ADDRESS)
         db = g.db = client[g.DB_NAME]
     return db
@@ -102,21 +104,31 @@ def get_files_col(g):
         files = g.files = db[g.FILES_COL_NAME]
     return files
 
+def get_links_col(g):
+    """takes flask.g object object, adds a database and links collection objects (if no exist)
+    as attributes to flask.g, return files collection object"""
+    db = get_db(g)
+    links = getattr(g, 'links', None)
+    if links is None:
+        links = g.links = db[g.LINKS_COL_NAME]
+    return links
+
 
 # Functions for working with users collection
 def remake_users(g, yes='no'):
     """takes flask.g object and the second parameter "yes" as confirmation. clear collection, build the indexes"""
     if yes == "yes":
         col = get_users_col(g)
-        col.remove()
+        col.delete_many({})
         col.create_index('login', unique=True)
         col.create_index('email', unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_user(g, login, pas, email):
-    """takes flask.g object, login, password, email. adds a user to the collection, returns its unique _id object"""
+def add_user(g, login, pas, email, status='simple'):
+    """takes flask.g object, login, password, email. additionally, takes user status simple/admin ('simple' by default).
+    adds a user to the collection, returns its unique _id object"""
     col = get_users_col(g)
-    _id = col.insert_one({'login':login, 'pas': pas, 'email':email, 'create_date':now_stamp(), 'deleted':False}).inserted_id
+    _id = col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'shared':{}, 'create_date':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
 def get_user(g, login, pas):
@@ -144,6 +156,11 @@ def check_email(g, email):
         return True
     return False 
 
+def update_user(g, user_id, login, pas, email):
+    """takes flask.g object, unique user's _id, new login, new password, new email. update user's data"""
+    col = get_users_col(g)
+    col.update_one({'_id':obj_id(user_id)}, {'$set':{'login':login, 'pas':pas, 'email':email}})
+
 def del_user(g, _id=None, login=None):
     """takes flask.g object, _id or login, switches deleted flag to Tru for this user"""
     col = get_users_col(g)
@@ -158,20 +175,37 @@ def remake_files(g, yes='no'):
     optionally takes database and files collection names (\"gorbin\", \"files\" by default)"""
     if yes == "yes":
         col = get_files_col(g)
-        col.remove()
+        col.delete_many({})
         #col.create_index(['owner', 'name'], unique=True)
     else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
 
-def add_file(g, owner, name, size, location):
-    """takes flask.g object, owner, name, size, location. adds a file to the files collection, returns its unique _id object"""
+def add_file(g, owner, name, size, location, directory='/', comment=None, tags=[]):
+    """takes flask.g object, owner, name, size, location and _id of the folder in which it is located ('/' for the main directory).
+    adds a file to the files collection, returns its unique _id object"""
     col = get_files_col(g)
-    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'location':location, 'data':now_stamp(), 'deleted':False}).inserted_id
+    directory = obj_id(directory) if directory != '/' else '/'
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':str(directory), 'location':location, 'comment':comment, 'tags':tags,
+        'type':'file', 'data':now_stamp(), 'deleted':False}).inserted_id
     return _id
 
-def get_file(g, id):
+def add_folder(g, owner, name, size, location, directory='/', comment=None, tags=[]):
+    """takes flask.g object, owner, name, size, location and _id of the folder in which it is located ('/' for the main directory).
+    adds a folder to the files collection, returns its unique _id object"""
+    col = get_files_col(g)
+    directory = obj_id(directory) if directory != '/' else '/'
+    _id = col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':str(directory), 'location':location, 'comment':comment, 'tags':tags,
+        'type':'folder', 'data':now_stamp(), 'deleted':False}).inserted_id
+    return _id
+
+def update_file(g, file_id, name, size, comment, tags):
+    """takes flask.g object, unique file's _id, new file name, new size, new comment, new list of tags. update file's data"""
+    col = get_files_col(g)
+    col.update_one({'_id':obj_id(file_id)}, {'$set':{'name':name, 'size':size, 'comment':comment, 'tags':tags}})
+
+def get_file(g, file_id):
     """takes flask.g object, id. returns file information by id"""
     col = get_files_col(g)
-    return col.find_one({'_id': obj_id(id), 'deleted':False})
+    return col.find_one({'_id': obj_id(file_id), 'deleted':False})
 
 def check_file(g, owner, name):
     """takes flask.g object, owner and name, returns True if such file exists and is not deleted or returns False"""
@@ -184,8 +218,105 @@ def del_file(g, _id):
     col = get_files_col(g)
     col.update_one({'_id':obj_id(_id)}, {'$set':{'deleted':True}})
 
-def get_user_files(g, owner):
+def get_user_files(g, owner, directory):
     """takes flask.g object and owner of files, return iterable object with files of this owner.
     if it has no files, the returned object will have a length of 0"""
     col = get_files_col(g)
-    return col.find({'owner':owner, 'deleted':False})
+    return col.find({'owner':owner, 'deleted':False, 'dir': directory})
+
+def add_comment(g, file_id, comment):
+    """takes flask.g object and unique file's _id. add a comment to this file"""
+    col = get_files_col(g)
+    col.update_one({'_id':obj_id(file_id)}, {'$set':{'comment':comment}})
+
+def add_tags(g, file_id, tags):
+    """takes flask.g object, unique file's _id and list of tags. add tags to this file"""
+    col = get_files_col(g)
+    for tag in tags:
+        col.update_one({'_id':obj_id(file_id)}, {'$addToSet':{'tags':tag}})
+
+def del_tags(g, file_id, tags):
+    """takes flask.g object, unique file's _id and list of tags. delete tags from this file"""
+    col = get_files_col(g)
+    col.update_one({'_id':obj_id(file_id)}, {'$pullAll':{'tags':tags}})
+
+
+# Functions for working with links collection
+def remake_links(g, yes='no'):
+    """takes flask.g object and the second parameter "yes" as confirmation. clear collection.
+    optionally takes database and files collection names (\"gorbin\", \"links\" by default)"""
+    if yes == "yes":
+        col = get_links_col(g)
+        col.delete_many({})
+    else: vprint(("as a confirmation, add \"yes\" with the second parameter"))
+
+
+def make_link(g, file_ids, comment=None):
+    """takes flask.g object and list _id of files/folders that will be available at this link, additionally, the comment
+    (None by default). return a unique link"""
+    col = get_links_col(g)
+    link = base64.b64encode(sha1(urandom(64)).digest()).decode('utf-8').replace('/', 's')
+    try: 
+        col.insert_one({'_id':link, 'files':list(map(obj_id, file_ids)), 'comment':comment, 'deleted':False}).inserted_id
+    except DuplicateKeyError:
+        link = make_link(g, file_ids, comment)
+    return link
+
+def get_linked(g, link):
+    """takes flask.g object and unique link. return dict {'files':list _id of files/folders, 'comment':comment to this list (may be None)}. if such link does not exist or deleted, return None"""
+    col = get_links_col(g)
+    f_col = get_files_col(g)
+    file_ids = col.find_one({'_id':link, 'deleted':False})
+    if file_ids != None: return {'files':list(f_col.find({'_id':{'$in':file_ids['files']}})), 'comment':file_ids['comment']}
+    return file_ids
+
+def del_link(g, link):
+    """takes flask.g object and the link, switches deleted flag to Tru for this file"""
+    col = get_links_col(g)
+    col.update_one({'_id':link}, {'$set':{'deleted':True}})
+
+
+# Functions for working with shared files
+def get_user_shared(g, user_id):
+    """takes flask.g object and unique user's _id. return dict: keys - logins of users who shared, values - 
+    list _id of files which were shared with him by this user"""
+    col = get_users_col(g)
+    f_col = get_files_col(g)
+    ret = {}
+    files = col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})
+    if files != None:
+        ret = {}
+        for log, lst in files['shared'].items():
+	        if lst != []: ret[log] = list(f_col.find({'_id':{'$in': lst}}))
+        return ret
+    return None
+
+def add_linked(g, login, user_id, file_ids):
+    """takes flask.g object,  login of user who shared. current user's _id and list _id of files/folders which were shared with him. adds to his shared list files from list"""
+    col = get_users_col(g)
+    for file_id in file_ids:
+        col.update_one({'_id':obj_id(user_id)}, {'$addToSet':{'shared.'+login:obj_id(file_id)}})
+
+def del_shared(g, login, user_id, file_ids):
+    """takes flask.g object, login of user who shared. current user's _id and list _id of files/folders which were shared with him. delete them from his shared list"""
+    col = get_users_col(g)
+    col.update_one({'_id':obj_id(user_id)}, {'$pullAll':{'shared.'+login:list(map(obj_id, file_ids))}})
+
+def check_availability(g, login: str, user_id, file_id):
+    """takes flask.g object, login of user who shared. current user's _id and unique files's/folder's _id. return True if this file is available to this user, else return False"""
+    col = get_users_col(g)
+    checked = col.find_one({'_id':obj_id(user_id), 'shared.'+login:obj_id(file_id)}, {})
+    if checked != None: return True
+    return False
+
+
+#Admin Functions
+def get_simple_users(g, deleted=False):
+    """takes flask.g object and deleted parameter which can be True, False, 'all' (False by default).
+    if False: return list of all non-deleed simple users (no admins).
+    if True: return list of all deleted simple users (no admins).
+    else: return list of all simple users (no admins)."""
+    col = get_users_col(g)
+    if deleted == True: return col.find({'status':'simple', 'delete':True})
+    elif  deleted == False: return col.find({'status':'simple', 'delete':False})
+    else: return col.find({'status':'simple'})
