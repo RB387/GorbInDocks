@@ -383,20 +383,21 @@ def home(directory = '/'):
 						#if get action to create folder
 
 						#gen path for new folder
+						folder_name = secure_filename(data[action])
 						if directory != '/':
-							path = os.path.join(gt.get_file(g, directory)['location'], data[action])
+							path = os.path.join(gt.get_file(g, directory)['location'], folder_name)
 						else:
-							path = os.path.join(app.config['UPLOAD_FOLDER'], session['login'], data[action])
+							path = os.path.join(app.config['UPLOAD_FOLDER'], session['login'], folder_name)
 
 						if not os.path.exists(path):
 							#create folder on hard drive
 							os.makedirs(path)
 							#add information about it to MongoDB
-							gt.add_folder(g, owner  = session['login'], name = data[action], size = None, location = path, directory = directory)
+							gt.add_folder(g, owner  = session['login'], name = folder_name, size = None, location = path, directory = directory)
 						else:
 							return render_template("home.html",
 								files = list(gt.get_user_files(g, owner=session['login'], directory = directory)), 
-								upload = True, upload_message = 'Folder ' + data[action] + ' already exists!',
+								upload = True, upload_message = 'Folder ' + folder_name + ' already exists!',
 								path = directory if directory!='/' else None,
 								directories = dir_tree)
 
