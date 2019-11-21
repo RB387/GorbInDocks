@@ -100,12 +100,12 @@
                                             {% else %}
                                             <th>
                                                 <form action="{{ url_for('home', directory = path) }}" method="post" name="download {{ file['_id'] }}">
-                                                        <input type="submit" name="download {{ file['_id'] }}" value="Download">
+                                                        <button name="download" value="{{ file['_id'] }}" type="submit">Download</button>
                                                 </form>
                                             </th>
                                             <th>
                                                 <form action="{{ url_for('home', directory = path) }}" method="post" name="delete {{ file['_id'] }}">
-                                                        <input type="submit" name="delete {{ file['_id'] }}" value="Delete">
+                                                        <button name="delete" value="{{ file['_id'] }}" type="submit">Delete</button>
                                                 </form>
                                             </th>
                                             {% endif %}
