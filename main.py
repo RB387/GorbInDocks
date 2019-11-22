@@ -2,7 +2,7 @@
 Coded by RB387
 '''
 
-from werkzeug.utils import secure_filename
+from werkzeug_utils_rus import secure_filename
 from flask import Flask, render_template, request, g, session, redirect, url_for, send_file
 from zipfile import ZipFile
 from sys import platform
@@ -56,13 +56,10 @@ def file_upload(file, login, directory):
 		return (0, None)
 	elif file:
 		#get file name
+
 		filename = secure_filename(file.filename)
+		print(filename)
 		#get path where file will be saved
-		file_path = os.path.join(app.config['UPLOAD_FOLDER'], login)
-		#create directory
-		if not os.path.exists(file_path):
-			os.makedirs(file_path)
-		#save file
 		if directory != '/':
 			file_path = gt.get_file(g, directory)['location']
 			print(file_path)
@@ -338,6 +335,7 @@ def home(directory = '/'):
 		else:
 
 			#get information what to do
+			print(request.form)
 			action = list(request.form.keys())[0]
 
 			if action == 'logout':
@@ -360,8 +358,9 @@ def home(directory = '/'):
 							path = directory if directory!='/' else None,
 							directories = dir_tree)
 
-			elif action[:-1:] == 'folder':
+			elif action[:6] == 'folder':
 				#open folder
+				print(list(request.form.values()))
 				return redirect(url_for('home', directory = list(request.form.values())[0]))
 
 			elif action == 'back':
