@@ -8,6 +8,7 @@ from bson.objectid import ObjectId as obj_id
 from zipfile import ZipFile
 from sys import platform
 import gorbin_tools2
+import file_tools
 import os
 import shutil
 
@@ -16,262 +17,8 @@ import shutil
 app = Flask(__name__)
 app.config.from_object('config')
 gt = gorbin_tools2.mongo_tools(g)
+ft = file_tools.file_tools(g)
 
-
-def get_file_paths(dirName):
-  # setup file paths variable
-  filePaths = []
-   
-  # Read all directory, subdirectories and file lists
-  for root, directories, files in os.walk(dirName):
-    for filename in files:
-        # Create the full filepath by using os module.
-        filePath = os.path.join(root, filename)
-        filePaths.append(filePath)
-         
-  # return all paths
-  return filePaths
-
-def get_dir_tree(dirId):
-	dir_names, directory = [], {'dir': dirId}
-	#Walk up to home directory
-	while directory['dir'] != '/':
-		directory = gt.get_file(directory['dir'])
-		#if directory exists
-		if directory:
-			dir_names.append((directory['_id'], directory['name']))
-		else:
-			#else return error
-			return None
-	#return list of directories (id, name)		
-	return dir_names[::-1]
-
-def file_upload(file, login, directory):
-	'''ERROR CODES:
-		1: File was uploaded succesfully
-		0: No selected file
-		-1: Such file already exists
-	'''
-
-
-	if file.filename == '':
-		return (0, None)
-	elif file:
-		#get file name
-
-		filename = secure_filename(file.filename)
-		#get path where file will be saved
-		if directory != '/':
-			file_path = gt.get_file(directory)['location']
-			print(file_path)
-		else:
-			file_path = os.path.join(app.config['UPLOAD_FOLDER'], login)
-
-		file_path = os.path.join(file_path, filename)
-		#if file file with same name already exists
-		if os.path.exists(file_path):
-			#print error
-			return (-1, filename)
-			''''''
-		file.save(file_path)
-		#"reset" fd to the beginning of the file
-		file.seek(0)
-		#get file size
-		file_bytes = file.read()
-		file.close()
-		#add information about file in to database
-		gt.add_file(owner=login, name=filename, size = round(len(file_bytes)/1024/1024, 2), location = file_path, directory = str(directory))
-		return (1, None)
-
-def download_file(file_data, login, directory):
-	'''ERROR CODES:
-		1: File is ready for download
-		0: Such file doesnt exist
-		-1: Permission denied
-	'''
-	if file_data:
-		if login != file_data['owner']:
-			#if user doesnt have access for this file
-			return (-1, None)
-
-		#if file disappeared
-		if not os.path.exists(file_data['location']):
-			#delete file and print error
-			gt.del_file(file_id = file_data['_id'])
-			return (0, None)
-		#else
-		if file_data['type'] == 'folder':
-			#download folder
-			if not os.path.exists(app.config['ZIP_FOLDER']):
-				#check temp path
-				os.makedirs(app.config['ZIP_FOLDER'])
-
-			#generate temp zip file name
-			temp_path = os.path.join(app.config['ZIP_FOLDER'], gorbin_tools2.str_now().replace(' ', '_').replace(':', '-')) + '_' + login + '.zip'
-
-			with ZipFile(temp_path,'w') as zip: 
-				#get basename for file
-				basename = os.path.dirname(file_data['location'])
-
-				#get info about files location on hard drive
-				files_location = get_file_paths(os.path.join(basename, file_data['name']))
-				
-				# writing each file one by one 
-				for file_loc in files_location:
-					zip.write(file_loc, os.path.relpath(file_loc, basename))
-
-			
-			#send zip file
-			return (1, temp_path)
-
-		else:
-			#download file
-			return (1, file_data['location'])
-
-def get_download_list(values, login, directory):
-	'''ERROR CODES:
-		1: zip is ready for download
-		0: such doesnt exist
-		-1: permission denied
-		-2: no file
-		-3: no file selected
-
-	'''
-	if len(values) <= 1:
-		return (-3, None)
-	#get only file ids
-	values = values[1::]
-
-	files_location = []
-
-	for file_id in values:
-		#read file info one by one
-		file_data = gt.get_file(file_id = file_id)
-
-		if file_data:
-			if session['login'] != file_data['owner']:
-				#if user doesnt have access for this file
-				return (-1, None)
-			#if file disappeared
-			if not os.path.exists(file_data['location']):
-				#delete file and print error
-				gt.del_file(file_id = file_data['_id'])
-				return (0, None)
-			#else
-			if file_data['type']=='folder':
-				#if folder then get info about all files in it
-				files_location += get_file_paths(file_data['location'])
-			else:
-				#else just append
-				files_location.append(file_data['location'])
-
-		else:
-			return (-2, None)
-	
-
-	if not os.path.exists(app.config['ZIP_FOLDER']):
-		#check temp path
-		os.makedirs(app.config['ZIP_FOLDER'])
-
-	#generate temp zip file name
-	temp_path = os.path.join(app.config['ZIP_FOLDER'], gorbin_tools2.str_now().replace(' ', '_').replace(':', '-')) + '_' + login + '.zip'
-	
-	with ZipFile(temp_path,'w') as zip: 
-		#get basename for file
-		if directory == '/':
-			basename = os.path.join(app.config['UPLOAD_FOLDER'], login)
-		else:
-			basename = os.path.dirname(gt.get_file(values[0])['location'])
-
-		# writing each file one by one 
-		for file_loc in files_location:
-			zip.write(file_loc, os.path.relpath(file_loc, basename))
-
-	#send zip file
-	return (1, temp_path)
-
-def delete_file(file_data, login, directory):
-	'''ERROR CODES:
-		1: File was deleted succesfully
-		0: File not found
-		-1: Permission denied
-	'''
-	if file_data:
-		if login == file_data['owner']:
-			#if such file exists
-			if os.path.exists(file_data['location']):
-				#delete file from database
-				gt.del_file(file_id = file_data['_id'])
-				#delete file from system
-				if file_data['type'] == 'folder':
-					shutil.rmtree(file_data['location'])
-				else:
-					os.remove(file_data['location'])
-				return 1
-			else:
-				#delete from database
-				gt.del_file(file_id = file_id)
-				return 0
-		else:
-			return -1
-
-def delete_file_list(values, login, directory):
-	'''ERROR CODES:
-		1: Files were deleted succesfully
-		0: File not found
-		-1: Permission denied
-		-2: No File data
-		-3: No File selected
-	'''
-	if len(values) <= 1:
-		return -3
-
-	#get only file ids
-	values = values[1::]
-	for file_id in values:
-		#read file info one by one
-		file_data = gt.get_file(file_id = file_id)
-		if file_data:
-			if login == file_data['owner']:
-				#if such file exists
-				if os.path.exists(file_data['location']):
-					#delete file from database
-					gt.del_file(file_id = file_id)
-					#delete file from system
-					if file_data['type'] == 'folder':
-						shutil.rmtree(file_data['location'])
-					else:
-						os.remove(file_data['location'])
-				else:
-					#delete from database
-					gt.del_file(file_id = file_id)
-					return 0
-			else:
-				#if user doesnt have access for this file
-				return -1
-		else:
-			return -2
-
-	return 1
-
-def create_folder(folder_name, login, directory):
-	'''ERROR CODES:
-		1: Folder was created succesfully
-		0: Such folder already exists
-	'''
-	if directory != '/':
-		path = os.path.join(gt.get_file(directory)['location'], folder_name)
-	else:
-		path = os.path.join(app.config['UPLOAD_FOLDER'], login, folder_name)
-
-	if not os.path.exists(path):
-		#create folder on hard drive
-		os.makedirs(path)
-		#add information about it to MongoDB
-		gt.add_folder(owner  = login, name = folder_name, size = None, location = path, directory = directory)
-		return 1
-	else:
-		return 0
 
 @app.route('/error', methods = ['GET'])
 def error():
@@ -285,7 +32,7 @@ def home(directory = '/'):
 		return redirect(url_for('index'))
 
 	#get current directory full path
-	dir_tree = get_dir_tree(directory)
+	dir_tree = ft.get_dir_tree(directory)
 
 	if dir_tree is None:
 		#if got error with directory path then redirect
@@ -304,7 +51,7 @@ def home(directory = '/'):
 			file_list = request.files.getlist('file')
 			#upload files one by one
 			for file in file_list:
-				error_code = file_upload(file, session['login'], directory)
+				error_code = ft.file_upload(file, session['login'], directory)
 
 				if error_code[0] == 0:
 					return render_template("home.html",
@@ -390,7 +137,7 @@ def home(directory = '/'):
 			elif action == 'download':
 				#if user have permission
 				file_data = gt.get_file(file_id = list(request.form.values())[0])
-				error_code = download_file(file_data, session['login'], directory)
+				error_code = ft.download_file(file_data, session['login'], directory)
 
 				if error_code[0] == 1:
 					return send_file(error_code[1], as_attachment=True)
@@ -415,7 +162,7 @@ def home(directory = '/'):
 
 				#get file ids
 				values = list(request.form.values())
-				error_code = get_download_list(values, session['login'], directory)
+				error_code = ft.get_download_list(values, session['login'], directory)
 
 				if error_code[0] == 1:
 					return send_file(error_code[1], as_attachment=True)
@@ -448,7 +195,7 @@ def home(directory = '/'):
 			elif action == 'delete':
 				#if user have permission
 				file_data = gt.get_file(file_id = list(request.form.values())[0])
-				error_code = delete_file(file_data, session['login'], directory)
+				error_code = ft.delete_file(file_data, session['login'], directory)
 
 				if error_code == 0:
 					return render_template("home.html",
@@ -470,7 +217,7 @@ def home(directory = '/'):
 				#get file ids
 				values = list(request.form.values())
 
-				error_code = delete_file_list(values, session['login'], directory)
+				error_code = ft.delete_file_list(values, session['login'], directory)
 				if error_code == 0:
 					return render_template("home.html",
 										files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
@@ -495,20 +242,12 @@ def home(directory = '/'):
 						upload = True, upload_message = 'No file selected!',
 						path = directory if directory!='/' else None,
 						directories = dir_tree)
-								
-			elif action == 'cancel_list':
-				#cancel action
-				return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
-								check = False,
-								path = directory if directory!='/' else None,
-								directories = dir_tree)
 
 			elif action == 'create_folder':
 				#if get action to create folder
 				#gen path for new folder
 				folder_name = secure_filename(list(request.form.values())[0])
-				error_code = create_folder(folder_name, session['login'], directory)
+				error_code = ft.create_folder(folder_name, session['login'], directory)
 
 				if error_code == 0:
 					return render_template("home.html",
