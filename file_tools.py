@@ -1,4 +1,4 @@
-from werkzeug.utils import secure_filename
+from werkzeug_utils_rus import secure_filename
 from zipfile import ZipFile
 import os
 import shutil
