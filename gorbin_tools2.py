@@ -198,6 +198,15 @@ class mongo_tools():
         f_col = self.get_files_col()
         return f_col.find_one({'_id': obj_id(file_id), 'deleted':False})
 
+    def get_files_by_tag(self, tag, owner):
+        f_col = self.get_files_col()
+        result = []
+        cols = list(f_col.find({'owner':owner, 'deleted':False, 'dir':'/'}))
+        for col in cols:
+            if tag in col['tags']:
+                result.append(col)
+        return result
+        
     def check_file(self, owner, name: str):
         """Takes unique file's _id, file's owner and file's name. Returns True if such file exists and is not deleted or returns False"""
         f_col = self.get_files_col()
