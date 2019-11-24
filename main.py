@@ -26,7 +26,7 @@ def error():
 
 @app.route('/home', methods = ['GET', 'POST'])
 @app.route('/home/<directory>', methods = ['GET', 'POST'])
-def home(directory = '/'): 
+def home(directory = '/'):
 
 	if 'login' not in session:
 		return redirect(url_for('index'))
@@ -55,20 +55,20 @@ def home(directory = '/'):
 
 				if error_code[0] == 0:
 					return render_template("home.html",
-									files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+									files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 									error = True, error_message = 'No selected file',
 									path = directory if directory!='/' else None,
 									directories = dir_tree)
 
 				elif error_code[0] == -1:
 					return render_template("home.html",
-									files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
-									upload = True, upload_message = 'File ' + error_code[1] + ' already exists', 
+									files = list(gt.get_user_files(owner=session['login'], directory = directory)),
+									upload = True, upload_message = 'File ' + error_code[1] + ' already exists',
 									path = directory if directory!='/' else None,
 									directories = dir_tree)
 			#refresh page
 			return render_template("home.html",
-							files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+							files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 							upload = True, upload_message = 'Uploaded!',
 							path = directory if directory!='/' else None,
 							directories = dir_tree)
@@ -85,7 +85,7 @@ def home(directory = '/'):
 			elif action == 'select_button':
 				#open file select menu
 				return render_template('home.html', directory = directory,
-							files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+							files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 							check = True,
 							path = directory if directory!='/' else None,
 							directories = dir_tree)
@@ -93,7 +93,7 @@ def home(directory = '/'):
 			elif action == 'add_folder':
 				#open add folder menu
 				return render_template('home.html',
-							files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+							files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 							add_folder = True,
 							path = directory if directory!='/' else None,
 							directories = dir_tree)
@@ -101,7 +101,7 @@ def home(directory = '/'):
 			elif action == 'add_tag_button':
 				#open add folder menu
 				return render_template('home.html',
-							files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+							files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 							add_tag = obj_id(list(request.form.values())[0]),
 							path = directory if directory!='/' else None,
 							directories = dir_tree)
@@ -114,7 +114,7 @@ def home(directory = '/'):
 			elif action[:3] == 'tag':
 				tag = list(request.form.values())[0]
 				return render_template('home.html',
-							files = list(gt.get_files_by_tag(tag = tag, owner=session['login'])), 
+							files = list(gt.get_files_by_tag(tag = tag, owner=session['login'])),
 							tag_search = tag,
 							path = directory if directory!='/' else None,
 							directories = dir_tree)
@@ -144,18 +144,18 @@ def home(directory = '/'):
 
 				elif error_code[0] == 0:
 					return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 								error = True, error_message = 'File not found!',
 								path = directory if directory!='/' else None,
-								directories = dir_tree) 
+								directories = dir_tree)
 
 				elif error_code[0] == -1:
 					return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 								error = True, error_message = 'Permission denied',
 								path = directory if directory!='/' else None,
 								directories = dir_tree)
-						 
+
 
 			elif action == 'download_list':
 				#if we get action for multiple file download
@@ -169,14 +169,14 @@ def home(directory = '/'):
 
 				elif error_code[0] == 0:
 					return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 								error = True, error_message = 'File not found!',
 								path = directory if directory!='/' else None,
-								directories = dir_tree) 
+								directories = dir_tree)
 
 				elif error_code[0] == -1:
 					return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 								error = True, error_message = 'Permission denied',
 								path = directory if directory!='/' else None,
 								directories = dir_tree)
@@ -187,10 +187,10 @@ def home(directory = '/'):
 								directories = dir_tree)
 				elif error_code[0] == -3:
 					return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 								upload = True, upload_message = 'No file selected!',
 								path = directory if directory!='/' else None,
-								directories = dir_tree)					
+								directories = dir_tree)
 
 			elif action == 'delete':
 				#if user have permission
@@ -199,17 +199,17 @@ def home(directory = '/'):
 
 				if error_code == 0:
 					return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 								error = True, error_message = 'File not found',
 								path = directory if directory!='/' else None,
 								directories = dir_tree)
 				elif error_code == -1:
 					return render_template("home.html",
-								files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+								files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 								error = True, error_message = 'Permission denied',
 								path = directory if directory!='/' else None,
 								directories = dir_tree)
-						
+
 
 			elif action == 'delete_list':
 				#if we get action for multiple file download
@@ -220,14 +220,14 @@ def home(directory = '/'):
 				error_code = ft.delete_file_list(values, session['login'], directory)
 				if error_code == 0:
 					return render_template("home.html",
-										files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+										files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 										error = True, error_message = 'File not found',
 										path = directory if directory!='/' else None,
-										directories = dir_tree) 
+										directories = dir_tree)
 
 				elif error_code == -1:
 					return render_template("home.html",
-										files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+										files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 										error = True, error_message = 'Permission denied',
 										path = directory if directory!='/' else None,
 										directories = dir_tree)
@@ -238,7 +238,7 @@ def home(directory = '/'):
 								directories = dir_tree)
 				elif error_code == -3:
 					return render_template("home.html",
-						files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+						files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 						upload = True, upload_message = 'No file selected!',
 						path = directory if directory!='/' else None,
 						directories = dir_tree)
@@ -251,21 +251,21 @@ def home(directory = '/'):
 
 				if error_code == 0:
 					return render_template("home.html",
-						files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+						files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 						upload = True, upload_message = 'Folder ' + folder_name + ' already exists!',
 						path = directory if directory!='/' else None,
 						directories = dir_tree)
-					
+
 	return render_template("home.html",
-			files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+			files = list(gt.get_user_files(owner=session['login'], directory = directory)),
 			error = False,
 			path = directory if directory!='/' else None,
 			directories = dir_tree)
 
 @app.route('/reg', methods = ['GET', 'POST'])
-def reg(): 
+def reg():
 	'''
-	Registration function 
+	Registration function
 	'''
 	if 'login' in session:
 		#If such user already logged in, then redirect him to home page
@@ -279,25 +279,25 @@ def reg():
 			#check if such login and email already taken or not
 			if (not gt.check_login(result['login'])) and (not gt.check_email(result['email'])):
 				#if not, then add information about new user in database
-				gt.add_user(login = result['login'], 
-							pas = gorbin_tools2.hash(result['password']), 
+				gt.add_user(login = result['login'],
+							pas = gorbin_tools2.hash(result['password']),
 							email = result['email'])
 				#log in user in session
 				session['login'] = result['login']
 				#redirect to home page
 				return redirect(url_for('home'))
 			else:
-				# if current login taken 
+				# if current login taken
 				if gt.check_login(result['login']):
 					#print error msg
-					return render_template("reg.html", 
-									error_flag = True, 
+					return render_template("reg.html",
+									error_flag = True,
 									error_message = 'This login is already taken')
 				#if current email taken
 				elif gt.check_email(result['email']):
 					#print error msg
-					return render_template("reg.html", 
-									error_flag = True, 
+					return render_template("reg.html",
+									error_flag = True,
 									error_message = 'This email is already taken')
 
 	return render_template("reg.html", error_flag = False)
@@ -308,7 +308,7 @@ def logout():
 	session.pop('login', None)
 	return redirect(url_for('index'))
 
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/index', methods = ['GET', 'POST'])
 def index():
 	if 'login' in session:
 		return redirect(url_for('home'))
@@ -322,8 +322,8 @@ def index():
 				return redirect(url_for('home'))
 			else:
 				#print error
-				return render_template("main.html", bad_auth = True)
-	return render_template("main.html", bad_auth = False)
+				return render_template("index.html", bad_auth = True)
+	return render_template("index.html", bad_auth = False)
 
 if __name__ == '__main__':
 	#For first time database configuration
@@ -334,7 +334,7 @@ if __name__ == '__main__':
 			gt.remake_files('yes')
 			gt.remake_users('yes')
 			gt.remake_links('yes')
-	
+
 	app.debug = True
 	if platform == 'win32':
 		app.run()
