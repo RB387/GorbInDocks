@@ -321,7 +321,6 @@ def reg():
 	if request.method == "POST":
 		#get information from registarion form
 		result = request.form
-		print(result)
 		with app.app_context():
 			#check if such login and email already taken or not
 			if (not gt.check_login(result['login'])) and (not gt.check_email(result['email'])):
@@ -356,6 +355,7 @@ def logout():
 	return redirect(url_for('index'))
 
 @app.route('/', methods = ['GET', 'POST'])
+@app.route('/index', methods = ['GET', 'POST'])
 def index():
 	if 'login' in session:
 		return redirect(url_for('home'))
@@ -363,11 +363,9 @@ def index():
 		if request.method == "POST":
 			#get information from registarion form
 			result = request.form
-			print(result)
 			if gt.get_user(result['login'], gorbin_tools2.hash(result['password'])):
 				#log in user to session
 				session['login'] = result['login']
-				print(session['login'])
 				return redirect(url_for('home'))
 			else:
 				#print error
