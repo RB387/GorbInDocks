@@ -1,6 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
     <body>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}" />
+        <!--
+        {% if share_file %}
+        <div id="zatemnenie">
+          <div id="okno">
+            <br>Share link for file {{ share_file['name'] }}</b>
+            <input type="text" name="link" value = {{ share_link }}>
+            <a href="#" class="close">Close</a>
+          </div>
+        </div>
+        {% endif %}
+        -->
         <form action="{{ url_for('home', directory = path) }}" method="post" name="logout_form">
             <input type="submit" name="logout" value="Logout">
         </form>
@@ -83,7 +95,24 @@
                         </form>
                     {% endif %}
                         <table border="1" width="100%" cellpadding="5">
-                                
+                            <!--
+                            {% if path is none %}
+                                <tr>
+                                    <th>
+                                        <form id="shared_folder_form" method="post">
+                                                <input type="hidden" id="shared_folder" name="shared_folder" value="None">
+                                                <p><a href="#" onclick="get_shared_folder()">Shared files</a></p>
+                                                <script>
+                                                  function {{ 'get_shared_folder' }}(){
+                                                    document.getElementById("shared_folder_form").submit();
+                                                  }
+                                                </script>
+                                        </form>
+                                    </th>
+
+                                </tr>
+                            -->
+                            {% endif %}
                                 {% for file in files %}
                                     <tr>
                                         {% if file['type'] == 'folder' %}
@@ -131,14 +160,29 @@
                                             {% if check %}
                                                 <th><input type="checkbox" name="{{ 'box' ~ loop.index0 }}" value="{{ file['_id'] }}" form = "checkbox_form"></th>
                                             {% else %}
-
+                                            <!--
                                             <th>
-                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="download {{ file['_id'] }}">
+                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="share_form">
+                                                    
+                                                    {% if share_file %}
+                                                        {% if share_file['_id'] == file['_id'] %}
+                                                            <a href="#zatemnenie">View link</a>
+                                                        {% else %}
+                                                            <button name="share" value="{{ file['_id'] }}" href = "#zatemnenie" type="submit">Share</button>
+                                                        {% endif %}   
+                                                    {% else %}
+                                                        <button name="share" value="{{ file['_id'] }}" href = "#zatemnenie" type="submit">Share</button>
+                                                    {% endif %}
+                                                </form>
+                                            </th>
+                                            -->
+                                            <th>
+                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="download_form">
                                                         <button name="download" value="{{ file['_id'] }}" type="submit">Download</button>
                                                 </form>
                                             </th>
                                             <th>
-                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="delete {{ file['_id'] }}">
+                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="delete_form">
                                                         <button name="delete" value="{{ file['_id'] }}" type="submit">Delete</button>
                                                 </form>
                                             </th>
