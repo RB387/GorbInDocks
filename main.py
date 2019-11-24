@@ -11,18 +11,55 @@ import gorbin_tools2
 import file_tools
 import os
 import shutil
+import pickle
 
-
+with open('settings.pickle', 'rb') as f:
+	settings = pickle.load(f)
 
 app = Flask(__name__)
 app.config.from_object('config')
 gt = gorbin_tools2.mongo_tools(g)
-ft = file_tools.file_tools(g)
+ft = file_tools.file_tools(g, settings)
+
 
 
 @app.route('/error', methods = ['GET'])
 def error():
 	return '<h1>404. Page not found</h1>'
+'''
+@app.route('/share/<link>', methods = ['GET', 'POST'])
+def share(link): 
+	files = gt.get_linked(link)
+	owner = files['files'][0]['owner']
+	if files is None:
+		return redirect(url_for('error'))
+	if request.method == "POST":
+		print(request.form)
+		action = list(request.form.keys())[0]
+		if action == 'download':
+			file_data = gt.get_file(file_id = list(request.form.values())[0])
+			error_code = ft.download_file(file_data, session['login'], None, True)
+
+			if error_code[0] == 1:
+				return send_file(error_code[1], as_attachment=True)
+
+			elif error_code[0] == 0:
+				return render_template("share.html",
+										files = files['files'],
+										link = link,
+										message = 'File not found!')
+		elif action == 'add_file':
+			gt.add_shared(login = session['login'], user_id = gt.get_user_id(session['login']), file_ids = [list(request.form.values())[0]])
+
+	return render_template("share.html",
+			files = files['files'],
+			link = link)
+'''
+
+@app.route('/admin', methods = ['GET', 'POST'])
+def admin():
+	pass
+
 
 @app.route('/home', methods = ['GET', 'POST'])
 @app.route('/home/<directory>', methods = ['GET', 'POST'])
@@ -32,18 +69,23 @@ def home(directory = '/'):
 		return redirect(url_for('index'))
 
 	#get current directory full path
-	dir_tree = ft.get_dir_tree(directory)
+	if directory != 'shared':
+		dir_tree = ft.get_dir_tree(session['login'], directory)
+	else:
+		dir_tree = [('shared', 'shared')]
+	print(dir_tree)
 
 	if dir_tree is None:
 		#if got error with directory path then redirect
 		return redirect(url_for('error'))
 
 
-	if directory != '/':
-		if gt.get_file(directory)['owner'] != session['login']:
+	if directory != '/' and directory != 'shared':
+		if (gt.get_file(directory)['owner'] != session['login']) and not (gt.check_availability(login = session['login'], user_id = gt.get_user_id(session['login']), file_id = directory)):
 			#if such user doesnt have permission to view this folder
 			return '<h1>Permission Denied</h1>'
 
+	
 	if request.method == "POST":
 		#if app gets file upload request
 		if 'file' in request.files:
@@ -64,6 +106,12 @@ def home(directory = '/'):
 					return render_template("home.html",
 									files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
 									upload = True, upload_message = 'File ' + error_code[1] + ' already exists', 
+									path = directory if directory!='/' else None,
+									directories = dir_tree)
+				elif error_code[0] == -2:
+					return render_template("home.html",
+									files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+									upload = True, upload_message = 'File ' + error_code[1] + ' exceeds size limit', 
 									path = directory if directory!='/' else None,
 									directories = dir_tree)
 			#refresh page
@@ -133,7 +181,6 @@ def home(directory = '/'):
 				go_dir = list(request.form.values())[0]
 				return redirect(url_for('home', directory = go_dir if go_dir!='/' else None))
 
-				#get information about file
 			elif action == 'download':
 				#if user have permission
 				file_data = gt.get_file(file_id = list(request.form.values())[0])
@@ -255,12 +302,32 @@ def home(directory = '/'):
 						upload = True, upload_message = 'Folder ' + folder_name + ' already exists!',
 						path = directory if directory!='/' else None,
 						directories = dir_tree)
+			'''
+			elif action == 'share':
+				file_id = list(request.form.values())[0]
+				link = gt.make_link([file_id])
+				return render_template("home.html",
+						files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+						share_file = gt.get_file(file_id), share_link = url_for('share', link = link, _external = True),
+						path = directory if directory!='/' else None,
+						directories = dir_tree)'''
+			'''
+			elif action == 'shared_folder':
+				return redirect(url_for('home', directory = 'shared'))'''
 					
-	return render_template("home.html",
-			files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
-			error = False,
-			path = directory if directory!='/' else None,
-			directories = dir_tree)
+	if directory == 'shared':
+		files = gt.get_shared(gt.get_user_id(session['login']))
+		files = list(files.values())[0]
+
+		return render_template('home.html',
+							files = files if files else [], 
+							path = 'shared',
+							directories = dir_tree)
+	else:
+		return render_template("home.html",
+				files = list(gt.get_user_files(owner=session['login'], directory = directory)), 
+				path = directory if directory!='/' else None,
+				directories = dir_tree)
 
 @app.route('/reg', methods = ['GET', 'POST'])
 def reg(): 
