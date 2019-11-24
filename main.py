@@ -64,7 +64,7 @@ def admin():
 @app.route('/home', methods = ['GET', 'POST'])
 @app.route('/home/<directory>', methods = ['GET', 'POST'])
 def home(directory = '/'):
-
+	print('IN GOME')
 	if 'login' not in session:
 		return redirect(url_for('index'))
 
@@ -73,7 +73,6 @@ def home(directory = '/'):
 		dir_tree = ft.get_dir_tree(session['login'], directory)
 	else:
 		dir_tree = [('shared', 'shared')]
-	print(dir_tree)
 
 	if dir_tree is None:
 		#if got error with directory path then redirect
@@ -85,8 +84,9 @@ def home(directory = '/'):
 			#if such user doesnt have permission to view this folder
 			return '<h1>Permission Denied</h1>'
 
-	
+	print(request, 'REQ')	
 	if request.method == "POST":
+
 		#if app gets file upload request
 		if 'file' in request.files:
 			#get list of files
@@ -303,6 +303,11 @@ def home(directory = '/'):
 						path = directory if directory!='/' else None,
 						directories = dir_tree)
 
+	return render_template("home.html",
+			files = list(gt.get_user_files(owner=session['login'], directory = directory)),
+			path = directory if directory!='/' else None,
+			directories = dir_tree)
+
 
 @app.route('/reg', methods = ['GET', 'POST'])
 def reg():
@@ -316,7 +321,7 @@ def reg():
 	if request.method == "POST":
 		#get information from registarion form
 		result = request.form
-
+		print(result)
 		with app.app_context():
 			#check if such login and email already taken or not
 			if (not gt.check_login(result['login'])) and (not gt.check_email(result['email'])):
@@ -350,7 +355,7 @@ def logout():
 	session.pop('login', None)
 	return redirect(url_for('index'))
 
-@app.route('/index', methods = ['GET', 'POST'])
+@app.route('/', methods = ['GET', 'POST'])
 def index():
 	if 'login' in session:
 		return redirect(url_for('home'))
@@ -358,9 +363,11 @@ def index():
 		if request.method == "POST":
 			#get information from registarion form
 			result = request.form
+			print(result)
 			if gt.get_user(result['login'], gorbin_tools2.hash(result['password'])):
 				#log in user to session
 				session['login'] = result['login']
+				print(session['login'])
 				return redirect(url_for('home'))
 			else:
 				#print error
