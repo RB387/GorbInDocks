@@ -6,11 +6,12 @@ import gorbin_tools2
 
 
 class file_tools():
-	def __init__(self, g_obj):
+	def __init__(self, g_obj, settings):
 		from config import UPLOAD_FOLDER, ZIP_FOLDER
 		self.gt = gorbin_tools2.mongo_tools(g_obj)
 		self.UPLOAD_FOLDER = UPLOAD_FOLDER
 		self.ZIP_FOLDER = ZIP_FOLDER
+		self.settings = settings
 
 	def get_file_paths(self, dirName):
 	  # setup file paths variable
@@ -26,13 +27,15 @@ class file_tools():
 	  # return all paths
 	  return filePaths
 
-	def get_dir_tree(self, dirId):
+	def get_dir_tree(self, login, dirId):
 		dir_names, directory = [], {'dir': dirId}
 		#Walk up to home directory
 		while directory['dir'] != '/':
 			directory = self.gt.get_file(directory['dir'])
 			#if directory exists
 			if directory:
+				if (not self.gt.check_availability(login = login, user_id = self.gt.get_user_id(login), file_id = directory['_id'])) and directory['owner'] != login:
+					return dir_names[::-1]
 				dir_names.append((directory['_id'], directory['name']))
 			else:
 				#else return error
@@ -45,46 +48,52 @@ class file_tools():
 			1: File was uploaded succesfully
 			0: No selected file
 			-1: Such file already exists
+			-2: File size exceeds limit
 		'''
 
 
 		if file.filename == '':
 			return (0, None)
 		elif file:
+			#get file size
+			file_bytes = file.read()
 			#get file name
-
 			filename = secure_filename(file.filename)
+			#"reset" fd to the beginning of the file
+			file.seek(0)
+			if len(file_bytes) > self.settings['max_file_size']:
+				return (-2, filename)
+			
 			#get path where file will be saved
 			if directory != '/':
 				file_path = self.gt.get_file(directory)['location']
 				print(file_path)
 			else:
 				file_path = os.path.join(self.UPLOAD_FOLDER, login)
-
 			file_path = os.path.join(file_path, filename)
+			
+
+			
 			#if file file with same name already exists
 			if os.path.exists(file_path):
 				#print error
 				return (-1, filename)
 				''''''
 			file.save(file_path)
-			#"reset" fd to the beginning of the file
-			file.seek(0)
-			#get file size
-			file_bytes = file.read()
+			
 			file.close()
 			#add information about file in to database
 			self.gt.add_file(owner=login, name=filename, size = round(len(file_bytes)/1024/1024, 2), location = file_path, directory = str(directory))
 			return (1, None)
 
-	def download_file(self, file_data, login, directory):
+	def download_file(self, file_data, login, directory, shared = False):
 		'''ERROR CODES:
 			1: File is ready for download
 			0: Such file doesnt exist
 			-1: Permission denied
 		'''
 		if file_data:
-			if login != file_data['owner']:
+			if login != file_data['owner'] and not shared:
 				#if user doesnt have access for this file
 				return (-1, None)
 
