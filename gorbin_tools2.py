@@ -141,6 +141,13 @@ class mongo_tools():
             if user_data['pas'] == pas: return user_data
         return None
 
+    def get_user_id(self, login):
+        u_col = self.get_users_col()
+        user_data = u_col.find_one({'login':login, 'deleted':False})
+        if user_data:
+            return user_data['_id']
+        return None
+
     def check_login(self, login: str):
         """Takes user's login. Returns True if such login is already used and False if it is not"""
         u_col = self.get_users_col()
@@ -201,7 +208,7 @@ class mongo_tools():
     def get_files_by_tag(self, tag, owner):
         f_col = self.get_files_col()
         result = []
-        cols = list(f_col.find({'owner':owner, 'deleted':False, 'dir':'/'}))
+        cols = list(f_col.find({'owner':owner, 'deleted':False}))
         for col in cols:
             if tag in col['tags']:
                 result.append(col)
