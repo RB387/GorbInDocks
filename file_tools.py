@@ -6,9 +6,9 @@ import gorbin_tools2
 
 
 class file_tools():
-	def __init__(self, g_obj, settings):
+	def __init__(self, settings, gt):
 		from config import UPLOAD_FOLDER, ZIP_FOLDER
-		self.gt = gorbin_tools2.mongo_tools(g_obj)
+		self.gt = gt
 		self.UPLOAD_FOLDER = UPLOAD_FOLDER
 		self.ZIP_FOLDER = ZIP_FOLDER
 		self.settings = settings
@@ -152,7 +152,7 @@ class file_tools():
 			file_data = self.gt.get_file(file_id = file_id)
 
 			if file_data:
-				if session['login'] != file_data['owner']:
+				if login != file_data['owner']:
 					#if user doesnt have access for this file
 					return (-1, None)
 				#if file disappeared
