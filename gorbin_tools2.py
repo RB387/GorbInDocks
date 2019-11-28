@@ -141,6 +141,13 @@ class mongo_tools():
             if user_data['pas'] == pas: return user_data
         return None
 
+    def get_user_status(self, login: str):
+        u_col = self.get_users_col()
+        user_data = u_col.find_one({'login':login, 'deleted':False})['status']
+        if user_data:
+            return user_data
+        return None
+
     def get_user_id(self, login):
         u_col = self.get_users_col()
         user_data = u_col.find_one({'login':login, 'deleted':False})
