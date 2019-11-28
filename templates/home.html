@@ -21,10 +21,10 @@
             <input type=submit value=Upload>
         </form>
        
-            {% if error %}
+            {% if error_message %}
                     <span style="color: #ff0000;">{{ error_message }}</span>
             {% endif %}
-            {% if upload %}
+            {% if upload_message %}
                     <span>{{ upload_message }}</span>
             {% endif %}
             {% if not check %}
@@ -57,24 +57,14 @@
                     {% endif %}
                      <p>
                         <ul>
-                        <form id="{{ 'dir_form' ~ '_home' }}" method="post" class="dir_tree">
+                        <form id="dir_form_home" method="post" class="dir_tree">
                                 <input type="hidden" id="{{ 'folder' ~ '_home' }}" name="{{ 'dir' ~ '_home' }}" value="/">
-                                <a href="#" onclick="{{ 'dir_link' ~ '_home' }}()">home/</a>
-                                <script>
-                                    function {{ 'dir_link' ~ '_home' }}(){
-                                         document.getElementById("{{ 'dir_form' ~ '_home' }}").submit();
-                                    }
-                                </script>
+                                <a href="#" onclick="document.getElementById('dir_form_home').submit();">home/</a>
                             </form>
                        {% for dir in directories %}
                             <form id="{{ 'dir_form' ~ loop.index0 }}" method="post" class="dir_tree">
                                 <input type="hidden" id="{{ 'folder' ~ loop.index0 }}" name="{{ 'dir' ~ loop.index0 }}" value="{{ dir[0] }}">
-                                <a href="#" onclick="{{ 'dir_link' ~ loop.index0 }}()">{{ dir[1] }}/</a>
-                                <script>
-                                    function {{ 'dir_link' ~ loop.index0 }}(){
-                                         document.getElementById("{{ 'dir_form' ~ loop.index0 }}").submit();
-                                    }
-                                </script>
+                                <a href="#" onclick="document.getElementById('dir_form{{ loop.index0 }}').submit();">{{ dir[1] }}/</a>
                             </form>
                        {% endfor %}
                    </ul>
@@ -95,6 +85,7 @@
                         </form>
                     {% endif %}
                         <table border="1" width="100%" cellpadding="5">
+                            
                             <!--
                             {% if path is none %}
                                 <tr>
@@ -114,48 +105,45 @@
                             
                             {% endif %}
                             -->
+
                                 {% for file in files %}
                                     <tr>
                                         {% if file['type'] == 'folder' %}
                                             <th>
-                                            <form id="{{ 'folder_form' ~ loop.index0 }}" method="post">
-                                                <input type="hidden" id="{{ 'folder' ~ loop.index0 }}" name="{{ 'folder' ~ loop.index0 }}" value="{{ file['_id'] }}">
-                                                <p><a href="#" onclick="{{ 'get' ~ loop.index0 }}()">{{ file['name'] }}</a></p>
-                                                <script>
-                                                  function {{ 'get' ~ loop.index0 }}(){
-                                                    document.getElementById("{{ 'folder_form' ~ loop.index0 }}").submit();
-                                                  }
-                                                </script>
-                                            </form></th>
+                                                <form action="{{ url_for('home', directory = path) }}" id = "{{ 'folder_id' ~ loop.index0 }}" method = "post">
+                                                    <input type="hidden" id="{{ 'folder_input' ~ loop.index0 }}" name="{{ 'folder_input' ~ loop.index0 }}" value="{{ file['_id'] }}">
+                                                    <p><a href="#" onclick="document.getElementById('folder_id{{ loop.index0 }}').submit();">{{ file['name'] }}</a></p>
+                                                </form>
+                                            </th>
                                             <th></th>
                                         {% else %}
                                             <th>{{ file['name'] }}</th>
                                             <th>{{ file['size'] }}mb</th>
                                         {% endif %}
                                             <th>{% for tag in file['tags'] %}
-                                                    <form id="{{ 'tag' ~ tag }}" method="post">
+                                                    <form action="{{ url_for('home', directory = path) }}" id = "{{ 'tag' ~ loop.index0 }}" method = "post">
                                                         <input type="hidden" id="{{ tag }}" name="{{ 'tag' ~ tag }}" value="{{ tag }}">
-                                                        <p><a href="#" onclick="{{ 'get_tag' ~ tag }}()">{{ tag }}</a></p>
-                                                        <script>
-                                                          function {{ 'get_tag' ~ tag }}(){
-                                                            document.getElementById("{{ 'tag' ~ tag }}").submit();
-                                                          }
-                                                        </script>
-                                                    </form> 
+                                                        <p><a href="#" onclick="document.getElementById('tag{{ loop.index0 }}').submit();">{{ tag }}</a></p>
+                                                    </form>
+                                                    
                                                {% endfor %}</th>
                                             {% if add_tag == file['_id'] %}
                                             <th>
-                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="tag_form">
-                                                        <input type="text" name="add_tag" placeholder="Tag name">
+                                                    <form action="{{ url_for('home', directory = path) }}" id = "add_tag_form{{ loop.index0 }}" method = "post">
                                                         <button name="add_tag_btn" value="{{ file['_id'] }}" type="submit">Add tag</button>
                                                         <button name="cancel_tag" value="{{ file['_id'] }}" type="submit">Cancel</button>
-                                                </form>
+                                                        <select name="tags_select" form = "add_tag_form{{ loop.index0 }}">
+                                                            {% for tag in tags %}
+                                                                <option>{{ tag }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </form>
                                             </th>
                                             {% else %}
                                             <th>
-                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="tag_form">
+                                                    <form action="{{ url_for('home', directory = path) }}" id = "add_tag_form" method = "post">
                                                         <button name="add_tag_button" value="{{ file['_id'] }}" type="submit">Add tag</button>
-                                                </form>
+                                                    </form>
                                             </th>
                                             {% endif %}
                                             {% if check %}
@@ -178,18 +166,19 @@
                                             </th>
                                             -->
                                             <th>
-                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="download_form">
+                                                <form action="{{ url_for('home', directory = path) }}" id = "download_form" method = "post">
                                                         <button name="download" value="{{ file['_id'] }}" type="submit">Download</button>
                                                 </form>
                                             </th>
                                             <th>
-                                                <form action="{{ url_for('home', directory = path) }}" method="post" name="delete_form">
+                                                <form action="{{ url_for('home', directory = path) }}" id = "delete_form" method = "post">
                                                         <button name="delete" value="{{ file['_id'] }}" type="submit">Delete</button>
                                                 </form>
                                             </th>
                                             {% endif %}
                                     </tr>
                                 {% endfor %}
+                            
                         </table>
             
             
