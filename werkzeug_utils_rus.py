@@ -287,18 +287,14 @@ def secure_filename(filename):
     """
     if isinstance(filename, text_type):
         from unicodedata import normalize
-        print(filename, 'BEGIN')
         filename = normalize('NFKD', filename).encode('utf-8', 'ignore')
         if not PY2:
-            print(filename, 'ASCOO')
             filename = filename.decode('utf-8')
     for sep in os.path.sep, os.path.altsep:
         if sep:
             filename = filename.replace(sep, ' ')
-    print(filename, 'FIRST')
     filename = str(_filename_ascii_strip_re.sub('', '_'.join(
                    filename.split()))).strip('._')
-    print(filename, 'WERK')
 
     # on nt a couple of special files are present in each folder.  We
     # have to ensure that the target file is not such a filename.  In
