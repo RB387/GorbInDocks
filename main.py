@@ -146,7 +146,7 @@ def home(directory = '/'):
 			#if such user doesnt have permission to view this folder
 			return '<h1>Permission Denied</h1>'
 
-	user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+	user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 	upload_message, error_message = None, None
 	check = None
 	add_folder, add_tag = None, None
@@ -183,7 +183,7 @@ def home(directory = '/'):
 					upload_message = 'Uploaded!'
 
 				#update files
-				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 
 		else:
 
@@ -213,7 +213,7 @@ def home(directory = '/'):
 				if tag_name in settings['tags']:
 					gt.add_tags(file_id, [tag_name])
 					#update
-					user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+					user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 				else:
 					upload_message = "Tag {} doesn't exist".format(tag_name)
 
@@ -281,7 +281,7 @@ def home(directory = '/'):
 					error_message = 'Permission denied'
 
 				#update
-				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 
 			elif action == 'delete_list':
 				#if we get action for multiple file download
@@ -300,7 +300,7 @@ def home(directory = '/'):
 					upload_message = 'No file selected!'
 
 				#update
-				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 
 			elif action == 'create_folder':
 				#if get action to create folder
@@ -312,7 +312,7 @@ def home(directory = '/'):
 					upload_message = 'Folder {} already exists!'.format(folder_name)
 
 				#update
-				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 
 	return render_template("home.html",
 			files = user_file_list,
