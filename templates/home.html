@@ -121,9 +121,9 @@
                                             <th>{{ file['size'] }}mb</th>
                                         {% endif %}
                                             <th>{% for tag in file['tags'] %}
-                                                    <form action="{{ url_for('home', directory = path) }}" id = "{{ 'tag' ~ loop.index0 }}" method = "post">
+                                                    <form action="{{ url_for('home', directory = path) }}" id = "{{ tag }}_form" method = "post">
                                                         <input type="hidden" id="{{ tag }}" name="{{ 'tag' ~ tag }}" value="{{ tag }}">
-                                                        <p><a href="#" onclick="document.getElementById('tag{{ loop.index0 }}').submit();">{{ tag }}</a></p>
+                                                        <p><a href="#" onclick="document.getElementById('{{ tag }}_form').submit();">{{ tag }}</a></p>
                                                     </form>
                                                     
                                                {% endfor %}</th>
