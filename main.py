@@ -11,11 +11,14 @@ import gorbin_tools2
 import file_tools
 import os
 import shutil
-import pickle
+import json
 
-with open('settings.pickle', 'rb') as f:
-	settings = pickle.load(f)
-
+with open(os.path.join(os.getcwd(), 'settings.json')) as json_data_file:
+    settings = json.load(json_data_file)
+'''
+with open('settings.json', 'w') as outfile:
+    json.dump(settings, outfile)
+'''
 app = Flask(__name__)
 app.config.from_object('config')
 gt = gorbin_tools2.mongo_tools(g)
@@ -58,7 +61,67 @@ def share(link):
 
 @app.route('/admin', methods = ['GET', 'POST'])
 def admin():
-	pass
+
+	add_tag = None
+	error_message = None
+	if 'login' not in session:
+		return redirect(url_for('index'))
+
+	if gt.get_user_status(session['login']) != 'admin':
+		return '<h1>Permission Denied</h1>'
+
+	if request.method == "POST":
+		print(request.form)
+		action = list(request.form.keys())[0]
+
+		if action == 'add_tag':
+			add_tag = True
+
+		elif action == 'save_tag':
+			tag = list(request.form.values())[1]
+
+			if tag in settings['tags']:
+				error_message = 'Tag {} already exists!'.format(tag)
+
+			else:
+				settings['tags'].append(tag)
+				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
+					json.dump(settings, outfile)
+
+		elif action == 'del_tag':
+			tag = list(request.form.values())[1]
+			if tag in settings['tags']:
+				settings['tags'].pop(settings['tags'].index(tag))
+				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
+					json.dump(settings, outfile)
+			else:
+				error_message = "Tag {} doesn't exitst".format(tag)
+
+		elif action == 'change_size_val':
+			size = request.form['change_size_val']
+			try:
+				settings['max_file_size'] = int(size) * 1024 * 1024
+				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
+					json.dump(settings, outfile)
+			except:
+				error_message = 'Enter valid number'
+
+		elif action == 'change_count_val':
+			count = request.form['change_count_val']
+			try:
+				settings['max_files_count'] = int(count)
+				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
+					json.dump(settings, outfile)
+			except:
+				error_message = 'Enter valid number'
+
+
+	return render_template("admin.html", 
+		tags = settings['tags'], 
+		current_limit = settings['max_file_size']/1024/1024, 
+		current_count_limit = settings['max_files_count'],
+		add_tag = add_tag,
+		error_message = error_message)
 
 
 @app.route('/home', methods = ['GET', 'POST'])
@@ -84,40 +147,43 @@ def home(directory = '/'):
 			return '<h1>Permission Denied</h1>'
 
 	user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
-	upload, upload_message = None, None
-	error, error_message = None, None
+	upload_message, error_message = None, None
 	check = None
 	add_folder, add_tag = None, None
 	tag_search = None
 
-	print(request, 'REQ')	
+	
 	if request.method == "POST":
 
 		#if app gets file upload request
 		if 'file' in request.files:
 			#get list of files
 			file_list = request.files.getlist('file')
-			#upload files one by one
-			for file in file_list:
-				error_code = ft.file_upload(file, session['login'], directory)
-				
-				if error_code[0] == 0:
-					error, error_message =  True, 'No selected file'
-					break
+			if len(file_list) > settings['max_files_count']:
+				error_message =  'Exceeded file count limit (Max. {} files)'.format(settings['max_files_count'])
 
-				elif error_code[0] == -1:
-					upload, upload_message = True, 'File ' + error_code[1] + ' already exists'
-					break
+			else:
+				#upload files one by one
+				for file in file_list:
+					error_code = ft.file_upload(file, session['login'], directory)
+					
+					if error_code[0] == 0:
+						error_message =  'No selected file'
+						break
 
-				elif error_code[0] == -2:
-					upload, upload_message = True, 'File ' + error_code[1] + ' exceeds size limit', 
-					break
+					elif error_code[0] == -1:
+						upload_message = 'File {} already exists'.format(error_code[1])
+						break
 
-			if error_code[0] == 1:
-				upload, upload_message = True, 'Uploaded!'
+					elif error_code[0] == -2:
+						upload_message = 'File {} exceeds size limit'.format(error_code[1]) 
+						break
 
-			#update files
-			user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+				if error_code[0] == 1:
+					upload_message = 'Uploaded!'
+
+				#update files
+				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
 
 		else:
 
@@ -141,12 +207,15 @@ def home(directory = '/'):
 				#open add folder menu
 				add_tag = obj_id(list(request.form.values())[0])
 
-			elif action == 'add_tag':
-				tag_name = list(request.form.values())[0]
-				file_id = list(request.form.values())[1]
-				gt.add_tags(file_id, [tag_name])
-				#update
-				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+			elif action == 'add_tag_btn':
+				tag_name = list(request.form.values())[1]
+				file_id = list(request.form.values())[0]
+				if tag_name in settings['tags']:
+					gt.add_tags(file_id, [tag_name])
+					#update
+					user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
+				else:
+					upload_message = "Tag {} doesn't exist".format(tag_name)
 
 			elif action[:3] == 'tag':
 				tag_search = list(request.form.values())[0]
@@ -175,10 +244,10 @@ def home(directory = '/'):
 					return send_file(error_code[1], as_attachment=True)
 
 				elif error_code[0] == 0:
-					error, error_message = True, 'File not found!'
+					error_message = 'File not found!'
 
 				elif error_code[0] == -1:
-					error, error_message = True, 'Permission denied'
+					error_message = 'Permission denied'
 
 
 			elif action == 'download_list':
@@ -192,13 +261,13 @@ def home(directory = '/'):
 					return send_file(error_code[1], as_attachment=True)
 
 				elif error_code[0] == 0:
-					error, error_message = True, 'File not found!'
+					error_message = 'File not found!'
 
 				elif error_code[0] == -1:
-					error, error_message = True, 'Permission denied'
+					error_message = 'Permission denied'
 
 				elif error_code[0] == -3:
-					upload, upload_message = True, 'No file selected!'
+					upload_message = 'No file selected!'
 
 			elif action == 'delete':
 				#if user have permission
@@ -206,10 +275,10 @@ def home(directory = '/'):
 				error_code = ft.delete_file(file_data, session['login'], directory)
 
 				if error_code == 0:
-					error, error_message = True, 'File not found'
+					error_message = 'File not found'
 
 				elif error_code == -1:
-					error, error_message = True, 'Permission denied'
+					error_message = 'Permission denied'
 
 				#update
 				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
@@ -222,13 +291,13 @@ def home(directory = '/'):
 
 				error_code = ft.delete_file_list(values, session['login'], directory)
 				if error_code == 0:
-					error, error_message = True, 'File not found'
+					error_message = 'File not found'
 
 				elif error_code == -1:
-					error, error_message = True, 'Permission denied'
+					error_message = 'Permission denied'
 
 				elif error_code == -3:
-					upload, upload_message = True, 'No file selected!'
+					upload_message = 'No file selected!'
 
 				#update
 				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
@@ -240,7 +309,7 @@ def home(directory = '/'):
 				error_code = ft.create_folder(folder_name, session['login'], directory)
 
 				if error_code == 0:
-					upload, upload_message = True, 'Folder ' + folder_name + ' already exists!'
+					upload_message = 'Folder {} already exists!'.format(folder_name)
 
 				#update
 				user_file_list = list(gt.get_user_files(owner=session['login'], directory = directory))
@@ -248,11 +317,11 @@ def home(directory = '/'):
 	return render_template("home.html",
 			files = user_file_list,
 			path = directory if directory!='/' else None,
-			upload = upload, upload_message = upload_message,
-			error = error, error_message = error_message,
+			upload_message = upload_message, error_message = error_message,
 			check = check, tag_search = tag_search,
 			add_folder = add_folder, add_tag = add_tag,
-			directories = dir_tree)
+			directories = dir_tree,
+			tags = settings['tags'])
 
 @app.route('/reg', methods = ['GET', 'POST'])
 def reg():
