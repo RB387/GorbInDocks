@@ -13,6 +13,12 @@ class file_tools():
 		self.ZIP_FOLDER = ZIP_FOLDER
 		self.settings = settings
 
+	def sort_files(self, files):
+		if files:
+			files.sort(key = lambda x: x['name'])
+			files.sort(key = lambda x: x['type'], reverse = True)
+		return files
+
 	def get_file_paths(self, dirName):
 	  # setup file paths variable
 	  filePaths = []
