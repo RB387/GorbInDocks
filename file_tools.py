@@ -15,7 +15,7 @@ class file_tools():
 
 	def sort_files(self, files):
 		if files:
-			files.sort(key = lambda x: x['name'])
+			files.sort(key = lambda x: x['name'].lower())
 			files.sort(key = lambda x: x['type'], reverse = True)
 		return files
 
