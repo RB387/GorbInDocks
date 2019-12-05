@@ -392,7 +392,7 @@ if __name__ == '__main__':
 
 	if setup:
 		with app.app_context():
-			gt.add_user(self, login = 'admin', pas = gorbin_tools2.hash('admin'), email = 'xd@yolo.com', status='admin')
+			gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin'), email = 'xd@yolo.com', status='admin')
 			gt.remake_files('yes')
 			gt.remake_users('yes')
 			gt.remake_links('yes')
