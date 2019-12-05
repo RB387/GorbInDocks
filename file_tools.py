@@ -76,9 +76,14 @@ class file_tools():
 				print(file_path)
 			else:
 				file_path = os.path.join(self.UPLOAD_FOLDER, login)
+				
+			if not os.path.exists(file_path):
+				#check temp path
+				os.makedirs(file_path)
+				
 			file_path = os.path.join(file_path, filename)
 			
-
+			
 			
 			#if file file with same name already exists
 			if os.path.exists(file_path):
