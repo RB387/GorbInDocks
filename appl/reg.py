@@ -13,7 +13,7 @@ def reg():
 	'''
 	if 'login' in session:
 		#If such user already logged in, then redirect him to home page
-		return redirect(url_for('home'))
+		return redirect(url_for('home.home'))
 
 	if request.method == "POST":
 		#get information from registarion form
@@ -28,7 +28,7 @@ def reg():
 				#log in user in session
 				session['login'] = result['login']
 				#redirect to home page
-				return redirect(url_for('home'))
+				return redirect(url_for('home.home'))
 			else:
 				# if current login taken
 				if gt.check_login(result['login']):

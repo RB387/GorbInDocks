@@ -2,18 +2,18 @@ from appl import app
 from flask import Blueprint, render_template
 from flask import Flask, request, g, session, redirect, url_for, send_file
 from run import gt, settings, dump
+from appl import decorators
+
 page = Blueprint('admin', __name__,
                         template_folder='templates')
+
 @page.route('/admin', methods = ['GET', 'POST'])
+@decorators.login_required
+@decorators.admin_required
 def admin():
 
 	add_tag = None
 	error_message = None
-	if 'login' not in session:
-		return redirect(url_for('index.index'))
-
-	if gt.get_user_status(session['login']) != 'admin':
-		return '<h1>Permission Denied</h1>'
 
 	if request.method == "POST":
 		print(request.form)

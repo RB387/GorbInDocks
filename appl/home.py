@@ -3,16 +3,16 @@ from flask import Blueprint, render_template
 from flask import Flask, request, g, session, redirect, url_for, send_file
 from werkzeug_utils_rus import secure_filename
 from run import gt, ft, settings
+from appl import decorators
 import gorbin_tools2
 
 page = Blueprint('home', __name__,
                         template_folder='templates')
+
 @page.route('/home', methods = ['GET', 'POST'])
 @page.route('/home/<directory>', methods = ['GET', 'POST'])
+@decorators.login_required
 def home(directory = '/'):
-	if 'login' not in session:
-		return redirect(url_for('index.index'))
-
 	
 	#get current directory full path
 	if directory != 'shared':
