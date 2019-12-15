@@ -443,7 +443,6 @@ class log_tests(unittest.TestCase):
             pre_read_file = open(path.join(getcwd(), 'logs', file_name), "r")
             pre_read = pre_read_file.read()
             pre_read_file.close()
-
         file = mt.get_log_file().write(input_string)
         mt.get_log_file().close()
 

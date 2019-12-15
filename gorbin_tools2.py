@@ -39,14 +39,6 @@ def now():
     return dt.datetime.now()
 
 
-# Useful visible print function
-def vprint(*items):
-    """takes >= 1 object, prints them line by line for easy view"""
-    print('\n-----------------------\n')
-    for i in items:
-        print('\t', i)
-    print('\n-----------------------\n')
-
 # Functions of encryption, decryption (ECB AES) and hashing (sha256)
 def encrypt(message, passphrase):
     """takes message and key, returns the result of the encryption in base64
@@ -74,6 +66,15 @@ def hash(message, salt=b'JT7BX67_rVrdEpLlzWbNRV'):
 class mongo_tools():
     def __init__(self, flask_g):
         self.g = flask_g
+
+    # Useful visible print function
+    def vprint(self, *items):
+        """takes >= 1 object, prints them line by line for easy view"""
+        self.write_log(vprint=items)
+        print('\n-----------------------\n')
+        for i in items:
+            print('\t', i)
+        print('\n-----------------------\n')
 
     def get_db(self):
         """Adds a database object (if no exists), MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
