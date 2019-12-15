@@ -6,6 +6,7 @@ import appl.home as home
 import appl.reg as reg
 import appl.logout as logout
 import appl.error as error
+import appl.user as user
 
 app.register_blueprint(admin.page)
 app.register_blueprint(index.page)
@@ -13,4 +14,5 @@ app.register_blueprint(home.page)
 app.register_blueprint(reg.page)
 app.register_blueprint(logout.page)
 app.register_blueprint(error.page)
+app.register_blueprint(user.page)
 

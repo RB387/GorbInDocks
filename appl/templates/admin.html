@@ -5,7 +5,7 @@
 			<span>{{ error_message }}
 		{% endif %}
 
-		<form action="{{ url_for('admin', admin_id = admin) }}" id = "tag_list" method="post">
+		<form action="{{ url_for('.admin') }}" id = "tag_list" method="post">
 			{% if not add_tag %}
 				<input type="submit" name="add_tag" value="Add tag">
 				<input type="submit" name="del_tag" value="Delete tag">
@@ -21,13 +21,13 @@
 			{% endif %}
 		</form>
 
-		<form action="{{ url_for('admin', admin_id = admin) }}" id = "max_file_size" method="post">
+		<form action="{{ url_for('.admin') }}" id = "max_file_size" method="post">
 			<label>Max File Size (mb): </label>
 			<input type="text" name="change_size_val" placeholder="{{ current_limit }}">
 	        <input type="submit" name="change_size" value="Save">
 	    </form>
 
-	    <form action="{{ url_for('admin', admin_id = admin) }}" id = "max_files_count" method="post">
+	    <form action="{{ url_for('.admin') }}" id = "max_files_count" method="post">
 	    	<label>Max Files Count: </label>
 			<input type="text" name="change_count_val" placeholder="{{ current_count_limit }}">
 	        <input type="submit" name="change_count" value="Save">

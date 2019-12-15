@@ -1,6 +1,7 @@
 from appl import app
 from flask import Blueprint, render_template
 from flask import Flask, request, g, session, redirect, url_for, send_file
+from run import gt, settings, dump
 page = Blueprint('admin', __name__,
                         template_folder='templates')
 @page.route('/admin', methods = ['GET', 'POST'])
@@ -9,7 +10,7 @@ def admin():
 	add_tag = None
 	error_message = None
 	if 'login' not in session:
-		return redirect(url_for('index'))
+		return redirect(url_for('index.index'))
 
 	if gt.get_user_status(session['login']) != 'admin':
 		return '<h1>Permission Denied</h1>'
@@ -29,15 +30,13 @@ def admin():
 
 			else:
 				settings['tags'].append(tag)
-				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
-					json.dump(settings, outfile)
+				dump()
 
 		elif action == 'del_tag':
 			tag = list(request.form.values())[1]
 			if tag in settings['tags']:
 				settings['tags'].pop(settings['tags'].index(tag))
-				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
-					json.dump(settings, outfile)
+				dump()
 			else:
 				error_message = "Tag {} doesn't exitst".format(tag)
 
@@ -45,8 +44,7 @@ def admin():
 			size = request.form['change_size_val']
 			try:
 				settings['max_file_size'] = int(size) * 1024 * 1024
-				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
-					json.dump(settings, outfile)
+				dump()
 			except:
 				error_message = 'Enter valid number'
 
@@ -54,8 +52,7 @@ def admin():
 			count = request.form['change_count_val']
 			try:
 				settings['max_files_count'] = int(count)
-				with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
-					json.dump(settings, outfile)
+				dump()
 			except:
 				error_message = 'Enter valid number'
 

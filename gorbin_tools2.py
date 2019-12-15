@@ -170,6 +170,16 @@ class mongo_tools():
             if user_data['pas'] == pas: return user_data
         return None
 
+    def get_user_data(self, login: str):
+        """Takes user's login and user's encrypted password. Returns data of user in dict
+        if such user exists and is not deleted or returns None"""
+        self.write_log(call_function="get_user_data", login=login)
+        u_col = self.get_users_col()
+        user_data = u_col.find_one({'login':login, 'deleted':False})
+        if user_data:
+            return user_data
+        return None
+
     def get_user_status(self, login: str):
         """Takes user's login. Returns its status"""
         self.write_log(call_function="get_user_status", login=login)
@@ -205,6 +215,18 @@ class mongo_tools():
         self.write_log(call_function="update_user", user_id=user_id, login=login, email=email)
         u_col = self.get_users_col()
         u_col.update_one({'_id':obj_id(user_id)}, {'$set':{'login':login, 'pas':pas, 'email':email}})
+
+    def update_user_mail(self, login: str, email: str):
+        """Takes unique user's _id, new login, new password, new email. Updates user's data"""
+        self.write_log(call_function="update_user_mail", login=login, email=email)
+        u_col = self.get_users_col()
+        u_col.update_one({'login':login}, {'$set':{'email':email}})
+
+    def update_user_pass(self, login: str, pas: bytes):
+        """Takes unique user's _id, new login, new password, new email. Updates user's data"""
+        self.write_log(call_function="update_user_pass", login=login)
+        u_col = self.get_users_col()
+        u_col.update_one({'login':login}, {'$set':{'pas':pas}})
 
     def del_user(self, user_id=None, login=None):
         """Takes unique user's _id or user's login. Switches deleted flag to Tru for this user"""
