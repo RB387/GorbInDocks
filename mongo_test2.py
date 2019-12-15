@@ -3,6 +3,7 @@ import unittest
 from time import sleep
 from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
 from pprint import pprint
+from os import path, getcwd
 
 class flask_g():
     def __init__(self):
@@ -428,6 +429,27 @@ class remake_test_end(unittest.TestCase):
         size = g.links.count_documents({})
 
         self.assertEqual(size, 0)
+
+
+class log_tests(unittest.TestCase):
+    def test1_open_log_file(self):
+        input_string = "\n\tRUN TESTS\n"
+        
+        pre_read_file = open(path.join(getcwd(), 'logs', dt.datetime.now().strftime("log_date_%Y-%m-%d.txt")), "r")
+        pre_read = pre_read_file.read()
+        pre_read_file.close()
+
+        file = mt.get_log_file().write(input_string)
+        mt.get_log_file().close()
+
+        post_read_file = open(path.join(getcwd(), 'logs', dt.datetime.now().strftime("log_date_%Y-%m-%d.txt")), "r")
+        post_read = post_read_file.read()
+        post_read_file.close()
+
+        self.assertEqual(pre_read+input_string, post_read)
+
+
+
 
 
 if __name__ == '__main__':

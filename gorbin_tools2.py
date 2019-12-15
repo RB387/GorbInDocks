@@ -13,7 +13,7 @@ from Crypto.Cipher import AES
 from hashlib import sha256, sha1
 import datetime as dt
 import base64
-from os import urandom
+from os import urandom, path, mkdir
 
 
 
@@ -70,7 +70,7 @@ def hash(message, salt=b'JT7BX67_rVrdEpLlzWbNRV'):
     return sha256(bytes(message, 'utf-8') + salt).hexdigest()
 
 
-# MongoDB functions
+# MongoDB adn log functions
 class mongo_tools():
     def __init__(self, flask_g):
         self.g = flask_g
@@ -113,6 +113,29 @@ class mongo_tools():
         if links is None:
             links = self.g.links = db[self.g.LINKS_COL_NAME]
         return links
+
+    def get_log_file(self):
+        """Adds a database and logs folder objects (if no exist) as attributes to flask.g. Returns log folder's path"""
+        log_file = getattr(self.g, 'log_file', None)
+        if log_file is None or log_file.closed:
+            from config import  LOG_FOLDER
+            if not path.exists(LOG_FOLDER): mkdir(LOG_FOLDER)
+            file_name = dt.datetime.now().strftime("log_date_%Y-%m-%d.txt")
+            log_file = self.g.log_file = open(path.join(LOG_FOLDER, file_name), "a+")
+        return log_file
+
+    def write_log(self, **items):
+        """Write down all **arguments to log f ile. Example: write_log(login='Mike')"""
+        line = str_now()
+        file = self.get_log_file()
+        for item in items.items():
+            line += " {}:{}".format(item[0], item[1])
+        line += "\n"
+        file.write(line)
+
+
+        
+
 
 
     # Functions for working with users collection
