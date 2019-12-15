@@ -13,6 +13,10 @@ import os
 import shutil
 import json
 
+
+#For first time database configuration
+setup = False
+
 with open(os.path.join(os.getcwd(), 'settings.json')) as json_data_file:
     settings = json.load(json_data_file)
 '''
@@ -58,6 +62,16 @@ def share(link):
 			files = files['files'],
 			link = link)
 '''
+
+
+@app.route('/user', methods = ['GET', 'POST'])
+@app.route('/user/<user_id>', methods = ['GET', 'POST'])
+def user():
+	if request.method == "POST":
+		print(request.form)
+		action = list(request.form.keys())[0]
+	return render_template("user.html") 
+
 
 @app.route('/admin', methods = ['GET', 'POST'])
 def admin():
@@ -130,6 +144,7 @@ def home(directory = '/'):
 	if 'login' not in session:
 		return redirect(url_for('index'))
 
+	
 	#get current directory full path
 	if directory != 'shared':
 		dir_tree = ft.get_dir_tree(session['login'], directory)
@@ -154,7 +169,7 @@ def home(directory = '/'):
 
 	
 	if request.method == "POST":
-
+		print(request.data)
 		#if app gets file upload request
 		if 'file' in request.files:
 			#get list of files
@@ -198,14 +213,6 @@ def home(directory = '/'):
 			elif action == 'select_button':
 				#open file select menu
 				check = True
-
-			elif action == 'add_folder':
-				#open add folder menu
-				add_folder = True
-
-			elif action == 'add_tag_button':
-				#open add folder menu
-				add_tag = obj_id(list(request.form.values())[0])
 
 			elif action == 'add_tag_btn':
 				tag_name = list(request.form.values())[1]
@@ -319,7 +326,6 @@ def home(directory = '/'):
 			path = directory if directory!='/' else None,
 			upload_message = upload_message, error_message = error_message,
 			check = check, tag_search = tag_search,
-			add_folder = add_folder, add_tag = add_tag,
 			directories = dir_tree,
 			tags = settings['tags'])
 
@@ -369,7 +375,6 @@ def logout():
 	return redirect(url_for('index'))
 
 @app.route('/', methods = ['GET', 'POST'])
-@app.route('/index', methods = ['GET', 'POST'])
 def index():
 	if 'login' in session:
 		return redirect(url_for('home'))
@@ -388,7 +393,6 @@ def index():
 
 if __name__ == '__main__':
 	#For first time database configuration
-	setup = False
 
 	if setup:
 		with app.app_context():
