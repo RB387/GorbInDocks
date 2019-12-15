@@ -434,15 +434,20 @@ class remake_test_end(unittest.TestCase):
 class log_tests(unittest.TestCase):
     def test1_open_log_file(self):
         input_string = "\n\tRUN TESTS\n"
-        
-        pre_read_file = open(path.join(getcwd(), 'logs', dt.datetime.now().strftime("log_date_%Y-%m-%d.txt")), "r")
-        pre_read = pre_read_file.read()
-        pre_read_file.close()
+        file_name = dt.datetime.now().strftime("log_date_%Y-%m-%d.txt")
+        if not path.exists(path.join(getcwd(), 'logs')):
+            mkdir(path.join(getcwd(), 'logs'))
+        if not path.exists(path.join(getcwd(), 'logs', file_name)):
+            pre_read = ""
+        else:
+            pre_read_file = open(path.join(getcwd(), 'logs', file_name), "r")
+            pre_read = pre_read_file.read()
+            pre_read_file.close()
 
         file = mt.get_log_file().write(input_string)
         mt.get_log_file().close()
 
-        post_read_file = open(path.join(getcwd(), 'logs', dt.datetime.now().strftime("log_date_%Y-%m-%d.txt")), "r")
+        post_read_file = open(path.join(getcwd(), 'logs', file_name), "r")
         post_read = post_read_file.read()
         post_read_file.close()
 
