@@ -221,13 +221,13 @@ class mongo_tools():
         u_col.update_one({'_id':obj_id(user_id)}, {'$set':{'login':login, 'pas':pas, 'email':email}})
 
     def update_user_mail(self, login: str, email: str):
-        """Takes unique user's _id, new login, new password, new email. Updates user's data"""
+        """Takes unique login, new email. Updates user's data"""
         self.write_log(call_function="update_user_mail", login=login, email=email)
         u_col = self.get_users_col()
         u_col.update_one({'login':login}, {'$set':{'email':email}})
 
     def update_user_pass(self, login: str, pas: bytes):
-        """Takes unique user's _id, new login, new password, new email. Updates user's data"""
+        """Takes unique login, new password. Updates user's data"""
         self.write_log(call_function="update_user_pass", login=login)
         u_col = self.get_users_col()
         u_col.update_one({'login':login}, {'$set':{'pas':pas}})
@@ -285,7 +285,7 @@ class mongo_tools():
         return f_col.find_one({'_id': obj_id(file_id), 'deleted':False})
 
     def search_files(self, owner, **kwargs):
-        """Takes unique file's _id. Returns file information of this file"""
+        
         self.write_log(call_function='search_files', owner=owner)
         f_col = self.get_files_col()
         result = []
@@ -298,13 +298,10 @@ class mongo_tools():
                         if tag not in col[arg]:
                             match = False
                             break
-
                 elif arg == 'data':
                     if not ((kwargs[arg][0] <= col[arg]) and (kwargs[arg][1] >= col[arg])):
                         match = False
-
                 elif arg == 'name':
-                    print('FALSE', kwargs[arg])
                     if kwargs[arg] not in col[arg]:
                         match = False
             if match:
