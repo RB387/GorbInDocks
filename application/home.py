@@ -111,6 +111,14 @@ def home(directory = '/'):
 				go_dir = request.form.get('get')
 				return redirect(url_for('home.home', directory = go_dir if go_dir!='/' else None))
 
+			elif action == 'add_comment':
+				file_id = request.form.get('get_id')
+				comment = request.form.get('get_comment')
+
+				gt.add_comment(file_id, comment)
+
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+
 			elif action == 'search_files':
 				name = request.form.get('get_name')
 				tags = request.form.get('get_tags')
