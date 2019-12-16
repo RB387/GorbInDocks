@@ -13,6 +13,7 @@ from Crypto.Cipher import AES
 from hashlib import sha256, sha1
 import datetime as dt
 import base64
+import time
 from os import urandom, path, mkdir
 
 
@@ -29,6 +30,9 @@ def from_stamp(stamp):
 def stamp2str(stamp):
     """takes timestamp, returns datetime in string like '2019-10-14 18:24:14'"""
     return str(dt.datetime.fromtimestamp(stamp))
+
+def time2stamp(date, plus = 0):
+    return time.mktime((dt.datetime.strptime(date, "%Y-%m-%d") + plus * dt.timedelta(days = 1)).timetuple())
 
 def str_now():
     """returns the current datetime in string like '2019-10-14 18:24:14'"""
@@ -279,6 +283,34 @@ class mongo_tools():
         self.write_log(call_function='get_file', file_id=file_id)
         f_col = self.get_files_col()
         return f_col.find_one({'_id': obj_id(file_id), 'deleted':False})
+
+    def search_files(self, owner, **kwargs):
+        """Takes unique file's _id. Returns file information of this file"""
+        self.write_log(call_function='search_files', owner=owner)
+        f_col = self.get_files_col()
+        result = []
+        cols = list(f_col.find({'owner':owner, 'deleted':False}))
+        for col in cols:
+            match = True
+            for arg in kwargs:
+                if arg == 'tags':
+                    for tag in kwargs[arg]:
+                        if tag not in col[arg]:
+                            match = False
+                            break
+
+                elif arg == 'data':
+                    if not ((kwargs[arg][0] <= col[arg]) and (kwargs[arg][1] >= col[arg])):
+                        match = False
+
+                elif arg == 'name':
+                    print('FALSE', kwargs[arg])
+                    if kwargs[arg] not in col[arg]:
+                        match = False
+            if match:
+                result.append(col)
+
+        return result
 
     def get_files_by_tag(self, tag, owner):
         """Takes tag and file's owner. Returns list of files with this tag"""

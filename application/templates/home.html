@@ -70,6 +70,31 @@
                             <button type="button" onclick="show_hide(['create_folder_div', 'add_folder_button'])">Cancel</button>
                         </form>
                     </div>
+
+                    <div id = "search_file_open" style = "display: block;">
+                        <form action="{{ url_for('.home', directory = path) }}" method="post" name="search_file_open_form">
+                            <button type="button" onclick="show_hide(['search_file', 'search_file_open'])">Search files by: </button>
+                        </form>
+                    </div>
+                    <div id = "search_file" style = "display: none;">
+                        <form action="{{ url_for('.home', directory = path) }}" id = "search_file_form" method="post" >
+                            <label>By name: </label>
+                            <input type="text" name="get_name" placeholder="File name">
+                            <br>
+                            <label>By tags: </label>
+                            <input type="text" name="get_tags" placeholder="tag1;tag2;tag3">
+                            <br>
+                            <label>By date: from</label>
+                            <input type="date" name="get_date_from">
+                            <label> to </label>
+                            <input type="date" name="get_date_to">
+                            <br>
+                            <button type="submit" name="action" value = "search_files">Search!</button>
+                            <button type="button" onclick="show_hide(['search_file_open', 'search_file'])">Cancel</button>
+                        </form>
+                    </div>
+
+                    
                     
                     {% if path %}
                         <form action="{{ url_for('.home', directory = path) }}" method="post" name="add_folder">

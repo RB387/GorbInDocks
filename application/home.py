@@ -22,7 +22,7 @@ def home(directory = '/'):
 
 	if dir_tree is None:
 		#if got error with directory path then redirect
-		return redirect(url_for('error.error'))
+		return redirect(url_for('error'))
 
 
 	if directory != '/' and directory != 'shared':
@@ -95,7 +95,7 @@ def home(directory = '/'):
 
 			elif action == 'tag':
 				tag_search = request.form.get('get')
-				user_file_list = list(gt.get_files_by_tag(tag = tag_search, owner=session['login']))
+				user_file_list = ft.sort_files(list(gt.get_files_by_tag(tag = tag_search, owner=session['login'])))
 
 			elif action == 'folder':
 				#open folder
@@ -110,6 +110,26 @@ def home(directory = '/'):
 				#go to selected folder
 				go_dir = request.form.get('get')
 				return redirect(url_for('home.home', directory = go_dir if go_dir!='/' else None))
+
+			elif action == 'search_files':
+				name = request.form.get('get_name')
+				tags = request.form.get('get_tags')
+				date_begin, date_end = request.form.get('get_date_from'), request.form.get('get_date_to')
+				
+				date_begin = gorbin_tools2.time2stamp(date_begin) if date_begin != '' else float("-inf")
+				date_end = gorbin_tools2.time2stamp(date_end, plus = 1) if date_end != '' else float("inf")
+
+				kwargs = {
+					'name':name,
+					'data': [date_begin, date_end],
+				}
+
+				if tags != '':
+					tags = tags.split(';')
+					kwargs.update({'tags':tags})
+
+				user_file_list = ft.sort_files(gt.search_files(session['login'], **kwargs))
+
 
 			elif action == 'download':
 				#if user have permission
