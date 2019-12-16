@@ -1,12 +1,12 @@
 from flask import Flask
 app = Flask(__name__)
-import appl.admin as admin
-import appl.index as index
-import appl.home as home
-import appl.reg as reg
-import appl.logout as logout
-import appl.error as error
-import appl.user as user
+import application.admin as admin
+import application.index as index
+import application.home as home
+import application.reg as reg
+import application.logout as logout
+import application.error as error
+import application.user as user
 
 app.register_blueprint(admin.page)
 app.register_blueprint(index.page)

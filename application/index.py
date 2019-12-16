@@ -1,4 +1,4 @@
-from appl import app
+from application import app
 from flask import Blueprint, render_template
 from flask import Flask, request, g, session, redirect, url_for, send_file
 from run import gt

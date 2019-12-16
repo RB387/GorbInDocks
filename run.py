@@ -1,6 +1,5 @@
 from flask import g
 from sys import platform
-from functools import wraps
 import gorbin_tools2
 import file_tools
 import os
@@ -20,28 +19,9 @@ def dump():
 gt = gorbin_tools2.mongo_tools(g)
 ft = file_tools.file_tools(settings, gt)
 
-def admin_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        if gt.get_user_status(session['login']) != 'admin':
-            return '<h1>Permission Denied</h1>'
-        else:
-            return fn(*args, **kwargs)
-    return wrapper
-
-def login_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        if 'login' not in session:
-            return redirect(url_for('index.index'))
-        else:
-            return fn(*args, **kwargs)
-    return wrapper
-
-
 if __name__ == '__main__':
     #For first time database configuration
-    from appl import app
+    from application import app
     app.config.from_object('config')
 
     if setup:

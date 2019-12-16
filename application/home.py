@@ -1,9 +1,9 @@
-from appl import app
+from application import app
 from flask import Blueprint, render_template
 from flask import Flask, request, g, session, redirect, url_for, send_file
 from werkzeug_utils_rus import secure_filename
 from run import gt, ft, settings
-from appl import decorators
+from application import decorators
 import gorbin_tools2
 
 page = Blueprint('home', __name__,

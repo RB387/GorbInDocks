@@ -1,8 +1,8 @@
-from appl import app
+from application import app
 from flask import Blueprint, render_template
 from flask import Flask, request, g, session, redirect, url_for, send_file
 from run import gt, settings, dump
-from appl import decorators
+from application import decorators
 
 page = Blueprint('admin', __name__,
                         template_folder='templates')
