@@ -3,6 +3,7 @@ import unittest
 from time import sleep
 from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
 from pprint import pprint
+from os import path, getcwd
 
 class flask_g():
     def __init__(self):
@@ -428,6 +429,7 @@ class remake_test_end(unittest.TestCase):
         size = g.links.count_documents({})
 
         self.assertEqual(size, 0)
+
 
 
 if __name__ == '__main__':

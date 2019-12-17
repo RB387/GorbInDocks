@@ -39,7 +39,7 @@
                     <h2> Sign up </h2> <br>
                 </div>
 
-            <form  action="{{ url_for('reg') }}" method="post" name="form_register">
+            <form  action="{{ url_for('.reg') }}" method="post" name="form_register">
                 <h6> Login: </h6>
                 <input type="text" class="form-control" name="login" placeholder="Enter login" required >
                 <br>
@@ -59,7 +59,7 @@
                 {% endif %}
                 <br>
                 <button class="btn btn-lg btn-primary btn-block" type="submit" name="btn_submit_register" >Sign up</button>
-                <p class="text-center">Do you have an account? <a href="index" >Sign in</a></p>
+                <p class="text-center">Do you have an account? <a href="./" >Sign in</a></p>
 
                 </div>
 

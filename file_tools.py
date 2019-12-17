@@ -154,7 +154,7 @@ class file_tools():
 		if len(values) <= 1:
 			return (-3, None)
 		#get only file ids
-		values = values[1::]
+		values = values[2::]
 
 		files_location = []
 
@@ -241,7 +241,7 @@ class file_tools():
 			return -3
 
 		#get only file ids
-		values = values[1::]
+		values = values[2::]
 		for file_id in values:
 			#read file info one by one
 			file_data = self.gt.get_file(file_id = file_id)
