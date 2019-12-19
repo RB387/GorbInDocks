@@ -2,44 +2,35 @@
 <head>
   <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-     <style>
-     .centrep{
-     padding: 50px;
-     position: fixed; top: 50%; left: 50%;
-     background: #eee2ea;
-     border-radius: 15px;
-     -webkit-transform: translate(-50%, -50%);
-     -ms-transform: translate(-50%, -50%);
-     transform: translate(-50%, -50%);
-
-      }
-      body {
-      background-color: #d3c6ce;
-      }
-      .right{
-           position: fixed; top: 0%; left: 73%;
-      }
-      .text {
-          text-align:  center;
-      }
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
 
-      </style>
+   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/signin.css') }}">
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/bootstrap.min.css') }}">
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+
+
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/bootstrap.min.js') }}">
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/bootstrap.js') }}">
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/jquery.js') }}">
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/jquery.min.js') }}">
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/popper.js') }}">
+   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/popper.min.js') }}">
+
+
 </head>
 
-<body >
-        <div id="form_register">
-            <div class="centrep">
-                <div class="text">
-                    <h2> Sign up </h2> <br>
-                </div>
+<body>
 
-            <form  action="{{ url_for('.reg') }}" method="post" name="form_register">
+
+            <form class="form-signin centrep" action="{{ url_for('.reg') }}" method="post" name="form_register"  >
+                <h2 class="text-center"> Sign up </h2> <br>
                 <h6> Login: </h6>
                 <input type="text" class="form-control" name="login" placeholder="Enter login" required >
                 <br>
@@ -51,22 +42,26 @@
                 <br>
                 <h6> Confirm the password: </h6>
                 <input type="password" class="form-control" name="password_confirm" id="pass_conf" placeholder="minimum 6 characters" required minlength="6" maxlength="32" oninput="validatePassword()">
+
                 <br>
                 <script language='javascript' type='text/javascript' src="{{url_for('static', filename='password_validate.js')}}"></script>
 
                 {% if error_flag %}
-                    <p>{{ error_message }}</p>
+                    <font color=#D14229 >{{ error_message }}</font>
                 {% endif %}
-                <br>
-                <button class="btn btn-lg btn-primary btn-block" type="submit" name="btn_submit_register" >Sign up</button>
-                <p class="text-center">Do you have an account? <a href="./" >Sign in</a></p>
 
-                </div>
+                <br>
+                <br>
+
+                <button class="btn btn-lg btn-primary btn-block  " type="submit" name="btn_submit_register" >Sign up</button>
+
+                <p class="text-center">Do you have an account? <a href="./" >Sign in</a></p>
 
 
 
             </form>
 
-        </div>
+
 </body>
+
 </html>
