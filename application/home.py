@@ -56,11 +56,11 @@ def home(directory = '/'):
 						break
 
 					elif error_code[0] == -1:
-						upload_message = 'File {} already exists'.format(error_code[1])
+						error_message = 'File {} already exists'.format(error_code[1])
 						break
 
 					elif error_code[0] == -2:
-						upload_message = 'File {} exceeds size limit'.format(error_code[1]) 
+						error_message = 'File {} exceeds size limit'.format(error_code[1]) 
 						break
 
 				if error_code[0] == 1:
@@ -91,7 +91,7 @@ def home(directory = '/'):
 					#update
 					user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 				else:
-					upload_message = "Tag {} doesn't exist".format(tag_name)
+					error_message = "Tag {} doesn't exist".format(tag_name)
 
 			elif action == 'tag':
 				tag_search = request.form.get('get')
@@ -188,7 +188,7 @@ def home(directory = '/'):
 						error_message = 'Permission denied'
 
 					elif error_code[0] == -3:
-						upload_message = 'No file selected!'
+						error_message = 'No file selected!'
 
 				elif action == 'Delete':
 				#if we get action for multiple file download
@@ -204,7 +204,7 @@ def home(directory = '/'):
 						error_message = 'Permission denied'
 
 					elif error_code == -3:
-						upload_message = 'No file selected!'
+						error_message = 'No file selected!'
 
 					#update
 					user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
@@ -217,7 +217,7 @@ def home(directory = '/'):
 				error_code = ft.create_folder(folder_name, session['login'], directory)
 
 				if error_code == 0:
-					upload_message = 'Folder {} already exists!'.format(folder_name)
+					error_message = 'Folder {} already exists!'.format(folder_name)
 
 				#update
 				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))

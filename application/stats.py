@@ -9,6 +9,7 @@ page = Blueprint('stats', __name__,
 @page.route('/statistics', methods = ['GET', 'POST'])
 @decorators.login_required
 @decorators.check_session
+@decorators.admin_required
 def statistics():
     data = get_stats()
     return data

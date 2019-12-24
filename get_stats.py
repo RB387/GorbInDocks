@@ -34,7 +34,7 @@ def get_stats(date_begin = float("-inf"), date_end = float("inf")):
                     data[user]['tags'].update({tag : 1})
 
             if line['type'] == 'file':
-                data[user].update({'avg_size' : data[user]['avg_size'] + line['size']})
+                data[user]['avg_size'] += line['size']
                 overall['overall_size'] += line['size']
 
     return {'overall' : overall, 'users' : data}
