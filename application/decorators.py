@@ -6,7 +6,6 @@ import gorbin_tools2
 def admin_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        print(session)
         if gt.get_user_status(session.get('login')) != 'admin':
             return '<h1>Permission Denied</h1>'
         else:
@@ -18,6 +17,15 @@ def login_required(fn):
     def wrapper(*args, **kwargs):
         if 'login' not in session:
             return redirect(url_for('index.index'))
+        else:
+            return fn(*args, **kwargs)
+    return wrapper
+
+def check_session(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not gt.get_user(session['login'], session['current_password']):
+            return redirect(url_for('logout.logout'))
         else:
             return fn(*args, **kwargs)
     return wrapper

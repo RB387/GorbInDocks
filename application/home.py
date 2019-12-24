@@ -12,6 +12,7 @@ page = Blueprint('home', __name__,
 @page.route('/home', methods = ['GET', 'POST'])
 @page.route('/home/<directory>', methods = ['GET', 'POST'])
 @decorators.login_required
+@decorators.check_session
 def home(directory = '/'):
 	
 	#get current directory full path
@@ -33,7 +34,6 @@ def home(directory = '/'):
 	user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
 	upload_message, error_message = None, None
 	check = None
-	add_folder, add_tag = None, None
 	tag_search = None
 
 	

@@ -1,6 +1,6 @@
 from application import app
 from flask import Blueprint, render_template
-from flask import Flask, request, g, session, redirect, url_for, send_file
+from flask import request, session, redirect, url_for
 from run import gt, settings, dump
 from application import decorators
 
@@ -9,6 +9,7 @@ page = Blueprint('admin', __name__,
 
 @page.route('/admin', methods = ['GET', 'POST'])
 @decorators.login_required
+@decorators.check_session
 @decorators.admin_required
 def admin():
 

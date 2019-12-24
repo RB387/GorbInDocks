@@ -285,7 +285,6 @@ class mongo_tools():
         return f_col.find_one({'_id': obj_id(file_id), 'deleted':False})
 
     def search_files(self, owner, **kwargs):
-        
         self.write_log(call_function='search_files', owner=owner)
         f_col = self.get_files_col()
         result = []
@@ -306,7 +305,15 @@ class mongo_tools():
                         match = False
             if match:
                 result.append(col)
+        return result
 
+    def search_files_by_date(self, owner, date_begin, date_end):
+        self.write_log(call_function='search_user_files_by_date', owner = owner)
+        f_col = list(self.get_files_col().find({'owner':owner}))
+        result = []
+        for col in f_col:
+            if (date_begin <= col['data']) and (date_end >= col['data']):
+                result.append(col)
         return result
 
     def get_files_by_tag(self, tag, owner):
