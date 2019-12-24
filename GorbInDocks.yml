@@ -1,0 +1,25 @@
+name: GorbInDocks
+channels:
+  - defaults
+dependencies:
+  - certifi=2019.11.28=py36_0
+  - click=7.0=py36_0
+  - cython=0.29.14=py36ha925a31_0
+  - flask=1.1.1=py_0
+  - flask-wtf=0.14.2=py36_1
+  - itsdangerous=1.1.0=py36_0
+  - jinja2=2.10.3=py_0
+  - markupsafe=1.1.1=py36he774522_0
+  - pip=19.3.1=py36_0
+  - pymongo=3.9.0=py36ha925a31_0
+  - python=3.6.9=h5500b2f_0
+  - setuptools=42.0.2=py36_0
+  - sqlite=3.30.1=he774522_0
+  - vc=14.1=h0510ff6_4
+  - vs2015_runtime=14.16.27012=hf0eaf9b_1
+  - werkzeug=0.16.0=py_0
+  - wheel=0.33.6=py36_0
+  - wincertstore=0.2=py36h7fe50ca_0
+  - wtforms=2.2.1=py36_0
+prefix: D:\Anaconda3\envs\GorbInDocks
+
