@@ -18,7 +18,7 @@ def get_stats(date_begin = float("-inf"), date_end = float("inf")):
         data.update({ user: 
                         {'files_count' : files_count,
                          'folders_count': folders_count,
-                         'avg_size': 0,
+                         'total_size': 0,
                          'tags': {} }})
 
         for line in user_data:
@@ -34,7 +34,7 @@ def get_stats(date_begin = float("-inf"), date_end = float("inf")):
                     data[user]['tags'].update({tag : 1})
 
             if line['type'] == 'file':
-                data[user]['avg_size'] += line['size']
+                data[user]['total_size'] += line['size']
                 overall['overall_size'] += line['size']
 
     return {'overall' : overall, 'users' : data}

@@ -6,10 +6,13 @@ from get_stats import get_stats
 page = Blueprint('stats', __name__,
                         template_folder='templates')
 
-@page.route('/statistics', methods = ['GET', 'POST'])
+@page.route('/admin/statistics', methods = ['GET', 'POST'])
 @decorators.login_required
 @decorators.check_session
 @decorators.admin_required
 def statistics():
     data = get_stats()
-    return data
+    return render_template("stats.html", 
+                        tags_data = list(data['overall']['tags'].items()),
+                        users_data = data['users'],
+                        overall = data['overall'])
