@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart(data) {
+        var data = google.visualization.arrayToDataTable([
+          ['Tags', 'Count'],
+          {% for line in tags_data %}
+            ['{{ line[0] }}', {{ line[1] }}],
+          {% endfor %}
+        ]);
+        console.log(data)
+        var options = {
+          title: 'Tags statistics'
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('tags_stat'));
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="tags_stat" style="width: 600px; height: 300px;"></div>
+    <a>Total files count: {{ overall['overall_files_count'] }}</a> <br>
+    <a>Total folders count: {{ overall['overall_folders_count'] }}</a> <br>
+    <a>Total files size: {{ overall['overall_size'] }}</a> <br>
+    <a>Average file size: {% if overall['overall_files_count'] != 0 %}
+                    {{ (overall['overall_size'] / overall['overall_files_count'])|round(2) }}
+                {% else %}
+                    0
+                {% endif %}</a> <br>
+
+    <form action="{{ url_for('stats.statistics') }}" method="post" name="search_form">
+        <input type="hidden" name="action" value="search_user">
+        <input type="text" name="user_login" placeholder="Username">
+        <button name="select_element" type="submit" value="Select">Search!</button>
+    </form>
+    <table style="background:#e7e7e7" border="1" width="100%" cellpadding="5">
+        <tr>
+            <th>Username</th>
+            <th>Files count</th>
+            <th>Folders count</th>
+            <th>Total files size</th>
+            <th>Average file size</th>
+            <th>Tags stats</th>
+        </tr>
+        {% for user in users_data %}
+        <tr>
+            <th>{{ user }}</th>
+            <th>{{ users_data[user]['files_count'] }}</th>
+            <th>{{ users_data[user]['folders_count'] }}</th>
+            <th>{{ users_data[user]['total_size'] }}</th>
+            <th>{% if users_data[user]['files_count'] != 0 %}
+                    {{ (users_data[user]['total_size'] / users_data[user]['files_count'])|round(2) }}
+                {% else %}
+                    0
+                {% endif %}</th>
+            <th>{{ users_data[user]['tags'] }}</th>
+        </tr>
+        {% endfor %}
+    </table>
+  </body>
+</html>
