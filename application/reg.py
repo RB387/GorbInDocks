@@ -1,6 +1,7 @@
 from application import app
+from application import decorators
 from flask import Blueprint, render_template
-from flask import Flask, request, g, session, redirect, url_for, send_file
+from flask import request, session, redirect, url_for
 from run import gt
 import gorbin_tools2
 page = Blueprint('reg', __name__,
@@ -27,6 +28,7 @@ def reg():
 							email = result['email'])
 				#log in user in session
 				session['login'] = result['login']
+				session['current_password'] = gorbin_tools2.hash(result['password'])
 				#redirect to home page
 				return redirect(url_for('home.home'))
 			else:
