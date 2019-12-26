@@ -24,7 +24,7 @@ class file_tools():
 	  filePaths = []
 	   
 	  # Read all directory, subdirectories and file lists
-	  for root, directories, files in os.walk(dirName):
+	  for root, _, files in os.walk(dirName):
 	    for filename in files:
 	        # Create the full filepath by using os module.
 	        filePath = os.path.join(root, filename)
@@ -217,10 +217,12 @@ class file_tools():
 					#delete file from database
 					self.gt.del_file(file_id = file_data['_id'])
 					#delete file from system
+					'''
 					if file_data['type'] == 'folder':
 						shutil.rmtree(file_data['location'])
 					else:
 						os.remove(file_data['location'])
+					'''
 					return 1
 				else:
 					#delete from database
@@ -252,10 +254,12 @@ class file_tools():
 						#delete file from database
 						self.gt.del_file(file_id = file_id)
 						#delete file from system
+						'''
 						if file_data['type'] == 'folder':
 							shutil.rmtree(file_data['location'])
 						else:
 							os.remove(file_data['location'])
+						'''
 					else:
 						#delete from database
 						self.gt.del_file(file_id = file_id)

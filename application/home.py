@@ -10,28 +10,34 @@ page = Blueprint('home', __name__,
                         template_folder='templates')
 
 @page.route('/home', methods = ['GET', 'POST'])
-@page.route('/home/<directory>', methods = ['GET', 'POST'])
+@page.route('/home/<status>', methods = ['GET', 'POST'])
+@page.route('/home/<status>/<directory>', methods = ['GET', 'POST'])
 @decorators.login_required
 @decorators.check_session
-def home(directory = '/'):
-	
-	#get current directory full path
-	if directory != 'shared':
-		dir_tree = ft.get_dir_tree(session['login'], directory)
+def home(directory = '/', status = None):
+
+	if not status or (gt.get_user_status(session.get('login')) != 'admin' and status != 'user'):
+		return redirect(url_for('.home', status = 'user'))
+
+	if gt.get_user_status(session.get('login')) == 'admin' and status and status != 'user':
+		current_user = status
 	else:
-		dir_tree = [('shared', 'shared')]
+		current_user = session['login']
+
+	#get current directory full path
+	dir_tree = ft.get_dir_tree(current_user, directory)
 
 	if dir_tree is None:
 		#if got error with directory path then redirect
 		return redirect(url_for('error'))
 
 
-	if directory != '/' and directory != 'shared':
-		if (gt.get_file(directory)['owner'] != session['login']) and not (gt.check_availability(login = session['login'], user_id = gt.get_user_id(session['login']), file_id = directory)):
+	if directory != '/':
+		if (gt.get_file(directory)['owner'] != current_user):
 			#if such user doesnt have permission to view this folder
 			return '<h1>Permission Denied</h1>'
 
-	user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+	user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 	upload_message, error_message = None, None
 	check = None
 	tag_search = None
@@ -49,7 +55,7 @@ def home(directory = '/'):
 			else:
 				#upload files one by one
 				for file in file_list:
-					error_code = ft.file_upload(file, session['login'], directory)
+					error_code = ft.file_upload(file, current_user, directory)
 					
 					if error_code[0] == 0:
 						error_message =  'No selected file'
@@ -67,7 +73,7 @@ def home(directory = '/'):
 					upload_message = 'Uploaded!'
 
 				#update files
-				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 
 		else:
 
@@ -89,27 +95,27 @@ def home(directory = '/'):
 				if tag_name in settings['tags']:
 					gt.add_tags(file_id, [tag_name])
 					#update
-					user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+					user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 				else:
 					error_message = "Tag {} doesn't exist".format(tag_name)
 
 			elif action == 'tag':
 				tag_search = request.form.get('get')
-				user_file_list = ft.sort_files(list(gt.get_files_by_tag(tag = tag_search, owner=session['login'])))
+				user_file_list = ft.sort_files(list(gt.get_files_by_tag(tag = tag_search, owner=current_user)))
 
 			elif action == 'folder':
 				#open folder
-				return redirect(url_for('home.home', directory = request.form.get('get')))
+				return redirect(url_for('home.home', directory = request.form.get('get'), status = status))
 
 			elif action == 'back':
 				#go back to prev folder
 				back_dir = gt.get_file(directory)['dir']
-				return redirect(url_for('home.home', directory = back_dir if back_dir!='/' else None))
+				return redirect(url_for('home.home', directory = back_dir if back_dir!='/' else None, status = status))
 
 			elif action == 'dir':
 				#go to selected folder
 				go_dir = request.form.get('get')
-				return redirect(url_for('home.home', directory = go_dir if go_dir!='/' else None))
+				return redirect(url_for('home.home', directory = go_dir if go_dir!='/' else None, status = status))
 
 			elif action == 'add_comment':
 				file_id = request.form.get('get_id')
@@ -117,7 +123,7 @@ def home(directory = '/'):
 				comment = comment if comment != '' else None
 				gt.add_comment(file_id, comment)
 
-				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 
 			elif action == 'search_files':
 				name = request.form.get('get_name')
@@ -136,13 +142,13 @@ def home(directory = '/'):
 					tags = tags.split(';')
 					kwargs.update({'tags':tags})
 
-				user_file_list = ft.sort_files(gt.search_files(session['login'], **kwargs))
+				user_file_list = ft.sort_files(gt.search_files(current_user, **kwargs))
 
 
 			elif action == 'download':
 				#if user have permission
 				file_data = gt.get_file(file_id = request.form.get('get'))
-				error_code = ft.download_file(file_data, session['login'], directory)
+				error_code = ft.download_file(file_data, current_user, directory)
 
 				if error_code[0] == 1:
 					return send_file(error_code[1], as_attachment=True)
@@ -156,7 +162,7 @@ def home(directory = '/'):
 			elif action == 'delete':
 				#if user have permission
 				file_data = gt.get_file(file_id = request.form.get('get'))
-				error_code = ft.delete_file(file_data, session['login'], directory)
+				error_code = ft.delete_file(file_data, current_user, directory)
 
 				if error_code == 0:
 					error_message = 'File not found'
@@ -165,7 +171,7 @@ def home(directory = '/'):
 					error_message = 'Permission denied'
 
 				#update
-				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 
 			elif action == 'multiple_file':
 
@@ -176,7 +182,7 @@ def home(directory = '/'):
 
 					#get file ids
 					values = list(request.form.values())
-					error_code = ft.get_download_list(values, session['login'], directory)
+					error_code = ft.get_download_list(values, current_user, directory)
 
 					if error_code[0] == 1:
 						return send_file(error_code[1], as_attachment=True)
@@ -196,7 +202,7 @@ def home(directory = '/'):
 				#get file ids
 					values = list(request.form.values())
 
-					error_code = ft.delete_file_list(values, session['login'], directory)
+					error_code = ft.delete_file_list(values, current_user, directory)
 					if error_code == 0:
 						error_message = 'File not found'
 
@@ -207,20 +213,20 @@ def home(directory = '/'):
 						error_message = 'No file selected!'
 
 					#update
-					user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+					user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 
 			
 			elif action == 'create_folder':
 				#if get action to create folder
 				#gen path for new folder
 				folder_name = secure_filename(request.form.get('get'))
-				error_code = ft.create_folder(folder_name, session['login'], directory)
+				error_code = ft.create_folder(folder_name, current_user, directory)
 
 				if error_code == 0:
 					error_message = 'Folder {} already exists!'.format(folder_name)
 
 				#update
-				user_file_list = ft.sort_files(list(gt.get_user_files(owner=session['login'], directory = directory)))
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 
 	return render_template("home.html",
 			files = user_file_list,
@@ -228,4 +234,6 @@ def home(directory = '/'):
 			upload_message = upload_message, error_message = error_message,
 			check = check, tag_search = tag_search,
 			directories = dir_tree,
-			tags = settings['tags'])
+			tags = settings['tags'],
+			status = status,
+			stamp2str = gorbin_tools2.stamp2str)

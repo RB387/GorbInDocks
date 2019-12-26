@@ -31,9 +31,9 @@
     <div id="tags_stat" style="width: 600px; height: 300px;"></div>
     <a>Total files count: {{ overall['overall_files_count'] }}</a> <br>
     <a>Total folders count: {{ overall['overall_folders_count'] }}</a> <br>
-    <a>Total files size: {{ overall['overall_size'] }}</a> <br>
+    <a>Total files size: {{ overall['overall_size']|round(3) }}</a> <br>
     <a>Average file size: {% if overall['overall_files_count'] != 0 %}
-                    {{ (overall['overall_size'] / overall['overall_files_count'])|round(2) }}
+                    {{ (overall['overall_size'] / overall['overall_files_count'])|round(3) }}
                 {% else %}
                     0
                 {% endif %}</a> <br><br>
@@ -78,9 +78,9 @@
             </form>
             <th>{{ users_data[user]['files_count'] }}</th>
             <th>{{ users_data[user]['folders_count'] }}</th>
-            <th>{{ users_data[user]['total_size'] }}</th>
+            <th>{{ users_data[user]['total_size']|round(3) }}</th>
             <th>{% if users_data[user]['files_count'] != 0 %}
-                    {{ (users_data[user]['total_size'] / users_data[user]['files_count'])|round(2) }}
+                    {{ (users_data[user]['total_size'] / users_data[user]['files_count'])|round(3) }}
                 {% else %}
                     0
                 {% endif %}</th>
@@ -96,6 +96,9 @@
       <form action="{{ url_for('.dashboard', user_id = None) }}" id = "close_user" method="post">
           <input type="submit" name="close_user" value="Close user's page">
         </form>
+      <form action="{{ url_for('home.home', directory = None, status = user_id) }}" id = "view_user_files" method="post">
+			  <button type="submit" name="action" value="view_files" >View user's files</button>
+		  </form>
       {% if status == 'admin' %}
       <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "remove_admin_status_form" method="post">
         <input type="hidden" name="action" value="remove_admin_status">
