@@ -348,10 +348,16 @@ class mongo_tools():
         f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'star':value}})
 
     def del_file(self, file_id):
-        """Takes unique file's _id. Switches deleted flag to Tru for this file"""
+        """Takes unique file's _id. Switches deleted flag to True for this file"""
         self.write_log(call_function='del_file', file_id=file_id)
         f_col = self.get_files_col()
         f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'deleted':True}})
+
+    def revert_file(self, file_id):
+        """Takes unique file's _id. Switches deleted flag to False for this file"""
+        self.write_log(call_function='revert_file', file_id=file_id)
+        f_col = self.get_files_col()
+        f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'deleted':False}})
 
     def del_fully(self, file_id):
         """Takes unique file's _id. Switches fully_deleted flag to Tru for this file"""
