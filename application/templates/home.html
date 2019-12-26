@@ -11,26 +11,30 @@
      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+     <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
 
      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/signin.css') }}">
      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/bootstrap.min.css') }}">
      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
 
-
-     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/bootstrap.min.js') }}">
-     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/bootstrap.js') }}">
-     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/jquery.js') }}">
-     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/jquery.min.js') }}">
-     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/popper.js') }}">
-     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='js/popper.min.js') }}">
 </head>
     <body >
 
-
-
+        <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="{{ url_for('home.home') }}">Home page</a>
+            <a href="{{ url_for('user.user') }}">User page</a>
+            <a href="{{ url_for('stats.dashboard') }}">Admin page</a>
+            <a href="{{ url_for('logout.logout') }}">Logout</a>
+          </div>
+          <span class="btn btn-secondary  button1" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+          <!--
         <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="logout_form">
             <button class="btn btn-secondary  button1" type="submit" name="action"value="logout" >Logout</button>
         </form>
+    -->
 <br>
 <br>
 
@@ -297,9 +301,5 @@
                         </div>
 
                         {% endif %}
-
-                        <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
-
-
     </body>
 </html>
