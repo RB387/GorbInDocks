@@ -266,7 +266,7 @@ class mongo_tools():
         self.write_log(call_function='add_file', owner=owner, name=name, size=size, location=location, directory=directory, comment=comment, tags=tags)
         f_col = self.get_files_col()
         file_id = f_col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':str(directory), 'location':location, 'comment':comment, 'tags':tags,
-            'type':'file', 'data':now_stamp(), 'deleted':False}).inserted_id
+            star:False, 'type':'file', 'data':now_stamp(), 'deleted':False, 'fully_deleted':False}).inserted_id
         return file_id
 
     def add_folder(self, owner, name: str, size: int, location: str, directory='/', comment=None, tags=[]):
@@ -291,6 +291,7 @@ class mongo_tools():
         return f_col.find_one({'_id': obj_id(file_id), 'deleted':False})
 
     def search_files(self, owner, **kwargs):
+        """coded by RB387"""
         self.write_log(call_function='search_files', owner=owner)
         f_col = self.get_files_col()
         result = []
@@ -314,6 +315,7 @@ class mongo_tools():
         return result
 
     def search_files_by_date(self, owner, date_begin, date_end):
+        """coded by RB387"""
         self.write_log(call_function='search_user_files_by_date', owner = owner)
         f_col = list(self.get_files_col().find({'owner':owner}))
         result = []
@@ -339,11 +341,23 @@ class mongo_tools():
         f_col = self.get_files_col()
         return bool(f_col.find_one({'owner':owner, 'name':name, 'deleted':False}))
 
+    def set_star(self, file_id, value: bool):
+        """Takes unique file's _id, new value of star field. Sets new value to the file"""
+        self.write_log(call_function='set_star', file_id=file_id, value=value)
+        f_col = self.get_files_col()
+        f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'star':value}})
+
     def del_file(self, file_id):
         """Takes unique file's _id. Switches deleted flag to Tru for this file"""
         self.write_log(call_function='del_file', file_id=file_id)
         f_col = self.get_files_col()
         f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'deleted':True}})
+
+    def del_fully(self, file_id):
+        """Takes unique file's _id. Switches fully_deleted flag to Tru for this file"""
+        self.write_log(call_function='del_fully', file_id=file_id)
+        f_col = self.get_files_col()
+        f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'fully_deleted':True}})
 
     def get_user_files(self, owner, directory):
         """Takes file's owner and directory in which it is located. Returns list of files in this directory.
