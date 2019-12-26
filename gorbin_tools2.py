@@ -366,6 +366,12 @@ class mongo_tools():
         f_col = self.get_files_col()
         return list(f_col.find({'owner':owner, 'deleted':False, 'dir':str(directory)}))
 
+    def get_user_trash(self, owner):
+        """Takes file's owner. Returns list of deleted files. if it has no files, it returns []"""
+        self.write_log(call_function='get_user_trash', owner=owner)
+        f_col = self.get_files_col()
+        return list(f_col.find({'owner':owner, 'deleted':True, 'fully_deleted':False}))
+
     def add_comment(self, file_id, comment: str):
         """Takes unique file's _id. Adds a comment to this file"""
         self.write_log(call_function='add_comment', file_id=file_id, comment=comment) 
