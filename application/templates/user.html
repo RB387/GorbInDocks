@@ -9,7 +9,7 @@
 		<form action="{{ url_for('.user') }}" id = "change_email" method="post">
 			<input type="hidden" name="action" value="change_mail">
 			<label>Change email: </label>
-			<input type="email" name="change_email_val" placeholder="{{ current_mail }}">
+			<input type="email" name="change_email_val" required placeholder="{{ current_mail }}">
 	        <input type="submit" name="change_em" value="Change!">
 		</form>
 

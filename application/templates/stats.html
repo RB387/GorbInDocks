@@ -8,13 +8,19 @@
       function drawChart(data) {
         var data = google.visualization.arrayToDataTable([
           ['Tags', 'Count'],
-          {% for line in tags_data %}
-            ['{{ line[0] }}', {{ line[1] }}],
-          {% endfor %}
+          {% if personal_data %}
+            {% for tag in personal_data['tags'] %}
+              ['{{ tag }}', {{ personal_data['tags'][tag] }}],
+            {% endfor %}
+          {% else %}
+            {% for line in tags_data %}
+              ['{{ line[0] }}', {{ line[1] }}],
+            {% endfor %}
+          {% endif %}
         ]);
         console.log(data)
         var options = {
-          title: 'Tags statistics'
+          title: 'Tags statistics' {% if user_id %} + ' for {{ user_id }}' {% endif %}
         };
         var chart = new google.visualization.PieChart(document.getElementById('tags_stat'));
         chart.draw(data, options);
@@ -30,13 +36,27 @@
                     {{ (overall['overall_size'] / overall['overall_files_count'])|round(2) }}
                 {% else %}
                     0
-                {% endif %}</a> <br>
-
-    <form action="{{ url_for('stats.statistics') }}" method="post" name="search_form">
+                {% endif %}</a> <br><br>
+    <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "cancel_search" method="post">
+      <a>Show stats in period: </a>
+      <input type="hidden" name="action" value="period">
+      <input type="date" name="get_date_from">
+      <input type="date" name="get_date_to">
+      <input type="submit" name="search_period" value="Show">
+    </form>
+    {% if not user_id %}
+    {% if search %}
+        <span>Search for {{ search }}</span>
+        <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "cancel_search" method="post">
+          <input type="submit" name="cancel_search" value="Cancel">
+        </form>
+      {% endif %}
+    <form action="{{ url_for('stats.dashboard', user_id = user_id) }}" method="post" name="search_form">
         <input type="hidden" name="action" value="search_user">
         <input type="text" name="user_login" placeholder="Username">
         <button name="select_element" type="submit" value="Select">Search!</button>
     </form>
+    
     <table style="background:#e7e7e7" border="1" width="100%" cellpadding="5">
         <tr>
             <th>Username</th>
@@ -46,9 +66,16 @@
             <th>Average file size</th>
             <th>Tags stats</th>
         </tr>
+
         {% for user in users_data %}
         <tr>
-            <th>{{ user }}</th>
+            <form action="{{ url_for('stats.dashboard', user_id = user_id) }}" id = "{{ loop.index0 }}_form" method = "post">
+                <input type="hidden" name="action" value="view_user">
+                <input type="hidden" id="{{ user }}" name="get" value="{{ user }}">
+                <th>
+                <a href="#" onclick="document.getElementById('{{ loop.index0 }}_form').submit();">{{ user }}</a>
+                </th>
+            </form>
             <th>{{ users_data[user]['files_count'] }}</th>
             <th>{{ users_data[user]['folders_count'] }}</th>
             <th>{{ users_data[user]['total_size'] }}</th>
@@ -61,5 +88,42 @@
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    <br>
+      {% if error_message %}
+        <span>{{ error_message }}</span>
+      {% endif %}
+      <form action="{{ url_for('.dashboard', user_id = None) }}" id = "close_user" method="post">
+          <input type="submit" name="close_user" value="Close user's page">
+        </form>
+      {% if status == 'admin' %}
+      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "remove_admin_status_form" method="post">
+        <input type="hidden" name="action" value="remove_admin_status">
+        <input type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
+        <input type="submit" name="admin_priv" value="Remover user's admin status">
+      </form>
+      {% else %}
+      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "admin_status_form" method="post">
+        <input type="hidden" name="action" value="admin_status">
+        <input type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
+        <input type="submit" name="admin_priv" value="Give user admin status">
+      </form>
+      {% endif %}
+      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "change_email" method="post">
+        <input type="hidden" name="action" value="change_mail">
+        <label>Change email: </label>
+        <input type="email" name="change_email_val" required placeholder="New email">
+        <input type="submit" name="change_em" value="Change!">
+      </form>
+      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "change_password_val" method="post">
+        <input type="hidden" name="action" value="change_pass">
+        <label>Change password: </label>
+        <input type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
+        <input type="password" name="change_password_val" id = "pass" placeholder="New user's password" required minlength="6" maxlength="32">
+        <input type="password" name="change_password_conf_val" id = "pass_conf" placeholder="Confirm new user's password" required minlength="6" maxlength="32" oninput="validatePassword()">
+            <input type="submit" name="change_pass" value="Change!">
+      </form>
+      
+    {% endif %}
   </body>
 </html>

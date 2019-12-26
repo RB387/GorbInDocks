@@ -226,6 +226,12 @@ class mongo_tools():
         u_col = self.get_users_col()
         u_col.update_one({'login':login}, {'$set':{'email':email}})
 
+    def update_user_status(self, login: str, status: str):
+        """Takes unique login, new status. Updates user's data"""
+        self.write_log(call_function="update_user_status", login=login, status=status)
+        u_col = self.get_users_col()
+        u_col.update_one({'login':login}, {'$set':{'status':status}})
+
     def update_user_pass(self, login: str, pas: bytes):
         """Takes unique login, new password. Updates user's data"""
         self.write_log(call_function="update_user_pass", login=login)

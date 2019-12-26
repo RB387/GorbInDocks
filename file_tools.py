@@ -94,7 +94,7 @@ class file_tools():
 			
 			file.close()
 			#add information about file in to database
-			self.gt.add_file(owner=login, name=filename, size = round(len(file_bytes)/1024/1024, 2), location = file_path, directory = str(directory))
+			self.gt.add_file(owner=login, name=filename, size = len(file_bytes)/1024/1024, location = file_path, directory = str(directory))
 			return (1, None)
 
 	def download_file(self, file_data, login, directory, shared = False):
