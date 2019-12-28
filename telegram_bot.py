@@ -1,28 +1,37 @@
-import telebot
 from application import app
-from config import BOT_TOKEN
-from run import bot
+from run import bot, open_config, dump, user_data
+from config import TELEGRAM_PATH
 from get_stats import get_stats
+import json
+import os
+
+def get_reply(reply, items):
+    for line in items:
+        reply += ' : '.join(list(map(str, line))) + '\n'
+    return reply
 
 @bot.message_handler(commands=['stats'])
-def start_message(message):
+def send_stats(message):
     with app.app_context():
         data = get_stats()
-    print(data)
     text = message.text.split()
     reply = ''
     if len(text)>1:
         user_stats = data['users'].get(text[-1])
         if user_stats:
-            for line in user_stats.items():
-                reply += ' : '.join(list(map(str, line))) + '\n'
+            reply = get_reply(reply, user_stats.items())
         else:
             reply = 'User was not found'
     else:
-        for line in data['overall'].items():
-            reply += ' : '.join(list(map(str, line))) + '\n'
+        reply = get_reply(reply, data['overall'].items())
     bot.send_message(message.chat.id, reply)
 
+@bot.message_handler(commands=['start'])
+def new_user(message):
+    user_data.update({message.from_user.username : message.chat.id})
+    dump(TELEGRAM_PATH, user_data)
+    bot.send_message(message.chat.id, 'Registration succesfully!')
+
 def run():
-    print('run')
+    print(' * Running Telegram bot')
     bot.polling()

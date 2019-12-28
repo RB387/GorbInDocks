@@ -30,7 +30,6 @@ from werkzeug._internal import _DictAccessorProperty, \
 _format_re = re.compile(r'\$(?:(%s)|\{(%s)\})' % (('[a-zA-Z_][a-zA-Z0-9_]*',) * 2))
 _entity_re = re.compile(r'&([^;]+);')
 _filename_ascii_strip_re = re.compile(r'[^A-Za-zа-яА-Я0-9_.-]')
-print(str(_filename_ascii_strip_re))
 _windows_device_files = ('CON', 'AUX', 'COM1', 'COM2', 'COM3', 'COM4', 'LPT1',
                          'LPT2', 'LPT3', 'PRN', 'NUL')
 

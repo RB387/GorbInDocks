@@ -9,7 +9,7 @@
 			<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 			<a href="{{ url_for('home.home') }}">Home page</a>
             <a href="{{ url_for('user.user') }}">User page</a>
-            <a href="{{ url_for('stats.dashboard') }}">Admin page</a>
+            <a href="{{ url_for('admin.admin') }}">Admin page</a>
             <a href="{{ url_for('logout.logout') }}">Logout</a>
           </div>
           <span class="btn btn-secondary  button1" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
@@ -47,6 +47,12 @@
 	    	<label>Max Files Count: </label>
 			<input type="text" name="change_count_val" placeholder="{{ current_count_limit }}">
 	        <input type="submit" name="change_count" value="Save">
+		</form>
+		<form action="{{ url_for('.admin') }}" id = "telegram_form" method="post">
+			<input type="hidden" name="action" value="add_telegram">
+	    	<label>Telegram login (to turn on bot notifications): @</label>
+			<input type="text" name="telegram_login" placeholder="Left field empty to turn off bot notifications">
+	        <input type="submit" name="change_telegram" value="Save">
 	    </form>
 	</body>
 </html>

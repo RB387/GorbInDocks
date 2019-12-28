@@ -164,7 +164,7 @@ class mongo_tools():
         Adds a user to the users collection, returns its unique _id object"""
         self.write_log(call_function='add_user', login=login, email=email, status=status)
         u_col = self.get_users_col()
-        user_id = u_col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'shared':{}, telegram:'', 'create_date':now_stamp(), 'deleted':False}).inserted_id
+        user_id = u_col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'shared':{}, 'telegram':'', 'create_date':now_stamp(), 'deleted':False}).inserted_id
         return user_id
 
     def get_user(self, login: str, pas: bytes):
@@ -204,12 +204,6 @@ class mongo_tools():
         if user_data:
             return user_data['_id']
         return None
-
-    def set_telegram(self, user_id, telegtam: str):
-        """Takes unique user's _id and new value of telegram fied. Sets new value for this user"""
-        self.write_log(call_function="set_telegram", user_id=user_id, telegtam=telegtam)
-        u_col = self.get_users_col()
-        u_col.update_one({'_id':obj_id(user_id)}, {'$set':{'telegram':telegtam}})
 
     def check_login(self, login: str):
         """Takes user's login. Returns True if such login is already used and False if it is not"""
@@ -257,11 +251,16 @@ class mongo_tools():
             self.write_log(call_function="remake_files", exception='Could not delete user. Did you forget to enter user\'s _id or user\'s login?')
             raise Exception('Could not delete user. Did you forget to enter user\'s _id or user\'s login?')
 
-    def set_telegram(self, user_id, telegtam: str):
+    def set_telegram(self, login: str, telegram: str):
         """Takes unique user's _id and new value of telegram fied. Sets new value for this user"""
-        self.write_log(call_function="set_telegram", user_id=user_id, telegtam=telegtam)
+        self.write_log(call_function="set_telegram", login=login, telegram=telegram)
         u_col = self.get_users_col()
-        u_col.update_one({'_id':obj_id(user_id)}, {'$set':{'telegram':telegtam}})
+        u_col.update_one({'login':login}, {'$set':{'telegram':telegram}})
+    
+    def get_telegrams(self):
+        u_col = self.get_users_col()
+        users = list(u_col.find({'status':'admin', 'deleted':False}))
+        return [user['telegram'] for user in users if user['telegram'] != '']
 
 
     # Functions for working with files collection

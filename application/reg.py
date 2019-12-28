@@ -3,6 +3,7 @@ from application import decorators
 from flask import Blueprint, render_template
 from flask import request, session, redirect, url_for
 from run import gt
+from push_notifications import notification
 import gorbin_tools2
 page = Blueprint('reg', __name__,
                         template_folder='templates')
@@ -26,6 +27,7 @@ def reg():
 				gt.add_user(login = result['login'],
 							pas = gorbin_tools2.hash(result['password']),
 							email = result['email'])
+				notification(user = result['login'], type_message = 'user', users = gt.get_telegrams())
 				#log in user in session
 				session['login'] = result['login']
 				session['current_password'] = gorbin_tools2.hash(result['password'])

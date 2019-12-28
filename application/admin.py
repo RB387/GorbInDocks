@@ -2,6 +2,7 @@ from application import app
 from flask import Blueprint, render_template
 from flask import request, session, redirect, url_for
 from run import gt, settings, dump
+from config import CONFIG_PATH
 from application import decorators
 
 page = Blueprint('admin', __name__,
@@ -30,13 +31,13 @@ def admin():
 
 			else:
 				settings['tags'].append(tag)
-				dump()
+				dump(CONFIG_PATH, settings)
 
 		elif action == 'del_tag':
 			tag = request.form.get('tags')
 			if tag in settings['tags']:
 				settings['tags'].pop(settings['tags'].index(tag))
-				dump()
+				dump(CONFIG_PATH, settings)
 			else:
 				error_message = "Tag {} doesn't exitst".format(tag)
 
@@ -44,7 +45,7 @@ def admin():
 			size = request.form.get('change_size_val')
 			try:
 				settings['max_file_size'] = int(size) * 1024 * 1024
-				dump()
+				dump(CONFIG_PATH, settings)
 			except:
 				error_message = 'Enter valid number'
 
@@ -52,12 +53,19 @@ def admin():
 			count = request.form.get('change_count_val')
 			try:
 				settings['max_files_count'] = int(count)
-				dump()
+				dump(CONFIG_PATH, settings)
 			except:
 				error_message = 'Enter valid number'
 		
 		elif action == 'dashboard':
 			return redirect(url_for('stats.dashboard'))
+		
+		elif action == 'add_telegram':
+			telegram_login = request.form.get('telegram_login')
+			if telegram_login:
+				gt.set_telegram(login=session['login'], telegram = telegram_login)
+			error_message = 'Telegram linked succesfully!'
+				
 
 	return render_template("admin.html", 
 		tags = settings['tags'], 

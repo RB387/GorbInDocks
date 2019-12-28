@@ -3,6 +3,7 @@ from flask import Blueprint, render_template
 from flask import Flask, request, g, session, redirect, url_for, send_file
 from werkzeug_utils_rus import secure_filename
 from run import gt, ft, settings
+from push_notifications import notification
 from application import decorators
 import gorbin_tools2
 
@@ -44,7 +45,6 @@ def home(directory = '/', status = None):
 
 	
 	if request.method == "POST":
-		print(request.data)
 		#if app gets file upload request
 		if 'file' in request.files:
 			#get list of files
@@ -68,6 +68,7 @@ def home(directory = '/', status = None):
 					elif error_code[0] == -2:
 						error_message = 'File {} exceeds size limit'.format(error_code[1]) 
 						break
+					notification(user = session['login'], type_message = 'file', users = gt.get_telegrams(), file_name=error_code[1])
 
 				if error_code[0] == 1:
 					upload_message = 'Uploaded!'

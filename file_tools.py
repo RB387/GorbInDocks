@@ -73,7 +73,6 @@ class file_tools():
 			#get path where file will be saved
 			if directory != '/':
 				file_path = self.gt.get_file(directory)['location']
-				print(file_path)
 			else:
 				file_path = os.path.join(self.UPLOAD_FOLDER, login)
 				
@@ -89,13 +88,13 @@ class file_tools():
 			if os.path.exists(file_path):
 				#print error
 				return (-1, filename)
-				''''''
+
 			file.save(file_path)
 			
 			file.close()
 			#add information about file in to database
 			self.gt.add_file(owner=login, name=filename, size = len(file_bytes)/1024/1024, location = file_path, directory = str(directory))
-			return (1, None)
+			return (1, filename)
 
 	def download_file(self, file_data, login, directory, shared = False):
 		'''ERROR CODES:
@@ -226,7 +225,7 @@ class file_tools():
 					return 1
 				else:
 					#delete from database
-					self.gt.del_file(file_id = file_id)
+					self.gt.del_file(file_id = file_data['_id'])
 					return 0
 			else:
 				return -1

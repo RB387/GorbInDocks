@@ -1,6 +1,6 @@
 from flask import g
 from sys import platform
-from config import BOT_TOKEN
+from config import BOT_TOKEN, TELEGRAM_PATH, CONFIG_PATH
 from threading import Thread
 import gorbin_tools2
 import file_tools
@@ -13,12 +13,25 @@ import telegram_bot
 #For first time database configuration
 setup = False
 
-with open(os.path.join(os.getcwd(), 'settings.json')) as json_data_file:
-    settings = json.load(json_data_file)
+def dump(path, data):
+    with open(path, 'w') as outfile:
+        json.dump(data, outfile)
 
-def dump():
-    with open(os.path.join(os.getcwd(), 'settings.json'), 'w') as outfile:
-        json.dump(settings, outfile)
+def open_config(path, config=False):
+    if os.path.exists(path):
+        with open(path) as json_data_file:
+            return json.load(json_data_file)
+    else:
+        if config:
+            dump_data = {"max_file_size": 10485760, "max_files_count": 5, "tags": ['Hello']}
+        else:
+            dump_data = {}
+        dump(path, dump_data)
+        return dump_data
+
+       
+settings = open_config(CONFIG_PATH, config=True)
+user_data = open_config(TELEGRAM_PATH)
 
 gt = gorbin_tools2.mongo_tools(g)
 ft = file_tools.file_tools(settings, gt)
@@ -33,7 +46,7 @@ if __name__ == '__main__':
             gt.remake_files('yes')
             gt.remake_users('yes')
             gt.remake_links('yes')
-            gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin'), email = 'xd@yolo.com', status='admin')
+            gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin00'), email = 'xd@yolo.com', status='admin')
 
     app.debug = True
     if BOT_TOKEN:

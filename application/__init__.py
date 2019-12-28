@@ -1,5 +1,4 @@
 from flask import Flask, url_for
-from run import bot
 app = Flask(__name__)
 import application.admin as admin
 import application.index as index
