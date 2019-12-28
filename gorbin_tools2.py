@@ -32,7 +32,10 @@ def stamp2str(stamp):
     return str(dt.datetime.fromtimestamp(stamp))
 
 def time2stamp(date, plus = 0):
-    return time.mktime((dt.datetime.strptime(date, "%Y-%m-%d") + plus * dt.timedelta(days = 1)).timetuple())
+    try:
+        return time.mktime((dt.datetime.strptime(date, "%Y-%m-%d") + dt.timedelta(days = plus)).timetuple())
+    except:
+        return float("inf")
 
 def str_now():
     """returns the current datetime in string like '2019-10-14 18:24:14'"""
@@ -266,7 +269,7 @@ class mongo_tools():
         self.write_log(call_function='add_file', owner=owner, name=name, size=size, location=location, directory=directory, comment=comment, tags=tags)
         f_col = self.get_files_col()
         file_id = f_col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':str(directory), 'location':location, 'comment':comment, 'tags':tags,
-            star:False, 'type':'file', 'data':now_stamp(), 'deleted':False, 'fully_deleted':False}).inserted_id
+            'star':False, 'type':'file', 'data':now_stamp(), 'deleted':False, 'fully_deleted':False}).inserted_id
         return file_id
 
     def add_folder(self, owner, name: str, size: int, location: str, directory='/', comment=None, tags=[]):
