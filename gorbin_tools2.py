@@ -161,7 +161,7 @@ class mongo_tools():
         Adds a user to the users collection, returns its unique _id object"""
         self.write_log(call_function='add_user', login=login, email=email, status=status)
         u_col = self.get_users_col()
-        user_id = u_col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'shared':{}, 'create_date':now_stamp(), 'deleted':False}).inserted_id
+        user_id = u_col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'shared':{}, telegram:'', 'create_date':now_stamp(), 'deleted':False}).inserted_id
         return user_id
 
     def get_user(self, login: str, pas: bytes):
@@ -247,6 +247,12 @@ class mongo_tools():
         else: 
             self.write_log(call_function="remake_files", exception='Could not delete user. Did you forget to enter user\'s _id or user\'s login?')
             raise Exception('Could not delete user. Did you forget to enter user\'s _id or user\'s login?')
+
+    def set_telegram(self, user_id, telegtam: str):
+        """Takes unique user's _id and new value of telegram fied. Sets new value for this user"""
+        self.write_log(call_function="set_telegram", user_id=user_id, telegtam=telegtam)
+        u_col = self.get_users_col()
+        u_col.update_one({'_id':obj_id(user_id)}, {'$set':{'telegram':telegtam}})
 
 
     # Functions for working with files collection
