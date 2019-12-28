@@ -36,12 +36,10 @@ if __name__ == '__main__':
             gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin'), email = 'xd@yolo.com', status='admin')
 
     app.debug = True
-
-    tele_bot = Thread(target=telegram_bot.run, daemon=True)
-    try:
+    if BOT_TOKEN:
+        tele_bot = Thread(target=telegram_bot.run, daemon=True)
         tele_bot.start()
-    except:
-        print('Already running')
     app.run()
-    tele_bot.join()
+    if BOT_TOKEN:
+        tele_bot.join()
     
