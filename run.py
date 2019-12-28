@@ -1,9 +1,13 @@
 from flask import g
 from sys import platform
+from config import BOT_TOKEN
+from threading import Thread
 import gorbin_tools2
 import file_tools
 import os
 import json
+import telebot
+import telegram_bot
 
 
 #For first time database configuration
@@ -18,9 +22,9 @@ def dump():
 
 gt = gorbin_tools2.mongo_tools(g)
 ft = file_tools.file_tools(settings, gt)
+bot = telebot.TeleBot(BOT_TOKEN)
 
 if __name__ == '__main__':
-    #For first time database configuration
     from application import app
     app.config.from_object('config')
 
@@ -32,7 +36,10 @@ if __name__ == '__main__':
             gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin'), email = 'xd@yolo.com', status='admin')
 
     app.debug = True
-    if platform == 'win32':
-        app.run()
-    else:
-        app.run(host = '0.0.0.0')
+    if BOT_TOKEN:
+        tele_bot = Thread(target=telegram_bot.run, daemon=True)
+        tele_bot.start()
+    app.run()
+    if BOT_TOKEN:
+        tele_bot.join()
+    
