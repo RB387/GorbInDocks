@@ -205,6 +205,12 @@ class mongo_tools():
             return user_data['_id']
         return None
 
+    def set_telegram(self, user_id, telegtam: str):
+        """Takes unique user's _id and new value of telegram fied. Sets new value for this user"""
+        self.write_log(call_function="set_telegram", user_id=user_id, telegtam=telegtam)
+        u_col = self.get_users_col()
+        u_col.update_one({'_id':obj_id(user_id)}, {'$set':{'telegram':telegtam}})
+
     def check_login(self, login: str):
         """Takes user's login. Returns True if such login is already used and False if it is not"""
         self.write_log(call_function="check_login", login=login)
