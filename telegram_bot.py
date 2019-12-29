@@ -30,7 +30,7 @@ def send_stats(message):
 def new_user(message):
     user_data.update({message.from_user.username : message.chat.id})
     dump(TELEGRAM_PATH, user_data)
-    bot.send_message(message.chat.id, 'Registration succesfully!')
+    bot.send_message(message.chat.id, 'Registrated succesfully!')
 
 def run():
     print(' * Running Telegram bot')
