@@ -3,8 +3,8 @@
     <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
-        
-        <div id="mySidenav" class="sidenav">
+
+        <div id="mySidenav" class="sidenav" >
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
             <a href="{{ url_for('home.home') }}">Home page</a>
             <a href="{{ url_for('user.user') }}">User page</a>
@@ -68,7 +68,7 @@
         <input type="text" name="user_login" placeholder="Username">
         <button name="select_element" type="submit" value="Select">Search!</button>
     </form>
-    
+
     <table style="background:#e7e7e7" border="1" width="100%" cellpadding="5">
         <tr>
             <th>Username</th>
@@ -138,7 +138,7 @@
         <input type="password" name="change_password_conf_val" id = "pass_conf" placeholder="Confirm new user's password" required minlength="6" maxlength="32" oninput="validatePassword()">
             <input type="submit" name="change_pass" value="Change!">
       </form>
-      
+
     {% endif %}
   </body>
 </html>

@@ -38,8 +38,9 @@
 .close:hover {background: #e6e6ff;}
 
 body {
+    margin-right: 0;
     overflow:scroll;
-    background-color: #ffffff;
+    background-color: #f0f0f0;
     max-height: 900px
        }
 
@@ -105,10 +106,14 @@ body {
        position: absolute; top: 5%; left: 5%;
       }
 
-   .button1 {width:90px;
-       position: absolute; top:1px; right: 0%
-   }
-   .button2 {padding: 15px 0px;}
+   .button1 {
+       position: fixed;
+       z-index: 5;
+       top: 0;
+       right: 0;
+       transition: 0.5s;
+        }
+   .button2 {padding: 16px}
    .button3 { position: absolute; top: 350px; left: 0%; }
    .button4 { width: 200px;}
    .button5 { top:1px}
@@ -121,10 +126,10 @@ body {
     padding: 5px; /* Поля вокруг текста */
 border: solid 1px black; /* Параметры рамки */}
 
-   .button9 { position: absolute; top: 40px; left: 0% ;}
-   .button10 { position: absolute; top: 40px; left: 377px ;}
-   .button11 { position: absolute; top: 40px; left: 577px ;}
-   .button12 { position: absolute; top: 40px; left: 777px ;}
+   .button9 { position: absolute; top: 0px; left: 0% ; z-index:3;}
+   .button10 { position: absolute; top: 0px; left: 432px ;}
+   .button11 { position: absolute; top: 0px; left: 632px ;}
+   .button12 { position: absolute; top: 0px; left: 832px ;}
 
 
 

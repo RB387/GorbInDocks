@@ -5,7 +5,7 @@
      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    
+
 
      <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -29,7 +29,7 @@
             <a href="{{ url_for('admin.admin') }}">Admin page</a>
             <a href="{{ url_for('logout.logout') }}">Logout</a>
           </div>
-          <span class="btn btn-secondary  button1" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+          <span class="btn btn-secondary  button1" style="font-size:30px; cursor:pointer" onclick="openNav()">&#9776;</span>
           <!--
         <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="logout_form">
             <button class="btn btn-secondary  button1" type="submit" name="action"value="logout" >Logout</button>
@@ -95,7 +95,7 @@
 
     <div id = "search_file_open" style = "display: block;">
         <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="search_file_open_form">
-            <button class="btn btn-secondary button2 button4 button12" type="button" onclick="show_hide(['search_file', 'search_file_open'])">Search files by: </button>
+            <button class="btn btn-secondary button2 button4 button12" type="button" onclick="show_hide(['search_file', 'search_file_open'])">Search: </button>
         </form>
     </div>
 
@@ -104,7 +104,7 @@
             <div  class="btn-group-vertical  button4  " >
                 <div class="btn-group  " role="group" >
                     <button class="btn btn-secondary button2 " type="button" onclick="show_hide(['search_file_open', 'search_file'])">Cancel</button>
-                    <button class="btn btn-secondary button2  " type="submit" name="action" value = "search_files">Search!</button>
+                    <button class="btn btn-secondary button2  " type="submit" name="action" value = "search_files">Search</button>
 
                 </div>
 
