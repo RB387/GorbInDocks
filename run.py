@@ -63,7 +63,6 @@ if __name__ == '__main__':
             #add default admin user
             gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin00'), email = 'xd@yolo.com', status='admin')
 
-    print(app.debug)
     if BOT_TOKEN:
         tele_bot = Thread(target=telegram_bot.run, daemon=True)
         tele_bot.start()
