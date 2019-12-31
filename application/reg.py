@@ -3,6 +3,7 @@ from application import decorators
 from flask import Blueprint, render_template
 from flask import request, session, redirect, url_for
 from run import gt
+from config import BOT_TOKEN
 from push_notifications import notification
 import gorbin_tools2
 page = Blueprint('reg', __name__,
@@ -24,10 +25,15 @@ def reg():
 			#check if such login and email already taken or not
 			if (not gt.check_login(result['login'])) and (not gt.check_email(result['email'])):
 				#if not, then add information about new user in database
+				if result['login'] == 'user':
+					return render_template("reg.html",
+									error_flag=True,
+									error_message='This login is already taken')
 				gt.add_user(login = result['login'],
 							pas = gorbin_tools2.hash(result['password']),
 							email = result['email'])
-				notification(user = result['login'], type_message = 'user', users = gt.get_telegrams())
+				if BOT_TOKEN:
+					notification(user = result['login'], type_message = 'user', users = gt.get_telegrams())
 				#log in user in session
 				session['login'] = result['login']
 				session['current_password'] = gorbin_tools2.hash(result['password'])
