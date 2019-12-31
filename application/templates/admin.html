@@ -53,6 +53,40 @@
 	    	<label>Telegram login (to turn on bot notifications): @</label>
 			<input type="text" name="telegram_login" placeholder="Left field empty to turn off bot notifications">
 	        <input type="submit" name="change_telegram" value="Save">
-	    </form>
+		</form>
+		<a>Files requested to delete: </a>
+		<table style="background:#e7e7e7" border="1" width="100%" cellpadding="5">
+			<tr><th>File name</th>
+				<th>File size</th>
+				<th>Owner</th>
+				<th></th>
+				<th></th></tr>
+			{% for file in files %}
+			<tr>
+				<th>{{ file['name'] }}<br>
+					{% if file['comment'] is not none %}
+						<a style="color:grey; font-size: 75%;">{{ file['comment'] }}</a>
+					{% else %}
+						<a style="color:grey; font-size: 75%;">No comment...</a>
+					{% endif %}</th>
+				<th>{% if file['type'] == 'file' %}
+						{{ file['size'] }}
+					{% endif %}</th>
+				<th>{{ file['owner'] }}</th>
+				<th>
+					<form action="{{ url_for('.admin') }}" id = "delete_form" method = "post">
+						<input type="hidden" name="action" value="restore">
+						<button class="btn btn-secondary" name="get" value="{{ file['_id'] }}" type="submit">Restore</button>
+					</form>
+				</th>
+				<th>
+					<form action="{{ url_for('.admin') }}" id = "delete_form" method = "post">
+						<input type="hidden" name="action" value="delete">
+						<button class="btn btn-secondary" name="get" value="{{ file['_id'] }}" type="submit">Delete</button>
+					</form>
+				</th>
+			</tr>
+			{% endfor %}
+		</table>
 	</body>
 </html>

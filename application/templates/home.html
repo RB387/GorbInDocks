@@ -99,6 +99,12 @@
         </form>
     </div>
 
+    <div id = "show_favs" style = "display: block;">
+        <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="show_favs_form">
+            <button name = "action" value="show_favs" class="btn btn-secondary button2 button4" type="submit">Show favourite files</button>
+        </form>
+    </div>
+
     <div id = "search_file" style = "display: none;">
         <form  class="button12" action="{{ url_for('.home', directory = path, status = status) }}" id = "search_file_form" method="post" >
             <div  class="btn-group-vertical  button4  " >
@@ -125,7 +131,7 @@
                 </div>
             </div>
         </form>
-    </div>
+    </div>    
 
 
                 <p>
@@ -159,12 +165,11 @@
                     <input type="submit" name="cancel_search" value="Cancel">
                 </form>
         {% endif %}
-
-                <a>Deleted files</a>
                         <table style="background:#e7e7e7" class="button8 button13" border="1" width="100%" height = "100%" cellpadding="5">
                             {% if not deleted and path is none %} 
                             <tr>
-                                <th>
+                                <th></th>
+                            <th>
                                 <form action="{{ url_for('.home', directory = path, status = status) }}" id = "deleted_files_form" method = "post">
                                     <input type="hidden" name="action" value="deleted_files">
                                     <a href="#" onclick="document.getElementById('deleted_files_form').submit();">Deleted Files</a>
@@ -180,6 +185,13 @@
                             {% endif %}
                             {% for file in files %}
                                     <tr>
+                                        <th>
+                                            <form action="{{ url_for('.home', directory = path, status = status) }}" id = "{{ 'star' ~ loop.index0 }}" method = "post">
+                                                <input type="hidden" name="action" value="favourite">
+                                                <input  type="hidden" id="{{ 'star' ~ loop.index0 }}" name="get" value="{{ file['_id'] }}">
+                                                <a href="#" onclick="document.getElementById('star{{ loop.index0 }}').submit();">{% if file['star'] %}&#9733;{% else %}&#9734;{% endif %}</a>
+                                            </form>
+                                        </th>
                                         {% if file['type'] == 'folder' %}
                                             <th width = "40%" height="50%">
                                                 <form action="{{ url_for('.home', directory = path, status = status) }}" id = "{{ 'folder_open' ~ loop.index0 }}" method = "post">
@@ -290,6 +302,13 @@
                                                         <button class="btn btn-secondary" name="get" value="{{ file['_id'] }}" type="submit">Delete</button>
                                                 </form>
                                                 
+                                            </th>
+                                            {% else %}
+                                            <th width = "10%" height="50%">
+                                                <form action="{{ url_for('.home', directory = path, status = status) }}" id = "restore_form" method = "post">
+                                                    <input type="hidden" name="action" value="restore">
+                                                    <button class="btn btn-secondary" name="get" value="{{ file['_id'] }}" type="submit">Restore</button>
+                                                </form>
                                             </th>
                                             {% endif %}
                                             <th>{{ stamp2str(file['data']) }}</th>

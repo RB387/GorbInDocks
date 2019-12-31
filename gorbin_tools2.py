@@ -289,7 +289,7 @@ class mongo_tools():
         self.write_log(call_function='add_folder', owner=owner, name=name, size=size, location=location, directory=directory, comment=comment, tags=tags)
         f_col = self.get_files_col()
         file_id = f_col.insert_one({'owner':owner, 'name':name, 'size':size, 'dir':str(directory), 'location':location, 'comment':comment, 'tags':tags,
-            'type':'folder', 'data':now_stamp(), 'deleted':False}).inserted_id
+            'star':False, 'type':'folder', 'data':now_stamp(), 'deleted':False, 'fully_deleted':False}).inserted_id
         return file_id
 
     def update_file(self, file_id, name: str, size: int, comment, tags: list):
@@ -298,11 +298,11 @@ class mongo_tools():
         f_col = self.get_files_col()
         f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'name':name, 'size':size, 'comment':comment, 'tags':tags}})
 
-    def get_file(self, file_id):
+    def get_file(self, file_id, deleted=False):
         """Takes unique file's _id. Returns file information of this file"""
         self.write_log(call_function='get_file', file_id=file_id)
         f_col = self.get_files_col()
-        return f_col.find_one({'_id': obj_id(file_id), 'deleted':False})
+        return f_col.find_one({'_id': obj_id(file_id), 'deleted':deleted})
 
     def search_files(self, owner, **kwargs):
         """coded by RB387"""
@@ -355,11 +355,14 @@ class mongo_tools():
         f_col = self.get_files_col()
         return bool(f_col.find_one({'owner':owner, 'name':name, 'deleted':False}))
 
-    def set_star(self, file_id, value: bool):
-        """Takes unique file's _id, new value of star field. Sets new value to the file"""
-        self.write_log(call_function='set_star', file_id=file_id, value=value)
+    def set_star(self, file_id):
+        """Takes unique file's _id. Sets new value to the file"""
+        self.write_log(call_function='set_star', file_id=file_id)
         f_col = self.get_files_col()
-        f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'star':value}})
+        star = f_col.find_one({'_id': obj_id(file_id), 'deleted':False})['star']
+        if star: star = False
+        else: star = True
+        f_col.update_one({'_id':obj_id(file_id)}, {'$set':{'star':star}})
 
     def del_file(self, file_id):
         """Takes unique file's _id. Switches deleted flag to True for this file"""
@@ -391,6 +394,18 @@ class mongo_tools():
         self.write_log(call_function='get_user_trash', owner=owner)
         f_col = self.get_files_col()
         return list(f_col.find({'owner':owner, 'deleted':True, 'fully_deleted':False}))
+    
+    def get_trash(self):
+        """Takes file's owner. Returns list of deleted files. if it has no files, it returns []"""
+        self.write_log(call_function='get_user_trash')
+        f_col = self.get_files_col()
+        return list(f_col.find({'deleted':True, 'fully_deleted':False}))
+
+    def get_user_favourite(self, owner):
+        """Takes file's owner. Returns list of favourite files. if it has no files, it returns []"""
+        self.write_log(call_function='get_user_trash', owner=owner)
+        f_col = self.get_files_col()
+        return list(f_col.find({'owner':owner, 'deleted':False, 'star':True}))
 
     def add_comment(self, file_id, comment: str):
         """Takes unique file's _id. Adds a comment to this file"""

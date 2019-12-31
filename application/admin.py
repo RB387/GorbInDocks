@@ -4,6 +4,8 @@ from flask import request, session, redirect, url_for
 from run import gt, settings, dump
 from config import CONFIG_PATH
 from application import decorators
+import os
+import shutil
 
 page = Blueprint('admin', __name__,
                         template_folder='templates')
@@ -27,7 +29,7 @@ def admin():
 	if request.method == "POST":
 		# get info what to do
 		action = request.form.get('action')
-
+		print(request.form)
 		if action == 'add_tag':
 			add_tag = True
 
@@ -83,10 +85,34 @@ def admin():
 				# save it
 				gt.set_telegram(login=session['login'], telegram = telegram_login)
 			error_message = 'Telegram linked succesfully!'
+		
+		elif action == 'delete':
+			# get file id
+			file_id = request.form.get('get')
+			# get data about file
+			file_data = gt.get_file(file_id, deleted=True)
+			if file_data:
+				if os.path.exists(file_data['location']):
+					#delete file from system
+					if file_data['type'] == 'folder':
+						shutil.rmtree(file_data['location'])
+					else:
+						os.remove(file_data['location'])
+				# delete file from database
+				gt.del_fully(file_id)
+				error_message = 'File deleted succesfully'
+
+		elif action == 'restore':
+			# get file id
+			file_id = request.form.get('get')
+			# restore file
+			gt.revert_file(file_id)
+			error_message = 'File restored succesfully'
 	# render template
 	return render_template("admin.html", 
 		tags = settings['tags'], 
 		current_limit = settings['max_file_size']/1024/1024, 
 		current_count_limit = settings['max_files_count'],
 		add_tag = add_tag,
-		error_message = error_message)
+		error_message = error_message,
+		files = gt.get_trash())

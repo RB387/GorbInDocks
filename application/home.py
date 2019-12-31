@@ -249,7 +249,24 @@ def home(directory = '/', status = None):
 				deleted = True
 				user_file_list = ft.sort_files(gt.get_user_trash(owner=current_user))
 
+			elif action == 'favourite':
+				file_id = request.form.get('get')
+				gt.set_star(file_id)
+				#update
+				user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 			
+			elif action == 'show_favs':
+				user_file_list = ft.sort_files(gt.get_user_favourite(current_user))
+			
+			elif action == 'restore':
+				# get file id
+				file_id = request.form.get('get')
+				# restore file
+				gt.revert_file(file_id)
+				upload_message = 'File restored succesfully'
+				user_file_list = ft.sort_files(gt.get_user_trash(owner=current_user))
+				deleted = True
+
 			elif action == 'create_folder':
 				#if get action to create folder
 				#gen path for new folder
