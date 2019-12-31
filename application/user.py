@@ -14,7 +14,6 @@ page = Blueprint('user', __name__,
 def user():
 	error_message = None
 	if request.method == "POST":
-		print(request.form)
 		action = request.form.get('action')
 
 		if action == 'change_mail':

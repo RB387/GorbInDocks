@@ -27,7 +27,6 @@ def dashboard(user_id=None):
         data['overall']['overall_size'] = data['users'][user_id]['total_size']
 
     if request.method == "POST":
-        print(request.form)
         action = request.form.get('action')
         if action == 'view_user':
             return redirect(url_for('stats.dashboard', user_id = request.form.get('get')))

@@ -85,7 +85,7 @@ def home(directory = '/', status = None):
 					if BOT_TOKEN:
 						# if telegram bot turned on, send notification about new file to admins
 						notification(user=session['login'], 
-									type_message= 'file', 
+									type_message='file', 
 									users=gt.get_telegrams(), 
 									file_name=error_code[1])
 
@@ -98,7 +98,6 @@ def home(directory = '/', status = None):
 		else:
 			# if no files
 			# get information what to do
-			print(request.form)
 			action = request.form.get('action')
 
 			if action == 'logout':

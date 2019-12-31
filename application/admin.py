@@ -29,7 +29,6 @@ def admin():
 	if request.method == "POST":
 		# get info what to do
 		action = request.form.get('action')
-		print(request.form)
 		if action == 'add_tag':
 			add_tag = True
 
@@ -81,7 +80,7 @@ def admin():
 		elif action == 'add_telegram':
 			# get telegram login
 			telegram_login = request.form.get('telegram_login')
-			if telegram_login:
+			if telegram_login or telegram_login == '':
 				# save it
 				gt.set_telegram(login=session['login'], telegram = telegram_login)
 			error_message = 'Telegram linked succesfully!'
