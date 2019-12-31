@@ -36,6 +36,8 @@ def admin():
 			# if such tag already exists
 			if tag in settings['tags']:
 				error_message = 'Tag {} already exists!'.format(tag)
+			elif ';' in  tag:
+				error_message = '";" is not allowed to use in tag name'
 			else:
 				#append and dump json config file
 				settings['tags'].append(tag)

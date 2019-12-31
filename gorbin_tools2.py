@@ -31,9 +31,9 @@ def stamp2str(stamp):
     """takes timestamp, returns datetime in string like '2019-10-14 18:24:14'"""
     return str(dt.datetime.fromtimestamp(stamp))
 
-def time2stamp(date, plus = 0):
+def time2stamp(date, plus=0, pattern="%Y-%m-%d"):
     try:
-        return time.mktime((dt.datetime.strptime(date, "%Y-%m-%d") + dt.timedelta(days = plus)).timetuple())
+        return time.mktime((dt.datetime.strptime(date, pattern) + dt.timedelta(days = plus)).timetuple())
     except:
         return float("inf")
 

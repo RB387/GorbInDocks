@@ -27,7 +27,7 @@ def open_config(path, config=False):
 
         arguments:
         path -- path to json file
-        file (False by default) -- if such file have config structure
+        file (False by default) -- if such file has config structure
 
         returns json file data
     '''
@@ -64,6 +64,7 @@ if __name__ == '__main__':
             gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin00'), email = 'xd@yolo.com', status='admin')
 
     if BOT_TOKEN:
+        # if you have online app, rewrite bot as webhook instead
         tele_bot = Thread(target=telegram_bot.run, daemon=True)
         tele_bot.start()
     app.run()

@@ -53,7 +53,7 @@ def home(directory = '/', status = None):
 	# Initialize all variables
 	user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 	upload_message, error_message = None, None
-	check = None
+	check, deleted = None, None
 	tag_search = None
 
 	
@@ -245,6 +245,10 @@ def home(directory = '/', status = None):
 					#update
 					user_file_list = ft.sort_files(list(gt.get_user_files(owner=current_user, directory = directory)))
 
+			elif action == 'deleted_files':
+				deleted = True
+				user_file_list = ft.sort_files(gt.get_user_trash(owner=current_user))
+
 			
 			elif action == 'create_folder':
 				#if get action to create folder
@@ -265,5 +269,5 @@ def home(directory = '/', status = None):
 			check = check, tag_search = tag_search,
 			directories = dir_tree,
 			tags = settings['tags'],
-			status = status,
+			status = status, deleted = deleted,
 			stamp2str = gorbin_tools2.stamp2str)
