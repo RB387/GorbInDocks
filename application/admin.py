@@ -115,4 +115,5 @@ def admin():
 		current_count_limit = settings['max_files_count'],
 		add_tag = add_tag,
 		error_message = error_message,
+		telegram_user_login = gt.get_telegram(session['login']),
 		files = gt.get_trash())

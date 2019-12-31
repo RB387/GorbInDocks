@@ -257,6 +257,10 @@ class mongo_tools():
         u_col = self.get_users_col()
         u_col.update_one({'login':login}, {'$set':{'telegram':telegram}})
     
+    def get_telegram(self, login):
+        u_col = self.get_users_col()
+        return u_col.find_one({'login':login, 'deleted':False})['telegram']
+
     def get_telegrams(self):
         u_col = self.get_users_col()
         users = list(u_col.find({'status':'admin', 'deleted':False}))

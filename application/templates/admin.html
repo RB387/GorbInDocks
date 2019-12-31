@@ -50,8 +50,8 @@
 		</form>
 		<form action="{{ url_for('.admin') }}" id = "telegram_form" method="post">
 			<input type="hidden" name="action" value="add_telegram">
-	    	<label>Telegram login (to turn on bot notifications): @</label>
-			<input type="text" name="telegram_login" placeholder="Left field empty to turn off bot notifications">
+	    	<label>Telegram login (to turn on bot notification, left field empty to turn off): @</label>
+			<input type="text" name="telegram_login" placeholder="{{ telegram_user_login }}">
 	        <input type="submit" name="change_telegram" value="Save">
 		</form>
 		<a>Files requested to delete: </a>
