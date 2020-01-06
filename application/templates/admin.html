@@ -1,10 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+	<script language='javascript' type='text/javascript' src="{{url_for('static', filename='password_validate.js')}}"></script>
+
+	     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+
+	     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	     <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
+
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/signin.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/bootstrap.min.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
+
+
 	<body>
-		<script src="{{ url_for('static',filename='show_hide.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
-        
+
+
+
         <div id="mySidenav" class="sidenav">
 			<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 			<a href="{{ url_for('home.home') }}">Home page</a>
@@ -12,81 +29,61 @@
             <a href="{{ url_for('admin.admin') }}">Admin page</a>
             <a href="{{ url_for('logout.logout') }}">Logout</a>
           </div>
-          <span class="btn btn-secondary  button1" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+          <span class="btn btn-secondary  button1" style="font-size:30px; cursor:pointer" onclick="openNav()">&#9776;</span>
+
 		{% if error_message %}
-			<span>{{ error_message }}
+		<div class="Toast Toast--warning">
+			<div class="Toast__message">
+				<div class="Toast__message-category">Warning</div>
+			<span>{{ error_message }}</span>
+		</div>
+		<button class="Toast__button" type="button" onclick="this.parentElement.style.display='none'">Ok</button>
+	</div>
 		{% endif %}
-		<form action="{{ url_for('.admin') }}" id = "open_dashboard_form" method="post">
-			<button type="submit" name="action" value="dashboard" >Open dashboard</button>
+
+
+		<form class="user1"action="{{ url_for('.admin') }}" id = "open_dashboard_form" method="post">
+			<button class="btn btn-secondary button4"type="submit" name="action" value="dashboard" >Open dashboard</button>
 		</form>
-		<form action="{{ url_for('.admin') }}" id = "tag_list" method="post">
+
+		<form  class="admin1  btn-group  button4" action="{{ url_for('.admin') }}" id = "tag_list" method="post">
 			{% if not add_tag %}
-				<button type="submit" name="action" value="add_tag" >Add tag</button>
-				<button type="submit" name="action" value="del_tag" >Delete tag</button>
-				<select name="tags" form = "tag_list">
+				<button class="btn btn-secondary button7  "type="submit" name="action" value="add_tag" >Add tag</button>
+				<button class="btn btn-secondary button7  "type="submit" name="action" value="del_tag" >Delete tag</button>
+				<select class="custom-select"  name="tags" form = "tag_list">
 					{% for tag in tags %}
 						<option>{{ tag }}</option>
 					{% endfor %}
 				</select>
 			{% else %}
-				<button type="submit" name="action" value="save_tag" >Add</button>
-				<button type="submit" name="action" value="cancel_tag" >Cancel</button>
-	        	<input type="text" name="tag_name" placeholder="Tag Name">
+				<button class="btn btn-secondary button7  " type="submit" name="action" value="save_tag" >Add</button>
+				<button class="btn btn-secondary button7 " type="submit" name="action" value="cancel_tag" >Cancel</button>
+	        	<input class="form-control " type="text" name="tag_name" placeholder="Tag Name">
 			{% endif %}
 		</form>
 
-		<form action="{{ url_for('.admin') }}" id = "max_file_size" method="post">
+		<form  class="admin2  btn-group  button4" action="{{ url_for('.admin') }}" id = "max_file_size" method="post">
+			<label class="admin6"> Max File Size :  </label>
 			<input type="hidden" name="action" value="change_size_val">
-			<label>Max File Size (mb): </label>
-			<input type="text" name="change_size_val" placeholder="{{ current_limit }}">
-	        <input type="submit" name="change_size" value="Save">
+
+			<input class="form-control admin5"  type="text" name="change_size_val" placeholder="{{ current_limit }}">
+			<button class="btn btn-secondary  " type="submit" name="change_size" value="Save" >Save</button>
+
 	    </form>
 
-	    <form action="{{ url_for('.admin') }}" id = "max_files_count" method="post">
+	    <form class="admin3  btn-group  button4" action="{{ url_for('.admin') }}" id = "max_files_count" method="post">
 			<input type="hidden" name="action" value="change_count_val">
-	    	<label>Max Files Count: </label>
-			<input type="text" name="change_count_val" placeholder="{{ current_count_limit }}">
-	        <input type="submit" name="change_count" value="Save">
+	    	<label class="admin6">Max Files Count: </label>
+			<input class="form-control admin5   " type="text" name="change_count_val" placeholder="{{ current_count_limit }}">
+			<button class="btn btn-secondary  " type="submit" name="change_count" value="Save" >Save</button>
 		</form>
-		<form action="{{ url_for('.admin') }}" id = "telegram_form" method="post">
+
+		<label class="admin4">Telegram login (to turn on bot notifications): @</label>
+		<form class="admin7  btn-group  button4" action="{{ url_for('.admin') }}" id = "telegram_form" method="post">
 			<input type="hidden" name="action" value="add_telegram">
-	    	<label>Telegram login (to turn on bot notification, left field empty to turn off): @</label>
-			<input type="text" name="telegram_login" placeholder="{{ telegram_user_login }}">
-	        <input type="submit" name="change_telegram" value="Save">
-		</form>
-		<a>Files requested to delete: </a>
-		<table style="background:#e7e7e7" border="1" width="100%" cellpadding="5">
-			<tr><th>File name</th>
-				<th>File size</th>
-				<th>Owner</th>
-				<th></th>
-				<th></th></tr>
-			{% for file in files %}
-			<tr>
-				<th>{{ file['name'] }}<br>
-					{% if file['comment'] is not none %}
-						<a style="color:grey; font-size: 75%;">{{ file['comment'] }}</a>
-					{% else %}
-						<a style="color:grey; font-size: 75%;">No comment...</a>
-					{% endif %}</th>
-				<th>{% if file['type'] == 'file' %}
-						{{ file['size'] }}
-					{% endif %}</th>
-				<th>{{ file['owner'] }}</th>
-				<th>
-					<form action="{{ url_for('.admin') }}" id = "delete_form" method = "post">
-						<input type="hidden" name="action" value="restore">
-						<button class="btn btn-secondary" name="get" value="{{ file['_id'] }}" type="submit">Restore</button>
-					</form>
-				</th>
-				<th>
-					<form action="{{ url_for('.admin') }}" id = "delete_form" method = "post">
-						<input type="hidden" name="action" value="delete">
-						<button class="btn btn-secondary" name="get" value="{{ file['_id'] }}" type="submit">Delete</button>
-					</form>
-				</th>
-			</tr>
-			{% endfor %}
-		</table>
+
+			<input class="form-control "  type="text" name="telegram_login" placeholder="Left field empty to turn off bot notifications">
+			<button class="btn btn-secondary admin5" type="submit" name="change_telegram" value="Save" >Save</button>
+	    </form>
 	</body>
 </html>
