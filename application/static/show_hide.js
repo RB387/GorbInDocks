@@ -11,8 +11,12 @@ function show_hide(elements) {
 function openNav() {
     document.getElementById("mySidenav").style.width = "250px";
 }
-  
+
 function closeNav() {
     document.getElementById("mySidenav").style.width = "0";
 }
-                        
+function change() {
+  if (document.getElementById("p2").style.display = "inline-block") {
+    document.getElementById("p2").style.display = "none";
+  }
+}

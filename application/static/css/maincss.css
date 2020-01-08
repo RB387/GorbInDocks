@@ -60,7 +60,34 @@ body {
    width: 25rem;
    position: fixed; top: 5%; right: 0% ;
 }
+.Toast2 {
+   background: white;
 
+   border-radius: 0rem;
+
+   display: flex;
+   font-family: Helvetica;
+   justify-content: space-between;
+   padding: 1rem;
+
+   width: 433px;
+   position: fixed; top: 223px; left: 0px;
+}
+.Toast3{
+   background: white;
+   border-radius: 0rem;
+   display: flex;
+   font-family: Helvetica;
+   justify-content: space-between;
+   padding: 1rem;
+
+   width: 433px;
+   position: fixed; top: 160px; left: 700px;
+}
+
+.Toast--found {
+   border-color: #8a8a8a;
+}
 .Toast--success {
    border-color: #008554;
 }
@@ -97,13 +124,16 @@ body {
          -ms-transform: translate(-50%, -50%);
          transform: translate(-50%, -50%);
    }
-
+   .stats4{position: absolute; top: 80px; left: 950px;}
+   .stats1{position: absolute; top: 110px; left: 700px;}
+   .stats2{position: absolute; top: 270px; left: 700px;}
+   .stats3{position: absolute; top: 110px; left: 950px;}
 
    .right{
-       position: absolute; top: 0%; left: 73%;
+       position: absolute; top: 10px; right: 100px;
        }
     .left{
-       position: absolute; top: 5%; left: 5%;
+       position: absolute; top: 10px; left: 600px;
       }
 
    .admin1{position: absolute; top: 80px; left: 20px;}
@@ -113,10 +143,11 @@ body {
    .admin5{ width: 100px;}
    .admin6{ width: 135px;}
    .admin7{position: absolute; top: 260px; left: 20px;}
-
+   .admin8{ width: 70px;}
 
    .user1{position: absolute; top: 10px; left: 20px;}
    .user2{position: absolute; top: 200px; left: 20px;}
+
 
 
    .button1 {
@@ -136,6 +167,7 @@ body {
    .button14{ width: 104px;}
    .button15{ height:  55px;    border-radius: 0;}
    .button16{ position: absolute; top: 55px; left: 450px; width:90px; height:  35px}
+   .button17 { width: 210px;}
    .button13{
  width: 1050px;
  height: 150px;
