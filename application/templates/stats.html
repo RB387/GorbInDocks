@@ -1,45 +1,46 @@
-<html>
-  <head>
-    <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <div id="mySidenav" class="sidenav" >
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+
+     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+     <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
+     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+     <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
+
+
+     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/bootstrap.min.css') }}">
+     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
+
+
+   </head>
+    <body >
+
+
+
+
+        <div id="mySidenav" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
             <a href="{{ url_for('home.home') }}">Home page</a>
             <a href="{{ url_for('user.user') }}">User page</a>
             <a href="{{ url_for('admin.admin') }}">Admin page</a>
             <a href="{{ url_for('logout.logout') }}">Logout</a>
           </div>
-          <span class="btn btn-secondary  button1" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawChart);
-      function drawChart(data) {
-        var data = google.visualization.arrayToDataTable([
-          ['Tags', 'Count'],
-          {% if personal_data %}
-            {% for tag in personal_data['tags'] %}
-              ['{{ tag }}', {{ personal_data['tags'][tag] }}],
-            {% endfor %}
-          {% else %}
-            {% for line in tags_data %}
-              ['{{ line[0] }}', {{ line[1] }}],
-            {% endfor %}
-          {% endif %}
-        ]);
-        console.log(data)
-        var options = {
-          title: 'Tags statistics' {% if user_id %} + ' for {{ user_id }}' {% endif %}
-        };
-        var chart = new google.visualization.PieChart(document.getElementById('tags_stat'));
-        chart.draw(data, options);
-      }
-    </script>
-  </head>
-  <body>
+          <span class="btn btn-secondary  button1" style="font-size:30px; cursor:pointer" onclick="openNav()">&#9776;</span>
+
+
+
+
+
     <div id="tags_stat" style="width: 600px; height: 300px;"></div>
     <a>Total files count: {{ overall['overall_files_count'] }}</a> <br>
     <a>Total folders count: {{ overall['overall_folders_count'] }}</a> <br>
@@ -49,27 +50,80 @@
                 {% else %}
                     0
                 {% endif %}</a> <br><br>
-    <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "cancel_search" method="post">
-      <a>Show stats in period: </a>
-      <input type="hidden" name="action" value="period">
-      <input type="date" name="get_date_from">
-      <input type="date" name="get_date_to">
-      <input type="submit" name="search_period" value="Show">
-    </form>
-    {% if not user_id %}
-    {% if search %}
-        <span>Search for {{ search }}</span>
-        <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "cancel_search" method="post">
-          <input type="submit" name="cancel_search" value="Cancel">
-        </form>
-      {% endif %}
-    <form action="{{ url_for('stats.dashboard', user_id = user_id) }}" method="post" name="search_form">
-        <input type="hidden" name="action" value="search_user">
-        <input type="text" name="user_login" placeholder="Username">
-        <button name="select_element" type="submit" value="Select">Search!</button>
-    </form>
+<div class="stats4">
+      <a >Show stats in period: </a> <br>
+</div>
 
-    <table style="background:#e7e7e7" border="1" width="100%" cellpadding="5">
+    <form class="btn-group admin6 stats3"action="{{ url_for('.dashboard', user_id = user_id) }}" id = "cancel_search" method="post">
+
+      <input  type="hidden" name="action" value="period">
+      <input  class="form-control  " type="date" name="get_date_from">
+      <input class="form-control "  type="date" name="get_date_to">
+      <input class="btn btn-secondary  " type="submit" name="search_period" value="Show">
+    </form>
+    <br>
+    <br>
+
+
+
+        <script   type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+
+        google.charts.setOnLoadCallback(drawChart);
+
+
+        function drawChart(data) {
+          var data = google.visualization.arrayToDataTable([
+            ['Tags', 'Count'],
+            {% if personal_data %}
+              {% for tag in personal_data['tags'] %}
+                ['{{ tag }}', {{ personal_data['tags'][tag] }}],
+              {% endfor %}
+            {% else %}
+              {% for line in tags_data %}
+                ['{{ line[0] }}', {{ line[1] }}],
+              {% endfor %}
+            {% endif %}
+          ]);
+          console.log(data)
+          var options = {
+            title: 'Tags statistics' {% if user_id %} + ' for {{ user_id }}'
+
+                {% endif %}
+
+          };
+
+
+
+          var chart = new google.visualization.PieChart(document.getElementById('tags_stat'));
+          chart.draw(data, options);
+        }
+
+        </script>
+
+
+    {% if not user_id %}
+
+    <form class="btn-group  stats1 "action="{{ url_for('stats.dashboard', user_id = user_id) }}" method="post" name="search_form">
+        <input type="hidden" name="action" value="search_user">
+        <input  class="form-control admin6   " type="text" name="user_login" placeholder="Username">
+        <button class="btn btn-secondary   "name="select_element" type="submit" value="Select">Search</button>
+    </form>
+    <br>
+    <br>
+    {% if search %}
+    <div id="p2" class=" Toast3 ">
+        <div class="Toast__message">
+            <div class="Toast__message-category">Found</div>
+        <span>Search for {{ search }}</span>
+    </div>
+    <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "cancel_search" method="post">
+        <button class="btn "  type="submit" name="cancel_search" value="Cancel">Cancel</button>
+    </form>
+</div>
+      {% endif %}
+
+    <table class=" stats2" style="background:#e7e7e7" border="1" width="800" cellpadding="5">
         <tr>
             <th>Username</th>
             <th>Files count</th>
@@ -106,37 +160,52 @@
         <span>{{ error_message }}</span>
       {% endif %}
       <form action="{{ url_for('.dashboard', user_id = None) }}" id = "close_user" method="post">
-          <input type="submit" name="close_user" value="Close user's page">
+          <input class="btn btn-secondary   " type="submit" name="close_user" value="Close user's page">
         </form>
+    <br>
+    <br>
       <form action="{{ url_for('home.home', directory = None, status = user_id) }}" id = "view_user_files" method="post">
-			  <button type="submit" name="action" value="view_files" >View user's files</button>
+			  <button class="btn btn-secondary   " type="submit" name="action" value="view_files" >View user's files</button>
 		  </form>
+    <br>
       {% if status == 'admin' %}
-      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "remove_admin_status_form" method="post">
+      <form class="btn-group  "action="{{ url_for('.dashboard', user_id = user_id) }}" id = "remove_admin_status_form" method="post">
         <input type="hidden" name="action" value="remove_admin_status">
-        <input type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
-        <input type="submit" name="admin_priv" value="Remover user's admin status">
+        <input  class="form-control "type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
+        <input class="btn btn-secondary   " type="submit" name="admin_priv" value="Remover user's admin status">
       </form>
+      <br>
       {% else %}
-      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "admin_status_form" method="post">
+      <form class="btn-group  " action="{{ url_for('.dashboard', user_id = user_id) }}" id = "admin_status_form" method="post">
         <input type="hidden" name="action" value="admin_status">
-        <input type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
-        <input type="submit" name="admin_priv" value="Give user admin status">
+        <input class="form-control" type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
+        <input class="btn btn-secondary  " type="submit" name="admin_priv" value="Give user admin status">
       </form>
+      <br>
       {% endif %}
-      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "change_email" method="post">
+      <br>
+      <label class="button6">Change email: </label>
+      <br>
+      <form class="btn-group  "action="{{ url_for('.dashboard', user_id = user_id) }}" id = "change_email" method="post">
         <input type="hidden" name="action" value="change_mail">
-        <label>Change email: </label>
-        <input type="email" name="change_email_val" required placeholder="New email">
-        <input type="submit" name="change_em" value="Change!">
+
+        <input class="form-control" type="email" name="change_email_val" required placeholder="New email">
+        <input class="btn btn-secondary  "type="submit" name="change_em" value="Change">
       </form>
-      <form action="{{ url_for('.dashboard', user_id = user_id) }}" id = "change_password_val" method="post">
+       <br><br>
+       <label class="button6">Change password: </label>
+       <br>
+      <form lass="btn-group  " action="{{ url_for('.dashboard', user_id = user_id) }}" id = "change_password_val" method="post">
         <input type="hidden" name="action" value="change_pass">
-        <label>Change password: </label>
-        <input type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
-        <input type="password" name="change_password_val" id = "pass" placeholder="New user's password" required minlength="6" maxlength="32">
-        <input type="password" name="change_password_conf_val" id = "pass_conf" placeholder="Confirm new user's password" required minlength="6" maxlength="32" oninput="validatePassword()">
-            <input type="submit" name="change_pass" value="Change!">
+
+        <input class="form-control button6" type="password" name="admin_password" id = "pass" placeholder="Your admin password" required minlength="6" maxlength="32">
+        <br>
+        <input class="form-control button6" type="password" name="change_password_val" id = "pass" placeholder="New user's password" required minlength="6" maxlength="32">
+        <br>
+        <input class="form-control button6" type="password" name="change_password_conf_val" id = "pass_conf" placeholder="Confirm new user's password" required minlength="6" maxlength="32" oninput="validatePassword()">
+        <br>
+            <input class="btn btn-secondary  " type="submit" name="change_pass" value="Change">
+            <br> <br>
       </form>
 
     {% endif %}

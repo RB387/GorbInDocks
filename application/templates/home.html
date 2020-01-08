@@ -97,7 +97,7 @@
 
     <div id = "search_file_open" style = "display: block;">
         <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="search_file_open_form">
-            <button class="btn btn-secondary button2 button4 button12" type="button" onclick="show_hide(['search_file', 'search_file_open'])">Search: </button>
+            <button class="btn btn-secondary button2 button4 button12 "  type="button"  onclick="show_hide(['search_file', 'search_file_open']);change()">Search: </button>
         </form>
     </div>
 
@@ -106,7 +106,7 @@
             <div  class="btn-group-vertical  button4  " >
                 <div class="btn-group  " role="group" >
                     <button class="btn btn-secondary button2 " type="button" onclick="show_hide(['search_file_open', 'search_file'])">Cancel</button>
-                    <button class="btn btn-secondary button2  " type="submit" name="action" value = "search_files">Search</button>
+                    <button class="btn btn-secondary button2  " type="submit" name="action" value = "search_files" >Search</button>
 
                 </div>
 
@@ -157,10 +157,15 @@
                    </ul>
                    </p>
         {% if tag_search %}
-            <p>Search for {{ tag_search }}</p>
+        <div id="p2" class="Toast2 Toast--found">
+            <div class="Toast__message">
+                <div class="Toast__message-category">Found</div>
+              <p>Search for {{ tag_search }}</p>
+                </div>
                 <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="cancel_tag_form">
-                    <input type="submit" name="cancel_search" value="Cancel">
+                    <button class="btn "  type="submit" name="cancel_search" value="Cancel">Cancel</button>
                 </form>
+        </div>
         {% endif %}
 
 
