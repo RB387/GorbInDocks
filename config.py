@@ -3,7 +3,7 @@ from os import path, getcwd
 SETUP = False # For first time database configuration
 DEBUG = True  # 
 ###############
-SECRET_KEY = '1337' # key to secret sessions. keep it a complete secret!
+SECRET_KEY = 'secretkeydonthackplease' # key to secret sessions. keep it a complete secret!
 UPLOAD_FOLDER = path.join(getcwd(), 'data') # ./data as default. Folder with loaded files. You can enter your path
 ZIP_FOLDER = path.join(getcwd(), 'temp_data') # ./temp_data as default. Folder with zipped files. You can enter your path
 LOG_FOLDER = path.join(getcwd(), 'logs') # ./logs as default. Folder with logs. You can enter your path
