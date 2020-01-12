@@ -13,11 +13,11 @@ case "$item" in
 esac		
 echo "Installing python libraries"
 sudo apt install python3-pip -y
-pip3 install flask
+pip3 install flask==1.1.1
 pip3 install pycryptodome
-pip3 install pymongo
+pip3 install pymongo==3.10.0
 pip3 install telebot
-pip3 install pyTelegramBotApi
+pip3 install pyTelegramBotApi==3.6.6
 echo "Python libraries werw installed!"
 echo "Generating secret key for flask sessions"
 key=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
