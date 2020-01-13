@@ -140,9 +140,10 @@ body {
    .admin2{position: absolute; top: 130px; left: 20px;}
    .admin3{position: absolute; top: 180px; left: 20px;}
    .admin4{position: absolute; top: 230px; left: 20px;}
+   .admin4_1{position: absolute; top: 255px; left: 20px;}
    .admin5{ width: 100px;}
    .admin6{ width: 135px;}
-   .admin7{position: absolute; top: 260px; left: 20px;}
+   .admin7{position: absolute; top: 280px; left: 20px;}
    .admin8{ width: 70px;}
 
    .user1{position: absolute; top: 10px; left: 20px;}

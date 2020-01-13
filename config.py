@@ -1,7 +1,7 @@
 from os import path, getcwd
 ###############
 SETUP = False # For first time database configuration
-DEBUG = True  # 
+DEBUG = False # 
 ###############
 SECRET_KEY = 'secretkeydonthackplease' # key to secret sessions. keep it a complete secret!
 UPLOAD_FOLDER = path.join(getcwd(), 'data') # ./data as default. Folder with loaded files. You can enter your path

@@ -78,11 +78,12 @@
 			<button class="btn btn-secondary  " type="submit" name="change_count" value="Save" >Save</button>
 		</form>
 
-		<label class="admin4">Telegram login (to turn on bot notifications): @</label>
+		<label class="admin4">Telegram login (to turn on bot notifications)</label>
+		<label class="admin4_1">Left field empty to turn off bot notifications</label>
 		<form class="admin7  btn-group  button4" action="{{ url_for('.admin') }}" id = "telegram_form" method="post">
 			<input type="hidden" name="action" value="add_telegram">
 
-			<input class="form-control "  type="text" name="telegram_login" placeholder="Left field empty to turn off bot notifications">
+			<label>@</label><input class="form-control "  type="text" name="telegram_login" placeholder="{{ telegram_user_login }}">
 			<button class="btn btn-secondary admin5" type="submit" name="change_telegram" value="Save" >Save</button>
 	    </form>
 	</body>

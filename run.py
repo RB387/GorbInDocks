@@ -1,6 +1,6 @@
 from flask import g
 from sys import platform
-from config import BOT_TOKEN, TELEGRAM_PATH, CONFIG_PATH, SETUP
+from config import BOT_TOKEN, TELEGRAM_PATH, CONFIG_PATH
 from threading import Thread
 import gorbin_tools2
 import file_tools
@@ -53,21 +53,12 @@ bot = telebot.TeleBot(BOT_TOKEN)
 if __name__ == '__main__':
     from application import app
     app.config.from_object('config')
-    #if setup==true in config
-    if SETUP:
-        with app.app_context():
-            #Configure database
-            gt.remake_files('yes')
-            gt.remake_users('yes')
-            gt.remake_links('yes')
-            #add default admin user
-            gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin00'), email = 'xd@yolo.com', status='admin')
-
     if BOT_TOKEN:
         # if you have online app, rewrite bot as webhook instead
         tele_bot = Thread(target=telegram_bot.run, daemon=True)
         tele_bot.start()
-    app.run()
-    if BOT_TOKEN:
+        app.run()
         tele_bot.join()
+    else:
+        app.run()
     
