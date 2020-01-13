@@ -19,11 +19,9 @@ def get_reply(reply, items):
 def get_date_keyboard(chat_id):
     '''Generate keyboard'''
     keyboard = telebot.types.InlineKeyboardMarkup()  
-    keyboard.row(
-        telebot.types.InlineKeyboardButton('Add begin date ({})'.format(message_history[chat_id]['begin-date']), callback_data='add-date-begin'),
-        telebot.types.InlineKeyboardButton('Add end date ({})'.format(message_history[chat_id]['end-date']), callback_data='add-date-end'),
-        telebot.types.InlineKeyboardButton('View stats', callback_data='add-date-view'),
-    )
+    keyboard.row(telebot.types.InlineKeyboardButton('Add begin date ({})'.format(message_history[chat_id]['begin-date']), callback_data='add-date-begin'))
+    keyboard.row(telebot.types.InlineKeyboardButton('Add end date ({})'.format(message_history[chat_id]['end-date']), callback_data='add-date-end'))
+    keyboard.row(telebot.types.InlineKeyboardButton('View stats', callback_data='add-date-view'))
     return keyboard
 
 def format_dates(date):
