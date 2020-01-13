@@ -72,7 +72,7 @@ class file_tools():
 			#if directory exists
 			if directory:
 				#check permission
-				if (not self.gt.check_availability(login = login, user_id = self.gt.get_user_id(login), file_id = directory['_id'])) and directory['owner'] != login:
+				if directory['owner'] != login:
 					return dir_names[::-1]
 				dir_names.append((directory['_id'], directory['name']))
 			else:
