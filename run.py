@@ -13,7 +13,7 @@ import telegram_bot
 def run(PORT):
     """Runs the flask server according to the platform"""
     if platform != "darwin" and platform != "win32":
-        app.run(host="0.0.0.0")
+        app.run(host="0.0.0.0", port=PORT)
     else:
         app.run(port=PORT)
 
