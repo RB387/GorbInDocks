@@ -1,6 +1,7 @@
 from os import path, getcwd
 ###############
 DEBUG = False # 
+PORT = 5000   #
 ###############
 SECRET_KEY = 'secretkeydonthackplease' # key to secret sessions. keep it a complete secret!
 UPLOAD_FOLDER = path.join(getcwd(), 'data') # ./data as default. Folder with loaded files. You can enter your path
