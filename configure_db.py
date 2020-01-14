@@ -8,7 +8,6 @@ if __name__ == '__main__':
     	#Configure database
         gt.remake_files('yes')
         gt.remake_users('yes')
-        gt.remake_links('yes')
         #add default admin user
         gt.add_user(login = 'admin', pas = gorbin_tools2.hash('admin00'), email = 'xd@yolo.com', status='admin')
 
