@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from flask import g
 from sys import platform
 from config import BOT_TOKEN, TELEGRAM_PATH, CONFIG_PATH
