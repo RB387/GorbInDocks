@@ -208,7 +208,7 @@ class file_tools():
 
 			returns tuple like (error_code, path to zip or None)
 		'''
-		if len(values) <= 1:
+		if len(values) <= 2:
 			return (-3, None)
 		# get only file ids
 		values = values[2::]
