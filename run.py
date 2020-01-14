@@ -9,6 +9,13 @@ import json
 import telebot
 import telegram_bot
 
+def run():
+    """Runs the flask server according to the platform"""
+    if platform != "darwin" and platform != "win32":
+        app.run(host="0.0.0.0")
+    else:
+        app.run()
+
 def dump(path, data):
     '''Function to dump json files
 
@@ -57,8 +64,8 @@ if __name__ == '__main__':
         # if you have online app, rewrite bot as webhook instead
         tele_bot = Thread(target=telegram_bot.run, daemon=True)
         tele_bot.start()
-        app.run()
+        run()
         tele_bot.join()
     else:
-        app.run()
+        run()
     
