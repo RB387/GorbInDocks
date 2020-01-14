@@ -1,7 +1,7 @@
 from gorbin_tools2 import *
 import unittest
 from time import sleep
-from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
+from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
 from pprint import pprint
 from os import path, getcwd
 
