@@ -12,6 +12,5 @@ TELEGRAM_PATH = path.join(getcwd(), 'telegram_users.json') # path to telegram js
 DB_NAME = 'gorbin' # name of Mongo database
 USERS_COL_NAME = 'users' # name of the users collection 
 FILES_COL_NAME = 'files' # name of the files collection
-LINKS_COL_NAME = 'links' # name of the links collection
 MONGO_ADDRESS = 'mongodb://localhost:27017/' # MongoDB address
 BOT_TOKEN = None #Telegram bot token

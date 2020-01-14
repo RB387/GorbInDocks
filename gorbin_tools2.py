@@ -88,12 +88,11 @@ class mongo_tools():
         as attributes to flask.g and returns a database object"""
         db = getattr(self.g, 'db', None)
         if db is None:
-            from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
+            from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
             self.g.MONGO_ADDRESS = MONGO_ADDRESS
             self.g.DB_NAME = DB_NAME
             self.g.USERS_COL_NAME = USERS_COL_NAME
             self.g.FILES_COL_NAME = FILES_COL_NAME
-            self.g.LINKS_COL_NAME = LINKS_COL_NAME
             client = MongoClient(self.g.MONGO_ADDRESS)
             db = self.g.db = client[self.g.DB_NAME]
             self.write_log(call_function="get_db", state="connection done")
@@ -116,15 +115,6 @@ class mongo_tools():
             files = self.g.files = db[self.g.FILES_COL_NAME]
             self.write_log(call_function='get_files_col', state="connection done")
         return files
-
-    def get_links_col(self):
-        """Adds a database and links collection objects (if no exist) as attributes to flask.g. returns links collection object"""
-        db = self.get_db()
-        links = getattr(self.g, 'links', None)
-        if links is None:
-            links = self.g.links = db[self.g.LINKS_COL_NAME]
-            self.write_log(call_function='get_links_col', state="create connection")
-        return links
 
     def get_log_file(self):
         """Adds a database and logs folder objects (if no exist) as attributes to flask.g. Returns log folder's path"""
@@ -164,7 +154,7 @@ class mongo_tools():
         Adds a user to the users collection, returns its unique _id object"""
         self.write_log(call_function='add_user', login=login, email=email, status=status)
         u_col = self.get_users_col()
-        user_id = u_col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'shared':{}, 'telegram':'', 'create_date':now_stamp(), 'deleted':False}).inserted_id
+        user_id = u_col.insert_one({'login':login, 'pas':pas, 'email':email, 'status':status, 'telegram':'', 'create_date':now_stamp(), 'deleted':False}).inserted_id
         return user_id
 
     def get_user(self, login: str, pas: bytes):
@@ -429,92 +419,6 @@ class mongo_tools():
         self.write_log(call_function='del_tags', file_id=file_id, tags=tags)
         f_col = self.get_files_col()
         f_col.update_one({'_id':obj_id(file_id)}, {'$pullAll':{'tags':tags}})
-
-
-    # Functions for working with links collection
-    def remake_links(self, yes='no'):
-        """Takes "yes" as a confirmation. Clears links collection"""
-        self.write_log(call_function="remake_links", yes=yes)
-        if yes == "yes":
-            l_col = self.get_links_col()
-            l_col.delete_many({})
-        else: 
-            self.write_log(call_function="remake_links", yes=yes, exception="As a confirmation, add \"yes\" with the parameter")
-            raise Exception("As a confirmation, add \"yes\" with the parameter")
-
-    def make_link(self, file_ids: list, comment=None):
-        """Takes list of file's _id, additionally, the comment (None by default). Adds a new unique link to links collection.
-        Returns generated link. If link cannot be added to the collection with a DuplicateKeyError for 5 times, it raised Exception, but this case is impossible!"""
-        self.write_log(call_function='make_link', file_ids=file_ids, comment=comment)
-        l_col = self.get_links_col()
-        retracts = 0
-        success_writen = False
-        while not success_writen:
-            link = base64.b64encode(sha1(urandom(64)).digest()).decode('utf-8').replace('/', 's')
-            try:
-                l_col.insert_one({'_id':link, 'files':list(map(obj_id, file_ids)), 'comment':comment, 'deleted':False})
-                success_writen = True
-                break
-            except DuplicateKeyError:
-                retracts += 1
-            if retracts >= 5: break
-        if success_writen: return link
-        raise Exception('NEVER WAS AND HERE AGAIN!!!\nError on link generation, sharing failed')
-
-    def get_linked(self, link: str):
-        """Takes unique link. Returns dict {'files':list of file's _id, 'comment':comment to this list (may be None)}.
-        If such link does not exist or deleted, returns None"""
-        self.write_log(call_function='get_linked', link=link) 
-        l_col = self.get_links_col()
-        f_col = self.get_files_col()
-        file_ids = l_col.find_one({'_id':link, 'deleted':False})
-        if file_ids != None: return {'files':list(f_col.find({'_id':{'$in':file_ids['files']}})), 'comment':file_ids['comment']}
-        return file_ids
-
-    def del_link(self, link: str):
-        """Takes the link. Switches deleted flag to Tru for this link"""
-        self.write_log(call_function='del_link', link=link)
-        l_col = self.get_links_col()
-        l_col.update_one({'_id':link}, {'$set':{'deleted':True}})
-
-
-    # Functions for working with shared files
-    def add_shared(self, login: str, user_id, file_ids: list):
-        """Takes login of user who shared, current user's _id and list of file's _id which were shared with current user.
-        Adds list of file's _id to his shared list"""
-        self.write_log(call_function='add_shared', login=login, user_id=user_id, file_ids=file_ids)
-        u_col = self.get_users_col()
-        for file_id in file_ids:
-            u_col.update_one({'_id':obj_id(user_id)}, {'$addToSet':{'shared.'+login:obj_id(file_id)}})
-
-    def get_shared(self, user_id):
-        """Takes unique user's _id. Returns dict: keys - logins of users who shared, values - 
-        list of file's _id which were shared with current user by this user"""
-        self.write_log(call_function='get_shared', user_id=user_id)
-        u_col = self.get_users_col()
-        f_col = self.get_files_col()
-        ret = {}
-        files = u_col.find_one({'_id':user_id, 'deleted':False}, {'_id':0, 'shared':1})
-        if files != None:
-            ret = {}
-            for log, lst in files['shared'].items():
-                if lst != []: ret[log] = list(f_col.find({'_id':{'$in': lst}}))
-            return ret
-        return None
-
-    def del_shared(self, login: str, user_id, file_ids: list):
-        """Takes login of user who shared, current user's _id and list of file's _id which were shared with current user.
-        Deletes list of file's _id from his shared list"""
-        self.write_log(call_function='del_shared', login=login, user_id=user_id, file_ids=file_ids)
-        u_col = self.get_users_col()
-        u_col.update_one({'_id':obj_id(user_id)}, {'$pullAll':{'shared.'+login:list(map(obj_id, file_ids))}})
-
-    def check_availability(self, login: str, user_id, file_id):
-        """Takes login of user who shared. current user's _id and unique files's _id. Returns True if this file is available to this user, else returns False"""
-        self.write_log(call_function='check_availability', login=login, user_id=user_id, file_id=file_id)
-        u_col = self.get_users_col()
-        return bool(u_col.find_one({'_id':obj_id(user_id), 'shared.'+login:obj_id(file_id)}, {}))
-
 
     #Admin Functions
     def get_simple_users(self, deleted=False):
