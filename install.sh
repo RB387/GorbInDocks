@@ -33,7 +33,9 @@ case "$item" in
 		echo "db was configurated!"	
 		echo "Runing mongo_test2"
 		python3 mongo_test2.py
-		python3 configure_db.py;;
+		echo "The final cConfiguratiing database"
+		python3 configure_db.py
+		echo "db was finaly configurated!";;	
 	n|N) echo "You can change the database name in config.py and then run mongo_test2.py"
 	exit 0;;
 	*) echo "Invalid answer"
