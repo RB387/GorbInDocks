@@ -1,7 +1,7 @@
 from gorbin_tools2 import *
 import unittest
 from time import sleep
-from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME, LINKS_COL_NAME
+from config import MONGO_ADDRESS, DB_NAME, USERS_COL_NAME, FILES_COL_NAME
 from pprint import pprint
 from os import path, getcwd
 
@@ -23,13 +23,6 @@ class begin_remake_test(unittest.TestCase):
         self.assertEqual(size, 0)
 
 
-    def test3_remake_links(self):
-        mt.remake_links('yes')
-        size = g.links.count_documents({})
-
-        self.assertEqual(size, 0)
-
-
 class mongo_tests(unittest.TestCase):
     def test1_add_simple_user(self):
         self.maxDiff = 1500
@@ -41,7 +34,6 @@ class mongo_tests(unittest.TestCase):
         self.assertEqual(real_get['login'], log)
         self.assertEqual(real_get['pas'], hash(pas))
         self.assertEqual(real_get['email'], mail)
-        self.assertEqual(real_get['shared'], {})
         self.assertEqual(real_get['status'], 'simple')
         self.assertEqual(real_get['deleted'], False)
         
@@ -55,7 +47,6 @@ class mongo_tests(unittest.TestCase):
         self.assertEqual(real_get['login'], log)
         self.assertEqual(real_get['pas'], hash(pas))
         self.assertEqual(real_get['email'], mail)
-        self.assertEqual(real_get['shared'], {})
         self.assertEqual(real_get['status'], status)
         self.assertEqual(real_get['deleted'], False)
 
@@ -77,7 +68,6 @@ class mongo_tests(unittest.TestCase):
 
         self.assertEqual(real_get['login'], func_get['login'])
         self.assertEqual(real_get['pas'], func_get['pas'])
-        self.assertEqual(real_get['shared'], func_get['shared'])
         self.assertEqual(real_get['status'], func_get['status'])
         self.assertEqual(real_get['deleted'], func_get['deleted'])
 
@@ -104,7 +94,6 @@ class mongo_tests(unittest.TestCase):
 
         self.assertEqual(real_get['login'], func_get['login'])
         self.assertEqual(real_get['pas'], func_get['pas'])
-        self.assertEqual(real_get['shared'], func_get['shared'])
         self.assertEqual(real_get['status'], func_get['status'])
         self.assertEqual(real_get['deleted'], func_get['deleted'])
 
@@ -282,124 +271,6 @@ class mongo_tests(unittest.TestCase):
         
         self.assertEqual(real_get['tags'], ['minecraft', 'jivet'])
 
-    def testh_make_link(self):
-        self.maxDiff = 1500
-        share_file = g.files.find_one({'name':'wow'})['_id']
-        comment = 'Go igrat wmeste!'
-
-        link = mt.make_link([share_file], comment)
-        real_get = g.links.find_one({'_id':link})
-        
-        self.assertEqual(real_get['_id'], link)
-        self.assertEqual(real_get['files'], [share_file])
-        self.assertEqual(real_get['comment'], comment)
-
-    def testi_broke_make_link(self):
-        # To run this test you should broke link generation in make_link function. You can write something like
-        # "link = '1'" instead of
-        # "link = base64.b64encode(sha1(urandom(64)).digest()).decode('utf-8').replace('/', 's')"
-        self.maxDiff = 1500
-        do_not_run_this_test = True
-        if do_not_run_this_test == False:
-            share_file = g.files.find_one({'name':'wow'})['_id']
-            try: link = mt.make_link([share_file])
-            except Exception: do_not_run_this_test = True 
-        
-        self.assertEqual(do_not_run_this_test, True)
-
-    def testj_get_linked(self):
-        self.maxDiff = 1500
-        share_file1 = g.files.find_one({'name':'Dengi'})['_id']
-        share_file2 = g.files.find_one({'name':'Vladya'})['_id']
-        comment = 'U Vladi est Dengi'
-        files = [share_file1, share_file2]
-
-        link = mt.make_link(files, comment)
-        file_ids = g.links.find_one({'_id':link, 'deleted':False})
-        real_get = {'files':list(g.files.find({'_id':{'$in':file_ids['files']}})), 'comment':file_ids['comment']}
-        func_get = mt.get_linked(link)
-
-        self.assertEqual(real_get, func_get)
-
-    def testk_del_linked(self):
-        self.maxDiff = 1500
-        share_file1 = g.files.find_one({'name':'Dengi'})['_id']
-        share_file2 = g.files.find_one({'name':'Vladya'})['_id']
-        comment = 'U Vladi ne budet Deneg'
-        files = [share_file1, share_file2]
-
-        link = mt.make_link(files, comment)
-        mt.del_link(link)
-        func_get = mt.get_linked(link)
-        real_get = g.links.find_one({'_id':link})
-
-        self.assertEqual(func_get, None)
-        self.assertEqual(real_get['deleted'], True)
-
-    def testl_add_shared(self):
-        self.maxDiff = 1500
-        share_file1 = g.files.find_one({'name':'Dom_AlinbI'})['_id']
-        share_file2 = g.files.find_one({'name':'Dom_Foxyashi'})['_id']
-        user = g.users.find_one({'login':'Alina'})['_id']
-        comment = 'Foxyasha ostanetsya doma!'
-        link_from = 'Vladya'
-        files = [share_file1, share_file2]
-
-        link = mt.make_link(files, comment)
-        mt.add_shared(link_from, user, files)
-        real_get = g.users.find_one({'login':'Alina'})
-
-        self.assertEqual(real_get['shared'][link_from], files)
-        self.assertEqual(list(real_get['shared'].keys()), [link_from])
-
-    def testm_add_more_shared(self):
-        self.maxDiff = 1500
-        files = [g.files.find_one({'name':'Metro'})['_id']]
-        user = g.users.find_one({'login':'Alina'})['_id']
-        comment = 'Na, tebe nujnee!'
-        link_from = 'Faralaks'
-
-        link = mt.make_link(files, comment)
-        mt.add_shared(link_from, user, files)
-        real_get = g.users.find_one({'login':'Alina'})
-
-        self.assertEqual(real_get['shared'][link_from], files)
-        self.assertEqual(list(real_get['shared'].keys()), ['Vladya', link_from])
-
-    def testn_get_shared(self):
-        self.maxDiff = 1500
-        user_id = g.users.find_one({'login':'Alina'})['_id']
-        shared = g.users.find_one({'login':'Alina'})['shared']
-
-        func_get = mt.get_shared(user_id)
-        real_get = {}
-        for log, lst in shared.items():
-            if lst != []: real_get[log] = list(g.files.find({'_id':{'$in': lst}}))
-
-        self.assertEqual(real_get, func_get)
-
-    def testo_check_availability(self):
-        self.maxDiff = 1500
-        user_id = g.users.find_one({'login':'Alina'})['_id']
-        shared_file1 = g.users.find_one({'login':'Alina'})['shared']['Vladya'][0]
-        shared_file2 = g.users.find_one({'login':'Alina'})['shared']['Faralaks'][0]
-
-        self.assertEqual(mt.check_availability('Vladya', user_id, shared_file1), True)
-        self.assertEqual(mt.check_availability('Faralaks', user_id, shared_file2), True)
-        self.assertEqual(mt.check_availability('Vladya', user_id, shared_file2), False)
-        self.assertEqual(mt.check_availability('Faralaks', user_id, shared_file1), False)
-
-    def testp_del_shared(self):
-        self.maxDiff = 1500
-        user_id = g.users.find_one({'login':'Alina'})['_id']
-        shared_file = g.users.find_one({'login':'Alina'})['shared']['Vladya'][1]
-        files_from = 'Vladya'
-
-        mt.del_shared(files_from, user_id, [shared_file])
-        real_get = g.users.find_one({'login':'Alina'})['shared'][files_from]
-        
-        self.assertEqual(mt.check_availability('Faralaks', user_id, shared_file), False)
-        self.assertEqual(len(real_get), 1)
 
     def testq_get_simple_users_false(self):
         self.maxDiff = 1500
@@ -422,14 +293,6 @@ class remake_test_end(unittest.TestCase):
         size = g.files.count_documents({})
 
         self.assertEqual(size, 0)
-
-
-    def test3_remake_links(self):
-        mt.remake_links('yes')
-        size = g.links.count_documents({})
-
-        self.assertEqual(size, 0)
-
 
 
 if __name__ == '__main__':

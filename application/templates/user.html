@@ -1,38 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 	<script language='javascript' type='text/javascript' src="{{url_for('static', filename='password_validate.js')}}"></script>
+
+	     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+
+	     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	     <script src="{{ url_for('static',filename='show_hide.js') }}"></script>
+
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/signin.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/bootstrap.min.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
+	     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
+
+
 	<body>
-		<script src="{{ url_for('static',filename='show_hide.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/maincss.css') }}">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/side_nav.css') }}">
-        
+
+
+
         <div id="mySidenav" class="sidenav">
 			<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 			<a href="{{ url_for('home.home') }}">Home page</a>
             <a href="{{ url_for('user.user') }}">User page</a>
-            <a href="{{ url_for('stats.dashboard') }}">Admin page</a>
+            <a href="{{ url_for('admin.admin') }}">Admin page</a>
             <a href="{{ url_for('logout.logout') }}">Logout</a>
           </div>
-          <span class="btn btn-secondary  button1" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+		  
+          <span class="btn btn-secondary  button1" style="font-size:30px; cursor:pointer" onclick="openNav()">&#9776;</span>
 		{% if error_message %}
 			<span>{{ error_message }}</span>
 		{% endif %}
 
-		<form action="{{ url_for('.user') }}" id = "change_email" method="post">
+
+
+
+		<form class="user1" action="{{ url_for('.user') }}" id = "change_email" method="post">
 			<input type="hidden" name="action" value="change_mail">
-			<label>Change email: </label>
-			<input type="email" name="change_email_val" required placeholder="{{ current_mail }}">
-	        <input type="submit" name="change_em" value="Change!">
+			<label > <big> Change email:</big>  </label> <br><br>
+			<div  role="group" >
+				<input class="form-control  button4 "type="email" name="change_email_val" required placeholder="{{ current_mail }}"><br>
+		    	<button class="btn btn-secondary  " type="submit" name="change_em" value="Change" >Change</button>
+			</div>
 		</form>
 
-		<form action="{{ url_for('.user') }}" id = "change_password_val" method="post">
+
+		<form class=" user2" action="{{ url_for('.user') }}" id = "change_password_val" method="post">
 			<input type="hidden" name="action" value="change_pass">
-			<label>Change password: </label>
-			<input type="password" name="password_val_old" id = "old_pass" placeholder="Your current password" required minlength="6" maxlength="32">
-			<input type="password" name="change_password_val" id = "pass" placeholder="New password" required minlength="6" maxlength="32">
-			<input type="password" name="change_password_conf_val" id = "pass_conf" placeholder="Confirm Password" required minlength="6" maxlength="32" oninput="validatePassword()">
-	        <input type="submit" name="change_pass" value="Change!">
-	    </form>
+			<br><br>
+			<label><big> Change password:</big>  </label><br><br>
+			<input class="form-control  button4" type="password" name="password_val_old" id = "old_pass" placeholder="Your current password" required minlength="6" maxlength="32"> <br>
+			<input class="form-control  button4"type="password" name="change_password_val" id = "pass" placeholder="New password" required minlength="6" maxlength="32"><br>
+			<input class="form-control  button4" type="password" name="change_password_conf_val" id = "pass_conf" placeholder="Confirm Password" required minlength="6" maxlength="32" oninput="validatePassword()"><br>
+			 <button class="btn btn-secondary   " type="submit" name="change_pass" value="Change" >Change</button>
+
+
+	</div>
 
 	</body>
 </html>

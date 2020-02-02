@@ -22,14 +22,17 @@
 </head>
     <body >
 
+
+
+
         <div id="mySidenav" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
             <a href="{{ url_for('home.home') }}">Home page</a>
             <a href="{{ url_for('user.user') }}">User page</a>
-            <a href="{{ url_for('stats.dashboard') }}">Admin page</a>
+            <a href="{{ url_for('admin.admin') }}">Admin page</a>
             <a href="{{ url_for('logout.logout') }}">Logout</a>
           </div>
-          <span class="btn btn-secondary  button1" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+          <span class="btn btn-secondary  button1" style="font-size:30px; cursor:pointer" onclick="openNav()">&#9776;</span>
           <!--
         <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="logout_form">
             <button class="btn btn-secondary  button1" type="submit" name="action"value="logout" >Logout</button>
@@ -39,10 +42,10 @@
 <br>
 
 
-        <form class="button9" method=post enctype=multipart/form-data>
+        <form class="button9 " method=post enctype=multipart/form-data>
             <div class="btn-group " role="group">
-                <input class="btn btn-secondary   "   type=file  name=file  multiple >
-                <button class="btn btn-secondary button2 button6 " type=submit value=Upload >Upload</button>
+                <input class="btn btn-secondary button6   "   type=file  name=file   multiple >
+                <button class="btn btn-secondary button2 button14 " type=submit value=Upload >Upload</button>
 
             </div>
         </form>
@@ -59,7 +62,7 @@
                </form>
        {% else %}
            <form method="post" action="{{ url_for('.home', directory = path, status = status) }}" id = "checkbox_form">
-               <div class="btn-group-vertical  button4 button10" role="group" >
+               <div class="btn-group  button4 button10" role="group" >
                        <input type="hidden" name="action" value="multiple_file">
                        <button class="btn btn-secondary button2 button5" type="submit" name="cancel_list" value="Cancel">Cancel</button>
                        <button class="btn btn-secondary button2 button5"   type="submit" name="get" value="Download">Download</button>
@@ -80,14 +83,13 @@
     <div id="create_folder_div" style = "display: none;">
         <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="add_folder">
             <input type="hidden" name="action" value="create_folder">
-            <div class="btn-group-vertical button11 " role="group" >
-                <button class="btn btn-secondary button2 button4" type="button" onclick="show_hide(['create_folder_div', 'add_folder_button'])">Cancel</button>
-
-                <button class="btn btn-secondary button2 button4" type="submit" name="create_folder_button" value="Create">Create</button>
-
-
-                <input class="form-control mb-2 button4" type="text" name="get" placeholder="Folder name"
+            <div class="btn-group button11 button4 " role="group" >
+                <button class="btn btn-secondary button2 " type="button" onclick="show_hide(['create_folder_div', 'add_folder_button'])">Cancel</button>
+                <input class="form-control mb-2 button15" type="text" name="get" placeholder="Folder name"
                 aria-label="Recipient's username with two button addons" aria-describedby="button-addon4">
+
+                <button class="btn btn-secondary button2 " type="submit" name="create_folder_button" value="Create">Create</button>
+
             </div>
 
         </form>
@@ -95,7 +97,7 @@
 
     <div id = "search_file_open" style = "display: block;">
         <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="search_file_open_form">
-            <button class="btn btn-secondary button2 button4 button12" type="button" onclick="show_hide(['search_file', 'search_file_open'])">Search files by: </button>
+            <button class="btn btn-secondary button2 button4 button12 "  type="button"  onclick="show_hide(['search_file', 'search_file_open']);change()">Search: </button>
         </form>
     </div>
 
@@ -104,7 +106,7 @@
             <div  class="btn-group-vertical  button4  " >
                 <div class="btn-group  " role="group" >
                     <button class="btn btn-secondary button2 " type="button" onclick="show_hide(['search_file_open', 'search_file'])">Cancel</button>
-                    <button class="btn btn-secondary button2  " type="submit" name="action" value = "search_files">Search!</button>
+                    <button class="btn btn-secondary button2  " type="submit" name="action" value = "search_files" >Search</button>
 
                 </div>
 
@@ -129,15 +131,16 @@
 
 
                 <p>
-                <ul class="list-group list-group-horizontal-sm button3 ">
+                    {% if path %}
+                            <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="add_folder">
+                                <input type="hidden" name="action" value="back">
+                                <button class="btn btn-secondary button16  " type="submit" name="back_element" value="Go back">Go back</button>
 
-        {% if path %}
-                <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="add_folder">
-                    <input type="hidden" name="action" value="back">
-                    <button class="btn btn-secondary   " type="submit" name="back_element" value="Go back">Go back</button>
+                            </form>
+                    {% endif %}
+                <ul class="list-group list-group-horizontal button3 ">
 
-                </form>
-        {% endif %}
+
 
     <form  id="dir_form_home" method="post" class="dir_tree ">
         <input type="hidden" name="action" value="dir">
@@ -154,14 +157,24 @@
                    </ul>
                    </p>
         {% if tag_search %}
-            <p>Search for {{ tag_search }}</p>
+        <div id="p2" class="Toast2 Toast--found">
+            <div class="Toast__message">
+                <div class="Toast__message-category">Found</div>
+              <p>Search for {{ tag_search }}</p>
+                </div>
                 <form action="{{ url_for('.home', directory = path, status = status) }}" method="post" name="cancel_tag_form">
-                    <input type="submit" name="cancel_search" value="Cancel">
+                    <button class="btn "  type="submit" name="cancel_search" value="Cancel">Cancel</button>
                 </form>
+        </div>
         {% endif %}
 
 
-                        <table style="background:#e7e7e7" class=" button8 button13" border="1" width="100%" cellpadding="5">
+
+
+
+
+
+                        <table style="background:#e7e7e7" class=" button8 button13" border="1"  cellpadding="5">
                                 {% for file in files %}
                                     <tr>
                                         {% if file['type'] == 'folder' %}
@@ -301,5 +314,6 @@
                         </div>
 
                         {% endif %}
+
     </body>
 </html>

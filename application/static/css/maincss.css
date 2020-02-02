@@ -38,11 +38,12 @@
 .close:hover {background: #e6e6ff;}
 
 body {
+    margin-right: 0;
     overflow:scroll;
-    background-color: #ffffff;
-    max-height: 900px
+    background-color: #f0f0f0;
+    max-height: 5000px
+    width: 5000px
        }
-
 
 
 
@@ -59,7 +60,34 @@ body {
    width: 25rem;
    position: fixed; top: 5%; right: 0% ;
 }
+.Toast2 {
+   background: white;
 
+   border-radius: 0rem;
+
+   display: flex;
+   font-family: Helvetica;
+   justify-content: space-between;
+   padding: 1rem;
+
+   width: 433px;
+   position: fixed; top: 223px; left: 0px;
+}
+.Toast3{
+   background: white;
+   border-radius: 0rem;
+   display: flex;
+   font-family: Helvetica;
+   justify-content: space-between;
+   padding: 1rem;
+
+   width: 433px;
+   position: fixed; top: 160px; left: 700px;
+}
+
+.Toast--found {
+   border-color: #8a8a8a;
+}
 .Toast--success {
    border-color: #008554;
 }
@@ -96,35 +124,61 @@ body {
          -ms-transform: translate(-50%, -50%);
          transform: translate(-50%, -50%);
    }
+   .stats4{position: absolute; top: 80px; left: 950px;}
+   .stats1{position: absolute; top: 110px; left: 700px;}
+   .stats2{position: absolute; top: 270px; left: 700px;}
+   .stats3{position: absolute; top: 110px; left: 950px;}
 
-
-.right{
-       position: absolute; top: 0%; left: 73%;
+   .right{
+       position: absolute; top: 10px; right: 100px;
        }
-.left{
-       position: absolute; top: 5%; left: 5%;
+    .left{
+       position: absolute; top: 10px; left: 600px;
       }
 
-   .button1 {width:90px;
-       position: absolute; top:1px; right: 0%
-   }
-   .button2 {padding: 15px 0px;}
-   .button3 { position: absolute; top: 350px; left: 0%; }
-   .button4 { width: 200px;}
+   .admin1{position: absolute; top: 80px; left: 20px;}
+   .admin2{position: absolute; top: 130px; left: 20px;}
+   .admin3{position: absolute; top: 180px; left: 20px;}
+   .admin4{position: absolute; top: 230px; left: 20px;}
+   .admin4_1{position: absolute; top: 255px; left: 20px;}
+   .admin5{ width: 100px;}
+   .admin6{ width: 135px;}
+   .admin7{position: absolute; top: 280px; left: 20px;}
+   .admin8{ width: 70px;}
+
+   .user1{position: absolute; top: 10px; left: 20px;}
+   .user2{position: absolute; top: 200px; left: 20px;}
+
+
+
+   .button1 {
+       position: fixed;
+       z-index: 5;
+       top: 0;
+       right: 0;
+       transition: 0.5s;
+        }
+   .button2 {padding: 16px}
+   .button3 { position: absolute; top: 55px; left: 550px; }
+   .button4 { width: 433px;}
    .button5 { top:1px}
-   .button6 { width: 60px;}
-   .button7 { width: 99px;}
-   .button8 { position:absolute; top: 400px; left: 0%;}
+   .button6 { width: 330px;}
+   .button7 { width: 217px;}
+   .button8 {  position:absolute; top: 100px; left:450px;}
+   .button14{ width: 104px;}
+   .button15{ height:  55px;    border-radius: 0;}
+   .button16{ position: absolute; top: 55px; left: 450px; width:90px; height:  35px}
+   .button17 { width: 210px;}
    .button13{
- width: 100%;
+ width: 1050px;
  height: 150px;
     padding: 5px; /* Поля вокруг текста */
 border: solid 1px black; /* Параметры рамки */}
 
-   .button9 { position: absolute; top: 40px; left: 0% ;}
-   .button10 { position: absolute; top: 40px; left: 377px ;}
-   .button11 { position: absolute; top: 40px; left: 577px ;}
-   .button12 { position: absolute; top: 40px; left: 777px ;}
+   .button9 { position: absolute; top: 0px; left: 0% ; z-index:3;}
+   .button10 { position: absolute; top: 55px; left: 0px ;}
+   .button11 { position: absolute; top: 110px; left: 0px ;}
+   .button12 { position: absolute; top: 165px; left: 0px ;}
 
 
 
